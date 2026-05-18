@@ -88,7 +88,7 @@ class _DiagnosticsPageState extends State<_DiagnosticsPage> {
               child: SizedBox(
                 width: 200,
                 height: 120,
-                child: ColoredBox(color: Colors.red),
+                child: ColoredBox(color: Colors.green),
               ),
             ),
             Positioned(
