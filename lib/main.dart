@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_falcon/cloud_flutter_falcon_update.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-const String kApiBaseUrl = String.fromEnvironment(
-  'API_BASE_URL',
-  defaultValue: 'http://localhost:9010',
+const String kFalconServerUrl = String.fromEnvironment(
+  'FLUTTER_FALCON_SERVER_URL',
+  defaultValue: 'https://flutterfalcon.com',
 );
-
-const String kServerBaseUrl = String.fromEnvironment(
-  'SERVER_BASE_URL',
-  defaultValue: 'http://localhost:9010',
+const String kFalconReadToken = String.fromEnvironment(
+  'FLUTTER_FALCON_READ_TOKEN',
 );
-
-const String kBuildCommitDate = String.fromEnvironment(
-  'BUILD_COMMIT_DATE',
-  defaultValue: 'not available',
+const String kFalconAppId = String.fromEnvironment(
+  'FLUTTER_FALCON_APP_ID',
+  defaultValue: 'com.example.red_rect_app',
 );
-
-const String kBuildReleaseDate = String.fromEnvironment(
-  'BUILD_RELEASE_DATE',
-  defaultValue: 'not available',
+const String kFalconPlatform = String.fromEnvironment(
+  'FLUTTER_FALCON_PLATFORM',
+  defaultValue: 'windows-x64',
+);
+const String kFalconChannel = String.fromEnvironment(
+  'FLUTTER_FALCON_CHANNEL',
+  defaultValue: 'stable',
 );
 
 void main() {
@@ -31,22 +31,26 @@ class RedRectApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: _DiagnosticsPage(),
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        scaffoldBackgroundColor: const Color(0xFFF6F1EE),
+      ),
+      home: const _FalconFixturePage(),
     );
   }
 }
 
-class _DiagnosticsPage extends StatefulWidget {
-  const _DiagnosticsPage();
+class _FalconFixturePage extends StatefulWidget {
+  const _FalconFixturePage();
 
   @override
-  State<_DiagnosticsPage> createState() => _DiagnosticsPageState();
+  State<_FalconFixturePage> createState() => _FalconFixturePageState();
 }
 
-class _DiagnosticsPageState extends State<_DiagnosticsPage> {
-  String _version = 'loading';
+class _FalconFixturePageState extends State<_FalconFixturePage> {
+  String? _version;
 
   @override
   void initState() {
@@ -59,11 +63,10 @@ class _DiagnosticsPageState extends State<_DiagnosticsPage> {
       final packageInfo = await PackageInfo.fromPlatform();
       if (!mounted) return;
       setState(() {
-        final build =
+        _version =
             packageInfo.buildNumber.isEmpty
                 ? packageInfo.version
                 : '${packageInfo.version}+${packageInfo.buildNumber}';
-        _version = build;
       });
     } catch (_) {
       if (!mounted) return;
@@ -75,77 +78,47 @@ class _DiagnosticsPageState extends State<_DiagnosticsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final version = _version;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Diagnostics'),
-        backgroundColor: Colors.black87,
-        foregroundColor: Colors.white,
-      ),
-      body: SafeArea(
-        child: Stack(
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Center(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.all(Radius.circular(18)),
-                ),
-                child: SizedBox(
-                  width: 240,
-                  height: 140,
-                  child: Center(
-                    child: Text(
-                      'Updated build CCCC',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
+            Container(
+              width: 280,
+              height: 180,
+              decoration: BoxDecoration(
+                color: const Color(0xFFD63A2F),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                version == null ? 'Loading...' : 'Version $version',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 12,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.72),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
-                ),
-                child: DefaultTextStyle.merge(
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    height: 1.3,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Falcon diagnostics',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 6),
-                      const CloudFlutterFalconUpdateButton(),
-                      const SizedBox(height: 8),
-                      Text('Version: $_version'),
-                      Text('Build commit date: $kBuildCommitDate'),
-                      Text('Release date: $kBuildReleaseDate'),
-                      Text('API_BASE_URL: $kApiBaseUrl'),
-                      Text('SERVER_BASE_URL: $kServerBaseUrl'),
-                    ],
-                  ),
+            const SizedBox(height: 24),
+            if (version == null)
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(),
+              )
+            else
+              CloudFlutterFalconUpdateButton(
+                config: CloudFlutterFalconUpdateConfig(
+                  serverUrl: kFalconServerUrl,
+                  readToken: kFalconReadToken,
+                  appId: kFalconAppId,
+                  platform: kFalconPlatform,
+                  channel: kFalconChannel,
+                  baseVersion: version,
                 ),
               ),
-            ),
           ],
         ),
       ),

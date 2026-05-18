@@ -1,52 +1,35 @@
 # red_rect_app
 
-A new Flutter project.
+Minimal Flutter Falcon Windows test app.
 
-## Getting Started
+## What it does
 
-This project is a starting point for a Flutter application.
+- shows the installed app version in a red rectangle
+- checks Flutter Falcon updates with one button
+- uses the installed package version as `baseVersion`
 
-A few resources to get you started if this is your first Flutter project:
+## Falcon defaults
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+The test target keeps its Falcon defaults in `pubspec.yaml` under
+`flutter_falcon.variables`:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- `FLUTTER_FALCON_SERVER_URL`
+- `FLUTTER_FALCON_APP_ID`
+- `FLUTTER_FALCON_PLATFORM`
+- `FLUTTER_FALCON_CHANNEL`
+- `FLUTTER_FALCON_READ_TOKEN`
 
-## Flutter Falcon update setup
+## Local run
 
-This project includes a Falcon update checker on the diagnostics screen:
+Run:
 
-- `package:flutter_falcon/cloud_flutter_falcon_update.dart`
-- `CloudFlutterFalconUpdateButton()`
+```powershell
+.\run.ps1
+```
 
-### Required build variables
+## Update flow
 
-Set these under the `flutter_falcon` block in `pubspec.yaml`:
-
-- `FLUTTER_FALCON_SERVER_URL=https://flutterfalcon.com`
-- `FLUTTER_FALCON_APP_ID=com.example.red_rect_app`
-- `FLUTTER_FALCON_PLATFORM=windows-x64`
-- `FLUTTER_FALCON_CHANNEL=stable`
-- `API_BASE_URL=http://localhost:9010` (for local/dev)
-- `SERVER_BASE_URL=http://localhost:9010` (for local/dev)
-
-Optional auth variables:
-
-- `FLUTTER_FALCON_READ_TOKEN` (if read auth is enabled)
-- `FLUTTER_FALCON_ROLLOUT_KEY` (for stable device/user rollout key)
-
-### Local run
-
-Use `run.ps1` to launch Windows builds with all required `--dart-define` values.
-
-### Release workflow (outline)
-
-1. Build and install the first Falcon-ready base (Windows portable).
-2. Commit your next change and build a newer commit artifact.
-3. Publish and promote a Falcon update target for:
-   - `platform=windows-x64`
-   - `channel=stable`
-   - matching `appId` and `baseVersion`.
+1. Build and install a Windows base build.
+2. Commit a change and build a newer Windows version.
+3. Publish and promote the newer Falcon update for the same app id, platform, and channel.
+4. Open the installed app and press `Check for update`.
