@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter_falcon/cloud_flutter_falcon_update.dart';
 
 const String kApiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
@@ -32,19 +33,19 @@ class RedRectApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: _RedRectScreen(),
+      home: _DiagnosticsPage(),
     );
   }
 }
 
-class _RedRectScreen extends StatefulWidget {
-  const _RedRectScreen();
+class _DiagnosticsPage extends StatefulWidget {
+  const _DiagnosticsPage();
 
   @override
-  State<_RedRectScreen> createState() => _RedRectScreenState();
+  State<_DiagnosticsPage> createState() => _DiagnosticsPageState();
 }
 
-class _RedRectScreenState extends State<_RedRectScreen> {
+class _DiagnosticsPageState extends State<_DiagnosticsPage> {
   String _version = 'loading';
 
   @override
@@ -75,6 +76,11 @@ class _RedRectScreenState extends State<_RedRectScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Diagnostics'),
+        backgroundColor: Colors.black87,
+        foregroundColor: Colors.white,
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -82,7 +88,7 @@ class _RedRectScreenState extends State<_RedRectScreen> {
               child: SizedBox(
                 width: 200,
                 height: 120,
-                child: ColoredBox(color: Colors.green),
+                child: ColoredBox(color: Colors.red),
               ),
             ),
             Positioned(
@@ -90,13 +96,13 @@ class _RedRectScreenState extends State<_RedRectScreen> {
               right: 12,
               bottom: 12,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
-                ),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.72),
                   borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
                 ),
                 child: DefaultTextStyle.merge(
                   style: const TextStyle(
@@ -108,6 +114,13 @@ class _RedRectScreenState extends State<_RedRectScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      const Text(
+                        'Falcon diagnostics',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 6),
+                      const CloudFlutterFalconUpdateButton(),
+                      const SizedBox(height: 8),
                       Text('Version: $_version'),
                       Text('Build commit date: $kBuildCommitDate'),
                       Text('Release date: $kBuildReleaseDate'),

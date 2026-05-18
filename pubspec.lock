@@ -70,6 +70,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_falcon:
+    dependency: "direct main"
+    description:
+      path: flutter_falcon
+      relative: true
+    source: path
+    version: "0.0.1"
   flutter_lints:
     dependency: "direct dev"
     description:

@@ -1,0 +1,14 @@
+name: flutter_falcon
+description: "Local placeholder package for FlutterFalcon update helper wiring."
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
