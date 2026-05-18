@@ -9,7 +9,7 @@ if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) {
 $apiBaseUrl = if ([string]::IsNullOrWhiteSpace($env:API_BASE_URL)) { 'http://localhost:9010' } else { $env:API_BASE_URL }
 $serverBaseUrl = if ([string]::IsNullOrWhiteSpace($env:SERVER_BASE_URL)) { 'http://localhost:9010' } else { $env:SERVER_BASE_URL }
 $falconServerUrl = if ([string]::IsNullOrWhiteSpace($env:FLUTTER_FALCON_SERVER_URL)) { 'https://flutterfalcon.com' } else { $env:FLUTTER_FALCON_SERVER_URL }
-$falconAppId = if ([string]::IsNullOrWhiteSpace($env:FLUTTER_FALCON_APP_ID)) { '<your-app-id>' } else { $env:FLUTTER_FALCON_APP_ID }
+$falconAppId = if ([string]::IsNullOrWhiteSpace($env:FLUTTER_FALCON_APP_ID)) { 'com.example.red_rect_app' } else { $env:FLUTTER_FALCON_APP_ID }
 $falconPlatform = if ([string]::IsNullOrWhiteSpace($env:FLUTTER_FALCON_PLATFORM)) { 'windows-x64' } else { $env:FLUTTER_FALCON_PLATFORM }
 $falconChannel = if ([string]::IsNullOrWhiteSpace($env:FLUTTER_FALCON_CHANNEL)) { 'stable' } else { $env:FLUTTER_FALCON_CHANNEL }
 

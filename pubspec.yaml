@@ -23,7 +23,7 @@ version: 1.0.0+1
 flutter_falcon:
   variables:
     FLUTTER_FALCON_SERVER_URL: https://flutterfalcon.com
-    FLUTTER_FALCON_APP_ID: <your-app-id>
+    FLUTTER_FALCON_APP_ID: com.example.red_rect_app
     FLUTTER_FALCON_PLATFORM: windows-x64
     FLUTTER_FALCON_CHANNEL: stable
     API_BASE_URL: http://localhost:9010

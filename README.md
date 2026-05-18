@@ -27,7 +27,7 @@ This project includes a Falcon update checker on the diagnostics screen:
 Set these under the `flutter_falcon` block in `pubspec.yaml`:
 
 - `FLUTTER_FALCON_SERVER_URL=https://flutterfalcon.com`
-- `FLUTTER_FALCON_APP_ID=<your-app-id>`
+- `FLUTTER_FALCON_APP_ID=com.example.red_rect_app`
 - `FLUTTER_FALCON_PLATFORM=windows-x64`
 - `FLUTTER_FALCON_CHANNEL=stable`
 - `API_BASE_URL=http://localhost:9010` (for local/dev)
