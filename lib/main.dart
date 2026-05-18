@@ -82,7 +82,7 @@ class _RedRectScreenState extends State<_RedRectScreen> {
               child: SizedBox(
                 width: 200,
                 height: 120,
-                child: ColoredBox(color: Colors.red),
+                child: ColoredBox(color: Colors.green),
               ),
             ),
             Positioned(
