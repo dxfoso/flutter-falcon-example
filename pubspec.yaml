@@ -18,6 +18,15 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
 
+# FlutterFalcon dart-define variables for this target.
+# Keep secrets out; these are non-sensitive runtime config values.
+flutterfalcon:
+  variables:
+    API_BASE_URL: http://localhost:9010
+    SERVER_BASE_URL: http://localhost:9010
+    BUILD_COMMIT_DATE: BUILD_COMMIT_DATE
+    BUILD_RELEASE_DATE: BUILD_RELEASE_DATE
+
 environment:
   sdk: ^3.7.0
 
@@ -30,6 +39,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  package_info_plus: ^8.0.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

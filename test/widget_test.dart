@@ -11,11 +11,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:red_rect_app/main.dart';
 
 void main() {
-  testWidgets('Red rectangle renders in the center', (WidgetTester tester) async {
+  testWidgets('Red rectangle renders in the center', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(const RedRectApp());
 
-    expect(find.byWidgetPredicate((widget) {
-      return widget is ColoredBox && widget.color == Colors.red;
-    }), findsOneWidget);
+    expect(
+      find.byWidgetPredicate((widget) {
+        return widget is ColoredBox && widget.color == Colors.red;
+      }),
+      findsOneWidget,
+    );
   });
 }
