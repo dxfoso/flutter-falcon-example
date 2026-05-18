@@ -22,8 +22,20 @@ const String kFalconChannel = String.fromEnvironment(
   defaultValue: 'stable',
 );
 
-void main() {
-  runApp(const RedRectApp());
+final Future<String> _versionFuture = _loadVersion();
+
+void main() => runApp(const RedRectApp());
+
+Future<String> _loadVersion() async {
+  try {
+    final packageInfo = await PackageInfo.fromPlatform();
+    if (packageInfo.buildNumber.isEmpty) {
+      return packageInfo.version;
+    }
+    return '${packageInfo.version}+${packageInfo.buildNumber}';
+  } catch (_) {
+    return 'unknown';
+  }
 }
 
 class RedRectApp extends StatelessWidget {
@@ -31,97 +43,64 @@ class RedRectApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
-        scaffoldBackgroundColor: const Color(0xFFF6F1EE),
-      ),
-      home: const _FalconFixturePage(),
+      home: FalconFixturePage(),
     );
   }
 }
 
-class _FalconFixturePage extends StatefulWidget {
-  const _FalconFixturePage();
-
-  @override
-  State<_FalconFixturePage> createState() => _FalconFixturePageState();
-}
-
-class _FalconFixturePageState extends State<_FalconFixturePage> {
-  String? _version;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadVersion();
-  }
-
-  Future<void> _loadVersion() async {
-    try {
-      final packageInfo = await PackageInfo.fromPlatform();
-      if (!mounted) return;
-      setState(() {
-        _version =
-            packageInfo.buildNumber.isEmpty
-                ? packageInfo.version
-                : '${packageInfo.version}+${packageInfo.buildNumber}';
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _version = 'unknown';
-      });
-    }
-  }
+class FalconFixturePage extends StatelessWidget {
+  const FalconFixturePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final version = _version;
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 280,
-              height: 180,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD63A2F),
-                borderRadius: BorderRadius.circular(24),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                version == null ? 'Loading...' : 'Version $version',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
+    return FutureBuilder<String>(
+      future: _versionFuture,
+      builder: (context, snapshot) {
+        final version = snapshot.data;
+        return Scaffold(
+          backgroundColor: const Color(0xFFF6F1EE),
+          body: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 280,
+                  height: 180,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD63A2F),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Text(
+                    version ?? 'Loading...',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 24),
+                if (version == null)
+                  const CircularProgressIndicator()
+                else
+                  CloudFlutterFalconUpdateButton(
+                    config: CloudFlutterFalconUpdateConfig(
+                      serverUrl: kFalconServerUrl,
+                      readToken: kFalconReadToken,
+                      appId: kFalconAppId,
+                      platform: kFalconPlatform,
+                      channel: kFalconChannel,
+                      baseVersion: version,
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 24),
-            if (version == null)
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(),
-              )
-            else
-              CloudFlutterFalconUpdateButton(
-                config: CloudFlutterFalconUpdateConfig(
-                  serverUrl: kFalconServerUrl,
-                  readToken: kFalconReadToken,
-                  appId: kFalconAppId,
-                  platform: kFalconPlatform,
-                  channel: kFalconChannel,
-                  baseVersion: version,
-                ),
-              ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
