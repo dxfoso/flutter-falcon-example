@@ -3,7 +3,8 @@
 Minimal Flutter Falcon Windows test app.
 
 It only shows the installed version and checks Flutter Falcon for updates.
-Falcon defaults live in `pubspec.yaml` under `flutter_falcon.variables`.
+Falcon runtime config lives in `.flutter_falcon.json` at the app root and is
+loaded through `package:flutter_falcon/flutter_falcon_api.dart`.
 
 Run:
 

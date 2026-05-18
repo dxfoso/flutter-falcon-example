@@ -3,14 +3,6 @@ description: Minimal Flutter Falcon test app.
 publish_to: 'none'
 version: 1.0.1+2
 
-flutter_falcon:
-  variables:
-    FLUTTER_FALCON_SERVER_URL: https://flutterfalcon.com
-    FLUTTER_FALCON_APP_ID: com.example.red_rect_app
-    FLUTTER_FALCON_PLATFORM: windows-x64
-    FLUTTER_FALCON_CHANNEL: stable
-    FLUTTER_FALCON_READ_TOKEN: 8df9b70751964cc6abb977adb8efd44c
-
 environment:
   sdk: ^3.7.0
 
@@ -18,7 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_falcon:
-    path: flutter_falcon
+    git:
+      url: https://github.com/dxfoso/flutterfalcon.git
+      path: flutter_falcon
   package_info_plus: ^8.0.2
 
 dev_dependencies:
@@ -28,3 +22,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - .flutter_falcon.json
