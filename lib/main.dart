@@ -87,7 +87,7 @@ class _DiagnosticsPageState extends State<_DiagnosticsPage> {
             const Center(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.green,
+                  color: Colors.redAccent,
                   borderRadius: BorderRadius.all(Radius.circular(18)),
                 ),
                 child: SizedBox(
@@ -95,7 +95,7 @@ class _DiagnosticsPageState extends State<_DiagnosticsPage> {
                   height: 140,
                   child: Center(
                     child: Text(
-                      'Base build',
+                      'Updated build',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
