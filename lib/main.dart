@@ -85,10 +85,25 @@ class _DiagnosticsPageState extends State<_DiagnosticsPage> {
         child: Stack(
           children: [
             const Center(
-              child: SizedBox(
-                width: 200,
-                height: 120,
-                child: ColoredBox(color: Colors.green),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.all(Radius.circular(18)),
+                ),
+                child: SizedBox(
+                  width: 240,
+                  height: 140,
+                  child: Center(
+                    child: Text(
+                      'Base build',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
             Positioned(
