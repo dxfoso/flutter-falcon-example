@@ -172,7 +172,8 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
             'Falcon: ${result.targetVersion ?? 'available'}\n\n'
             'Apply the published Falcon update through the updater flow.';
       case FlutterFalconUpdateStatus.current:
-        return 'Installed: ${result.currentVersion}\nFalcon: current';
+        return 'Installed: ${result.currentVersion}\n'
+            'Falcon: no published update matched this version yet.';
       case FlutterFalconUpdateStatus.failed:
         final parts = <String>['Falcon check failed.'];
         if (result.failureStatusCode != null) {
