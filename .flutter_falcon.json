@@ -1,8 +1,4 @@
 {
-  "schemaVersion": "flutter_falcon_runtime_config_v1",
   "serverUrl": "https://flutterfalcon.com",
-  "readToken": "8df9b70751964cc6abb977adb8efd44c",
-  "appId": "com.example.red_rect_app",
-  "channel": "stable",
-  "automatic": false
+  "appId": "com.example.red_rect_app"
 }
