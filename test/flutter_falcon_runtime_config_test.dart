@@ -33,7 +33,7 @@ void main() {
   });
 
   test(
-    'live update check works with env read token fallback',
+    'live update check works with committed runtime config',
     skip: !const bool.fromEnvironment('FLUTTER_FALCON_LIVE_SMOKE'),
     () async {
       final rawConfig =
