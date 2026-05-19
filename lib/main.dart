@@ -164,14 +164,22 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
 
   String _messageFor(FlutterFalconUpdateCheckResult result) {
     if (!result.configured) {
-      return result.message ?? 'Falcon update settings are not configured.';
+      return 'Falcon update settings are not configured for this build.';
     }
-    if (result.updateAvailable && result.targetVersion != null) {
-      return 'Installed: ${result.currentVersion}\n'
-          'Falcon: ${result.targetVersion}\n\n'
-          'Apply the published Falcon update through the updater flow.';
+    switch (result.status) {
+      case FlutterFalconUpdateStatus.available:
+        return 'Installed: ${result.currentVersion}\n'
+            'Falcon: ${result.targetVersion ?? 'available'}\n\n'
+            'Apply the published Falcon update through the updater flow.';
+      case FlutterFalconUpdateStatus.current:
+        return 'Installed: ${result.currentVersion}\nFalcon: current';
+      case FlutterFalconUpdateStatus.failed:
+        return 'Falcon check failed.';
+      case FlutterFalconUpdateStatus.notConfigured:
+        return 'Falcon update settings are not configured for this build.';
+      case FlutterFalconUpdateStatus.downloaded:
+      case FlutterFalconUpdateStatus.active:
+        return 'Installed: ${result.currentVersion}';
     }
-    return result.message ??
-        'Installed: ${result.currentVersion}\nFalcon: current';
   }
 }
