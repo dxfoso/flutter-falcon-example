@@ -80,10 +80,7 @@ class FalconFixturePage extends StatelessWidget {
 }
 
 class FalconCheckButton extends StatefulWidget {
-  const FalconCheckButton({
-    super.key,
-    required this.installedVersion,
-  });
+  const FalconCheckButton({super.key, required this.installedVersion});
 
   final String installedVersion;
 
@@ -98,13 +95,14 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
       onPressed: _checking ? null : _checkForUpdate,
-      icon: _checking
-          ? const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : const Icon(Icons.system_update_alt),
+      icon:
+          _checking
+              ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+              : const Icon(Icons.system_update_alt),
       label: const Text('Check for update'),
     );
   }
@@ -128,16 +126,17 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
       });
       await showDialog<void>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Falcon update'),
-          content: Text(_messageFor(result)),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Falcon update'),
+              content: Text(_messageFor(result)),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Close'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
     } catch (error) {
       if (!mounted) {
@@ -148,16 +147,17 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
       });
       await showDialog<void>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Falcon update'),
-          content: Text('Could not load .flutter_falcon.json.\n\n$error'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+        builder:
+            (context) => AlertDialog(
+              title: const Text('Falcon update'),
+              content: Text('Could not load .flutter_falcon.json.\n\n$error'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Close'),
+                ),
+              ],
             ),
-          ],
-        ),
       );
     }
   }
@@ -174,7 +174,18 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
       case FlutterFalconUpdateStatus.current:
         return 'Installed: ${result.currentVersion}\nFalcon: current';
       case FlutterFalconUpdateStatus.failed:
-        return 'Falcon check failed.';
+        final parts = <String>['Falcon check failed.'];
+        if (result.failureStatusCode != null) {
+          parts.add('HTTP ${result.failureStatusCode}');
+        }
+        if (result.failureResponseBody != null &&
+            result.failureResponseBody!.trim().isNotEmpty) {
+          parts.add(result.failureResponseBody!.trim());
+        } else if (result.failureMessage != null &&
+            result.failureMessage!.trim().isNotEmpty) {
+          parts.add(result.failureMessage!.trim());
+        }
+        return parts.join('\n\n');
       case FlutterFalconUpdateStatus.notConfigured:
         return 'Falcon update settings are not configured for this build.';
       case FlutterFalconUpdateStatus.downloaded:
