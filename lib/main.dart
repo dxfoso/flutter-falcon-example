@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon_api.dart';
+import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 final Future<String> _versionFuture = _loadVersion();
@@ -110,29 +113,53 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
     setState(() {
       _checking = true;
     });
-    final config = await FlutterFalconRuntimeConfigLoader.load(
-      baseVersion: widget.installedVersion,
-    );
-    final result = await FlutterFalconUpdateClient(config: config).check();
-    if (!mounted) {
-      return;
+    try {
+      final rawConfig = await rootBundle.loadString('.flutter_falcon.json');
+      final config = FlutterFalconUpdateConfig.fromJson(
+        jsonDecode(rawConfig) as Map<String, dynamic>,
+        baseVersion: widget.installedVersion,
+      );
+      final result = await FlutterFalconUpdateClient(config: config).check();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _checking = false;
+      });
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Falcon update'),
+          content: Text(_messageFor(result)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _checking = false;
+      });
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Falcon update'),
+          content: Text('Could not load .flutter_falcon.json.\n\n$error'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
     }
-    setState(() {
-      _checking = false;
-    });
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Falcon update'),
-        content: Text(_messageFor(result)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
   }
 
   String _messageFor(FlutterFalconUpdateCheckResult result) {
