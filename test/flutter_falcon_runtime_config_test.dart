@@ -12,18 +12,18 @@ void main() {
     expect(json, <String, dynamic>{
       'serverUrl': 'https://flutterfalcon.com',
       'appId': 'com.example.red_rect_app',
+      'baseVersion': '1.0.1+2',
     });
   });
 
-  test('minimal config defaults stay app-friendly', () {
+  test('committed config loads directly into the runtime client', () {
     const rawConfig = <String, dynamic>{
       'serverUrl': 'https://flutterfalcon.com',
       'appId': 'com.example.red_rect_app',
+      'baseVersion': '1.0.1+2',
     };
-    final config = FlutterFalconUpdateConfig.fromJson(
-      rawConfig,
-      baseVersion: '1.0.1+2',
-    );
+    final client = FlutterFalconUpdateClient.fromJson(rawConfig);
+    final config = client.config;
 
     expect(config.serverUrl, 'https://flutterfalcon.com');
     expect(config.appId, 'com.example.red_rect_app');
@@ -36,15 +36,10 @@ void main() {
     'live update check works with committed runtime config',
     skip: !const bool.fromEnvironment('FLUTTER_FALCON_LIVE_SMOKE'),
     () async {
-      final rawConfig =
-          jsonDecode(File('.flutter_falcon.json').readAsStringSync())
-              as Map<String, dynamic>;
-      final config = FlutterFalconUpdateConfig.fromJson(
-        rawConfig,
-        baseVersion: '1.0.1+2',
+      final client = FlutterFalconUpdateClient.fromJsonString(
+        File('.flutter_falcon.json').readAsStringSync(),
       );
-
-      final result = await FlutterFalconUpdateClient(config: config).check();
+      final result = await client.check();
 
       expect(result.configured, isTrue);
       expect(result.status, isNot(FlutterFalconUpdateStatus.notConfigured));

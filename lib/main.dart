@@ -1,24 +1,14 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon_api.dart';
 import 'package:flutter/services.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
-final Future<String> _versionFuture = _loadVersion();
+final Future<FlutterFalconUpdateClient> _clientFuture = _loadClient();
 
 void main() => runApp(const RedRectApp());
 
-Future<String> _loadVersion() async {
-  try {
-    final packageInfo = await PackageInfo.fromPlatform();
-    if (packageInfo.buildNumber.isEmpty) {
-      return packageInfo.version;
-    }
-    return '${packageInfo.version}+${packageInfo.buildNumber}';
-  } catch (_) {
-    return 'unknown';
-  }
+Future<FlutterFalconUpdateClient> _loadClient() async {
+  final rawConfig = await rootBundle.loadString('.flutter_falcon.json');
+  return FlutterFalconUpdateClient.fromJsonString(rawConfig);
 }
 
 class RedRectApp extends StatelessWidget {
@@ -38,10 +28,11 @@ class FalconFixturePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String>(
-      future: _versionFuture,
+    return FutureBuilder<FlutterFalconUpdateClient>(
+      future: _clientFuture,
       builder: (context, snapshot) {
-        final version = snapshot.data;
+        final client = snapshot.data;
+        final version = client?.config.baseVersion;
         return Scaffold(
           backgroundColor: const Color(0xFFF6F1EE),
           body: Center(
@@ -53,7 +44,7 @@ class FalconFixturePage extends StatelessWidget {
                   height: 180,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: Colors.blue, 
+                    color: Colors.blue,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Text(
@@ -66,10 +57,10 @@ class FalconFixturePage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                if (version == null)
+                if (client == null)
                   const CircularProgressIndicator()
                 else
-                  FalconCheckButton(installedVersion: version),
+                  FalconCheckButton(client: client),
               ],
             ),
           ),
@@ -80,9 +71,9 @@ class FalconFixturePage extends StatelessWidget {
 }
 
 class FalconCheckButton extends StatefulWidget {
-  const FalconCheckButton({super.key, required this.installedVersion});
+  const FalconCheckButton({super.key, required this.client});
 
-  final String installedVersion;
+  final FlutterFalconUpdateClient client;
 
   @override
   State<FalconCheckButton> createState() => _FalconCheckButtonState();
@@ -112,12 +103,7 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
       _checking = true;
     });
     try {
-      final rawConfig = await rootBundle.loadString('.flutter_falcon.json');
-      final config = FlutterFalconUpdateConfig.fromJson(
-        jsonDecode(rawConfig) as Map<String, dynamic>,
-        baseVersion: widget.installedVersion,
-      );
-      final result = await FlutterFalconUpdateClient(config: config).check();
+      final result = await widget.client.check();
       if (!mounted) {
         return;
       }
@@ -150,7 +136,7 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
         builder:
             (context) => AlertDialog(
               title: const Text('Falcon update'),
-              content: Text('Could not load .flutter_falcon.json.\n\n$error'),
+              content: Text('Could not check for a Falcon update.\n\n$error'),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(),
