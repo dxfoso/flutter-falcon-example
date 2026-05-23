@@ -94,7 +94,7 @@ class _FalconCheckButtonState extends State<FalconCheckButton> {
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
               : const Icon(Icons.system_update_alt),
-      label: const Text('Check for update sss'),
+      label: const Text('Check for update sssss'),
     );
   }
 
