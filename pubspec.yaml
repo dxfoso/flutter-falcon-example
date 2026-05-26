@@ -1,7 +1,7 @@
 name: red_rect_app
 description: Minimal Flutter Falcon test app.
 publish_to: 'none'
-version: 1.0.1+2
+version: 1.0.1+3
 
 environment:
   sdk: ^3.7.0
