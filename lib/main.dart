@@ -44,7 +44,7 @@ class FalconFixturePage extends StatelessWidget {
                   height: 180,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: Colors.black,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Text(
