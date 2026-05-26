@@ -11,16 +11,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:red_rect_app/main.dart';
 
 void main() {
-  testWidgets('Red rectangle renders in the center', (
+  testWidgets('Version screen loads and shows the app title', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const RedRectApp());
 
-    expect(
-      find.byWidgetPredicate((widget) {
-        return widget is ColoredBox && widget.color == Colors.red;
-      }),
-      findsOneWidget,
-    );
+    expect(find.text('Flutter Falcon Version'), findsOneWidget);
   });
 }
