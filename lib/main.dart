@@ -48,35 +48,29 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F1EE),
       appBar: AppBar(
-        title: const Text('Red Rect Version'),
-        actions: [
-          IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
-        ],
+        title: const Text('Flutter Falcon Version'),
+        actions: [IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh))],
       ),
       body: FutureBuilder<_VersionInfo>(
         future: _infoFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
             final message = snapshot.error?.toString() ?? 'unknown error';
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text(
-                  'Unable to load version info.\n$message',
-                  textAlign: TextAlign.center,
-                ),
+                child: Text('Unable to load version info.\n$message', textAlign: TextAlign.center),
               ),
             );
           }
+
           final data = snapshot.data!;
           return Center(
             child: Container(
-              width: 320,
+              width: 340,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -87,27 +81,29 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Installed', style: TextStyle(fontSize: 16)),
-                  const SizedBox(height: 4),
+                  const Text('Installed version'),
                   Text(
                     data.installedVersion,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Latest on server', style: TextStyle(fontSize: 16)),
-                  const SizedBox(height: 4),
+                  const Text('Latest version on server'),
                   Text(
                     data.latestVersion,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    data.updateAvailable ? 'Update available' : 'You are up to date',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: data.updateAvailable ? Colors.green.shade700 : Colors.blueGrey,
                     ),
                   ),
                   const SizedBox(height: 16),
                   const Text('appId', style: TextStyle(fontSize: 13)),
+                  const SizedBox(height: 4),
                   Text(
                     data.appId,
                     style: const TextStyle(fontFamily: 'monospace'),
@@ -127,11 +123,13 @@ class _VersionInfo {
     required this.installedVersion,
     required this.latestVersion,
     required this.appId,
+    required this.updateAvailable,
   });
 
   final String installedVersion;
   final String latestVersion;
   final String appId;
+  final bool updateAvailable;
 }
 
 Future<_VersionInfo> _loadVersionInfo() async {
@@ -144,10 +142,13 @@ Future<_VersionInfo> _loadVersionInfo() async {
     appId: client.config.appId,
     platform: client.config.resolvedPlatform,
   );
+
   return _VersionInfo(
     installedVersion: installedVersion.isEmpty ? 'Unknown' : installedVersion,
     latestVersion: latestVersion,
     appId: client.config.appId,
+    updateAvailable:
+        installedVersion.isNotEmpty && installedVersion != latestVersion,
   );
 }
 
@@ -164,6 +165,7 @@ Future<String> _fetchLatestVersion({
       'channel': _channel,
     },
   );
+
   final request = await HttpClient().getUrl(uri);
   final response = await request.close();
   final body = await response.fold<String>(
