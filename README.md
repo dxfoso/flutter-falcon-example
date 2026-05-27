@@ -11,6 +11,7 @@ It shows:
 `Falcon` runtime config is now derived from package metadata at runtime:
 
 - `appId`: from `FLUTTER_FALCON_RUNTIME_APP_ID` build-time override when set, otherwise `PackageInfo.packageName`
+  - For user-safe namespacing, set `FLUTTER_FALCON_RUNTIME_APP_ID_NAMESPACE=<username>` at build time to use `<namespace>.<packageName>`.
 - `baseVersion`: from app package version/build number
 - `serverUrl`: from `FLUTTER_FALCON_SERVER_URL` override, then `FLUTTER_FALCON_RUNTIME_SERVER_URL`, then defaults to `https://flutterfalcon.com`
 - `channel`: fixed to `stable` in this example
@@ -18,6 +19,12 @@ It shows:
 Hosted FlutterFalcon builds do not need a client read token for app update
 checks. If you use a private Falcon server that still protects `/updates`,
 pass a read token through `FLUTTER_FALCON_RUNTIME_READ_TOKEN` at build time.
+
+Example build command with user namespace:
+
+```powershell
+flutter build windows --release --dart-define=FLUTTER_FALCON_RUNTIME_APP_ID_NAMESPACE=your_username
+```
 
 Release flow this app expects:
 

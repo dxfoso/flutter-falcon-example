@@ -182,11 +182,16 @@ String _falconBaseVersion(String version, String buildNumber) {
 
 String _falconAppId(String packageName) {
   final override = const String.fromEnvironment('FLUTTER_FALCON_RUNTIME_APP_ID');
+  final namespace = const String.fromEnvironment('FLUTTER_FALCON_RUNTIME_APP_ID_NAMESPACE')
+      .trim();
   final fallback = packageName.trim();
 
   final trimmedOverride = override.trim();
   if (trimmedOverride.isNotEmpty) {
     return trimmedOverride;
+  }
+  if (namespace.isNotEmpty) {
+    return '${namespace.trim()}.${fallback.isEmpty ? 'red_rect_app' : fallback}';
   }
   return fallback;
 }
