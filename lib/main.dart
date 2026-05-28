@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_falcon/flutter_falcon_api.dart';
 
@@ -125,6 +126,12 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                     ),
                   ],
                   const SizedBox(height: 12),
+                  const Text('Exact /updates request'),
+                  Text(
+                    data.updatesRequestUrl,
+                    style: const TextStyle(fontFamily: 'monospace', height: 1.2),
+                  ),
+                  const SizedBox(height: 12),
                   const Text('What this means'),
                   Text(data.statusExplanation, style: const TextStyle(height: 1.3)),
                   const SizedBox(height: 12),
@@ -216,6 +223,12 @@ class _VersionInfo {
     required this.updateAvailable,
     required this.checkStatus,
     this.failureMessage,
+    required this.statusExplanation,
+    required this.baseVersion,
+    required this.configured,
+    required this.failureStatusCode,
+    required this.failureResponseBody,
+    required this.updatesRequestUrl,
   });
 
   final String installedVersion;
@@ -230,6 +243,7 @@ class _VersionInfo {
   final bool configured;
   final int? failureStatusCode;
   final String? failureResponseBody;
+  final String updatesRequestUrl;
 }
 
 Future<_VersionInfo> _loadVersionInfo() async {
@@ -271,6 +285,12 @@ Future<_VersionInfo> _loadVersionInfo() async {
     serverUrl: serverUrl,
     checkStatus: checkResult.status.name,
     failureMessage: checkResult.failureMessage,
+    updatesRequestUrl: _falconUpdatesRequestUrl(
+      serverUrl: serverUrl,
+      appId: appId,
+      channel: _channel,
+      baseVersion: baseVersion,
+    ),
     statusExplanation: _falconStatusExplanation(
       checkStatus: checkResult.status,
       configured: checkResult.configured,
@@ -286,6 +306,48 @@ Future<_VersionInfo> _loadVersionInfo() async {
         latestVersion.isNotEmpty &&
         installedVersion != latestVersion,
   );
+}
+
+String _falconUpdatesRequestUrl({
+  required String serverUrl,
+  required String appId,
+  required String channel,
+  required String baseVersion,
+}) {
+  final parsed = Uri.tryParse(serverUrl);
+  if (parsed == null) {
+    return 'invalid server URL';
+  }
+  final normalizedPath = parsed.path.trim();
+  final path =
+      normalizedPath.endsWith('/updates') || normalizedPath == '/updates'
+          ? normalizedPath
+          : '/updates';
+  final url = parsed.replace(path: path, queryParameters: null, fragment: null);
+  return url
+      .replace(
+        queryParameters: {
+          'appId': appId,
+          'platform': _falconDefaultRuntimePlatform(),
+          'channel': channel,
+          'baseVersion': baseVersion,
+        },
+      )
+      .toString();
+}
+
+String _falconDefaultRuntimePlatform() {
+  if (kIsWeb) {
+    return 'web';
+  }
+  return switch (defaultTargetPlatform) {
+    TargetPlatform.windows => 'windows-x64',
+    TargetPlatform.macOS => 'macos-universal',
+    TargetPlatform.linux => 'linux-x64',
+    TargetPlatform.android => 'android-arm64',
+    TargetPlatform.iOS => 'ios-arm64',
+    TargetPlatform.fuchsia => 'fuchsia',
+  };
 }
 
 String _falconStatusExplanation({
