@@ -95,6 +95,15 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton.icon(
+                      onPressed: _refresh,
+                      icon: const Icon(Icons.system_update_alt),
+                      label: const Text('Check for update'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   const Text('appId', style: TextStyle(fontSize: 13)),
                   const SizedBox(height: 4),
                   Text(data.appId, style: const TextStyle(fontFamily: 'monospace')),
