@@ -103,6 +103,28 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  const Text('Server check status'),
+                  Text(
+                    data.checkStatus,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: data.checkStatus == 'available'
+                          ? Colors.orange.shade700
+                          : data.checkStatus == 'failed' ||
+                              data.checkStatus == 'notConfigured'
+                          ? Colors.red.shade700
+                          : Colors.green.shade700,
+                    ),
+                  ),
+                  if (data.failureMessage != null) ...[
+                    const SizedBox(height: 8),
+                    const Text('Check failure'),
+                    Text(
+                      data.failureMessage!,
+                      style: TextStyle(color: Colors.red.shade700),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
                   Text(
                     data.updateAvailable
                         ? 'Update available'
@@ -156,6 +178,8 @@ class _VersionInfo {
     required this.appId,
     required this.serverUrl,
     required this.updateAvailable,
+    required this.checkStatus,
+    this.failureMessage,
   });
 
   final String installedVersion;
@@ -163,6 +187,8 @@ class _VersionInfo {
   final String appId;
   final String serverUrl;
   final bool updateAvailable;
+  final String checkStatus;
+  final String? failureMessage;
 }
 
 Future<_VersionInfo> _loadVersionInfo() async {
@@ -202,6 +228,8 @@ Future<_VersionInfo> _loadVersionInfo() async {
     latestVersion: latestVersion,
     appId: appId,
     serverUrl: serverUrl,
+    checkStatus: checkResult.status.name,
+    failureMessage: checkResult.failureMessage,
     updateAvailable:
         installedVersion.isNotEmpty &&
         latestVersion.isNotEmpty &&
