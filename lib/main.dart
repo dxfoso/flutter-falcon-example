@@ -47,8 +47,10 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F1EE),
       appBar: AppBar(
-        title: const Text('Flutter Falcon Version'),
-        actions: [IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh))],
+        title: const Text('Flutter Falcon Version FFF'),
+        actions: [
+          IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
+        ],
       ),
       body: FutureBuilder<_VersionInfo>(
         future: _infoFuture,
@@ -61,7 +63,10 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Text('Unable to load version info.\n$message', textAlign: TextAlign.center),
+                child: Text(
+                  'Unable to load version info.\n$message',
+                  textAlign: TextAlign.center,
+                ),
               ),
             );
           }
@@ -81,17 +86,34 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('Installed version'),
-                  Text(data.installedVersion, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+                  Text(
+                    data.installedVersion,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   const Text('Latest version on server'),
-                  Text(data.latestVersion, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
+                  Text(
+                    data.latestVersion,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   Text(
-                    data.updateAvailable ? 'Update available' : 'You are up to date',
+                    data.updateAvailable
+                        ? 'Update available'
+                        : 'You are up to date',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: data.updateAvailable ? Colors.green.shade700 : Colors.blueGrey,
+                      color:
+                          data.updateAvailable
+                              ? Colors.green.shade700
+                              : Colors.blueGrey,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -106,11 +128,17 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                   const SizedBox(height: 16),
                   const Text('appId', style: TextStyle(fontSize: 13)),
                   const SizedBox(height: 4),
-                  Text(data.appId, style: const TextStyle(fontFamily: 'monospace')),
+                  Text(
+                    data.appId,
+                    style: const TextStyle(fontFamily: 'monospace'),
+                  ),
                   const SizedBox(height: 16),
                   const Text('server', style: TextStyle(fontSize: 13)),
                   const SizedBox(height: 4),
-                  Text(data.serverUrl, style: const TextStyle(fontFamily: 'monospace')),
+                  Text(
+                    data.serverUrl,
+                    style: const TextStyle(fontFamily: 'monospace'),
+                  ),
                 ],
               ),
             ),
@@ -141,7 +169,10 @@ Future<_VersionInfo> _loadVersionInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final serverUrl = _falconServerUrl();
   final appId = _falconAppId(packageInfo.packageName);
-  final baseVersion = _falconBaseVersion(packageInfo.version, packageInfo.buildNumber);
+  final baseVersion = _falconBaseVersion(
+    packageInfo.version,
+    packageInfo.buildNumber,
+  );
 
   final client = FlutterFalconUpdateClient(
     config: FlutterFalconUpdateConfig(
@@ -154,13 +185,17 @@ Future<_VersionInfo> _loadVersionInfo() async {
 
   final checkResult = await client.check();
   if (!checkResult.configured) {
-    throw Exception(checkResult.failureMessage ?? 'runtime configuration is incomplete');
+    throw Exception(
+      checkResult.failureMessage ?? 'runtime configuration is incomplete',
+    );
   }
 
-  final installedVersion = baseVersion.isEmpty ? _buildUnknownVersion : baseVersion;
-  final latestVersion = checkResult.targetVersion?.trim().isNotEmpty == true
-      ? checkResult.targetVersion!.trim()
-      : installedVersion;
+  final installedVersion =
+      baseVersion.isEmpty ? _buildUnknownVersion : baseVersion;
+  final latestVersion =
+      checkResult.targetVersion?.trim().isNotEmpty == true
+          ? checkResult.targetVersion!.trim()
+          : installedVersion;
 
   return _VersionInfo(
     installedVersion: installedVersion,
@@ -169,8 +204,8 @@ Future<_VersionInfo> _loadVersionInfo() async {
     serverUrl: serverUrl,
     updateAvailable:
         installedVersion.isNotEmpty &&
-            latestVersion.isNotEmpty &&
-            installedVersion != latestVersion,
+        latestVersion.isNotEmpty &&
+        installedVersion != latestVersion,
   );
 }
 
@@ -190,9 +225,13 @@ String _falconBaseVersion(String version, String buildNumber) {
 }
 
 String _falconAppId(String packageName) {
-  final override = const String.fromEnvironment('FLUTTER_FALCON_RUNTIME_APP_ID');
-  final namespace = const String.fromEnvironment('FLUTTER_FALCON_RUNTIME_APP_ID_NAMESPACE')
-      .trim();
+  final override = const String.fromEnvironment(
+    'FLUTTER_FALCON_RUNTIME_APP_ID',
+  );
+  final namespace =
+      const String.fromEnvironment(
+        'FLUTTER_FALCON_RUNTIME_APP_ID_NAMESPACE',
+      ).trim();
   final fallback = packageName.trim();
 
   final trimmedOverride = override.trim();
@@ -206,7 +245,9 @@ String _falconAppId(String packageName) {
 }
 
 String _falconServerUrl() {
-  final override = const String.fromEnvironment('FLUTTER_FALCON_RUNTIME_SERVER_URL');
+  final override = const String.fromEnvironment(
+    'FLUTTER_FALCON_RUNTIME_SERVER_URL',
+  );
   final fallback = const String.fromEnvironment('FLUTTER_FALCON_SERVER_URL');
   final trimmedOverride = override.trim();
   if (trimmedOverride.isNotEmpty) {
