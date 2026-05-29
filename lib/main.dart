@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_falcon/flutter_falcon_api.dart';
 
-const _defaultServerUrl = 'https://flutterfalcon.com';
 const _channel = 'stable';
 const _buildUnknownVersion = 'Unknown';
 
@@ -109,12 +108,13 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                     data.checkStatus,
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: data.checkStatus == 'available'
-                          ? Colors.orange.shade700
-                          : data.checkStatus == 'failed' ||
-                              data.checkStatus == 'notConfigured'
-                          ? Colors.red.shade700
-                          : Colors.green.shade700,
+                      color:
+                          data.checkStatus == 'available'
+                              ? Colors.orange.shade700
+                              : data.checkStatus == 'failed' ||
+                                  data.checkStatus == 'notConfigured'
+                              ? Colors.red.shade700
+                              : Colors.green.shade700,
                     ),
                   ),
                   if (data.failureMessage != null) ...[
@@ -129,11 +129,17 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                   const Text('Exact /updates request'),
                   Text(
                     data.updatesRequestUrl,
-                    style: const TextStyle(fontFamily: 'monospace', height: 1.2),
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      height: 1.2,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   const Text('What this means'),
-                  Text(data.statusExplanation, style: const TextStyle(height: 1.3)),
+                  Text(
+                    data.statusExplanation,
+                    style: const TextStyle(height: 1.3),
+                  ),
                   const SizedBox(height: 12),
                   const Text('Request context sent to server'),
                   Text(
@@ -156,7 +162,10 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                     const SizedBox(height: 4),
                     Text(
                       'failure status code: ${data.failureStatusCode}',
-                      style: const TextStyle(fontFamily: 'monospace', color: Colors.red),
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        color: Colors.red,
+                      ),
                     ),
                   ],
                   if (data.failureResponseBody != null) ...[
@@ -164,7 +173,10 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                     const Text('failure response'),
                     Text(
                       data.failureResponseBody!,
-                      style: const TextStyle(fontFamily: 'monospace', color: Colors.red),
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        color: Colors.red,
+                      ),
                     ),
                   ],
                   const SizedBox(height: 12),
@@ -250,7 +262,7 @@ Future<_VersionInfo> _loadVersionInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final packageVersion = _falconPackageVersion(packageInfo.version);
   final serverUrl = _falconServerUrl();
-  final appId = _falconAppId(packageInfo.packageName, packageVersion);
+  final appId = _falconAppId(packageInfo.packageName);
 
   final client = FlutterFalconUpdateClient(
     config: FlutterFalconUpdateConfig(
@@ -357,14 +369,18 @@ String _falconStatusExplanation({
     return 'Not configured: runtime config needs serverUrl, appId, and baseVersion.';
   }
   return switch (checkStatus) {
-    FlutterFalconUpdateStatus.available => 'A newer target version was found on the server for your installed version.',
-    FlutterFalconUpdateStatus.current => 'No newer patch was found. Server reports current as version "$latestVersion", so app is up to date relative to your current build.',
+    FlutterFalconUpdateStatus.available =>
+      'A newer target version was found on the server for your installed version.',
+    FlutterFalconUpdateStatus.current =>
+      'No newer patch was found. Server reports current as version "$latestVersion", so app is up to date relative to your current build.',
     FlutterFalconUpdateStatus.failed =>
       'The server check failed: ${failureMessage ?? 'unknown failure'}.',
     FlutterFalconUpdateStatus.notConfigured =>
       'Runtime config is incomplete for update checks.',
-    FlutterFalconUpdateStatus.downloaded => 'An update was downloaded but not applied yet.',
-    FlutterFalconUpdateStatus.active => 'An update is active and marked as current runtime state.',
+    FlutterFalconUpdateStatus.downloaded =>
+      'An update was downloaded but not applied yet.',
+    FlutterFalconUpdateStatus.active =>
+      'An update is active and marked as current runtime state.',
   };
 }
 
@@ -376,44 +392,14 @@ String _falconPackageVersion(String version) {
   return cleanVersion;
 }
 
-String _falconAppId(String packageName, String flutterVersion) {
-  final user = _falconUserTokenFromPackage(packageName);
-  final normalizedVersion = _falconVersionToken(flutterVersion);
-  if (user.isNotEmpty) {
-    return '$user-$normalizedVersion';
+String _falconAppId(String packageName) {
+  final trimmed = packageName.trim();
+  if (trimmed.isNotEmpty) {
+    return trimmed;
   }
-  return normalizedVersion;
+  return 'flutter-falcon-example';
 }
 
 String _falconServerUrl() {
-  return _defaultServerUrl;
-}
-
-String _falconAppIdFromUser(String user) {
-  final token = user.trim().toLowerCase();
-  final cleaned = token.replaceAll(RegExp(r'[^a-z0-9._-]'), '-');
-  return cleaned.isEmpty ? 'falcon-user' : cleaned;
-}
-
-String _falconVersionToken(String rawVersion) {
-  final token = rawVersion.trim().toLowerCase();
-  return token.replaceAll(RegExp(r'[^a-z0-9._+-]'), '-');
-}
-
-String _falconUserTokenFromPackage(String packageName) {
-  final trimmed = packageName.trim().toLowerCase();
-  if (trimmed.isEmpty) {
-    return 'falcon-user';
-  }
-  final parts = trimmed.split('.').where((item) => item.isNotEmpty).toList();
-  if (parts.isEmpty) {
-    return 'falcon-user';
-  }
-  if (parts.length == 1) {
-    return _falconAppIdFromUser(parts.first);
-  }
-  if (parts.length >= 3) {
-    return _falconAppIdFromUser(parts[1]);
-  }
-  return _falconAppIdFromUser(parts.first);
+  return flutterFalconDefaultServerUrl;
 }
