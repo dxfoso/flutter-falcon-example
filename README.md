@@ -10,9 +10,9 @@ It shows:
 
 `Falcon` runtime config is now derived from package metadata at runtime:
 
-- `appId`: `<user>-<version>`, where `user` is derived from package name and `version` is `version` from `pubspec.yaml`
+- `appId`: package name from app metadata, kept stable across releases
 - `baseVersion`: from app package `version` in `pubspec.yaml`
-- `serverUrl`: defaults to `https://flutterfalcon.com`
+- `serverUrl`: defaults to `https://flutterfalcon.com` from the `flutter_falcon` package
 - `channel`: fixed to `stable` in this example
 
 Hosted FlutterFalcon builds do not need a client read token for app update
