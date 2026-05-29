@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_falcon/flutter_falcon_api.dart';
 
+const _defaultServerUrl = 'https://flutterfalcon.com';
 const _channel = 'stable';
 const _buildUnknownVersion = 'Unknown';
 
@@ -401,5 +402,5 @@ String _falconAppId(String packageName) {
 }
 
 String _falconServerUrl() {
-  return flutterFalconDefaultServerUrl;
+  return _defaultServerUrl;
 }
