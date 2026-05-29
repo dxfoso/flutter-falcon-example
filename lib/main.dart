@@ -248,19 +248,16 @@ class _VersionInfo {
 
 Future<_VersionInfo> _loadVersionInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
+  final packageVersion = _falconPackageVersion(packageInfo.version);
   final serverUrl = _falconServerUrl();
-  final appId = _falconAppId(packageInfo.packageName);
-  final baseVersion = _falconBaseVersion(
-    packageInfo.version,
-    packageInfo.buildNumber,
-  );
+  final appId = _falconAppId(packageInfo.packageName, packageVersion);
 
   final client = FlutterFalconUpdateClient(
     config: FlutterFalconUpdateConfig(
       serverUrl: serverUrl,
       appId: appId,
       channel: _channel,
-      baseVersion: baseVersion,
+      baseVersion: packageVersion,
     ),
   );
 
@@ -272,7 +269,7 @@ Future<_VersionInfo> _loadVersionInfo() async {
   }
 
   final installedVersion =
-      baseVersion.isEmpty ? _buildUnknownVersion : baseVersion;
+      packageVersion.isEmpty ? _buildUnknownVersion : packageVersion;
   final latestVersion =
       checkResult.targetVersion?.trim().isNotEmpty == true
           ? checkResult.targetVersion!.trim()
@@ -289,7 +286,7 @@ Future<_VersionInfo> _loadVersionInfo() async {
       serverUrl: serverUrl,
       appId: appId,
       channel: _channel,
-      baseVersion: baseVersion,
+      baseVersion: packageVersion,
     ),
     statusExplanation: _falconStatusExplanation(
       checkStatus: checkResult.status,
@@ -297,12 +294,12 @@ Future<_VersionInfo> _loadVersionInfo() async {
       latestVersion: latestVersion,
       failureMessage: checkResult.failureMessage,
     ),
-    baseVersion: baseVersion,
+    baseVersion: packageVersion,
     configured: checkResult.configured,
     failureStatusCode: checkResult.failureStatusCode,
     failureResponseBody: checkResult.failureResponseBody,
     updateAvailable:
-        installedVersion.isNotEmpty &&
+        packageVersion.isNotEmpty &&
         latestVersion.isNotEmpty &&
         installedVersion != latestVersion,
   );
@@ -371,52 +368,52 @@ String _falconStatusExplanation({
   };
 }
 
-String _falconBaseVersion(String version, String buildNumber) {
+String _falconPackageVersion(String version) {
   final cleanVersion = version.trim();
-  final cleanBuild = buildNumber.trim();
   if (cleanVersion.isEmpty) {
     return '';
   }
-  if (cleanBuild.isEmpty) {
-    return cleanVersion;
-  }
-  if (cleanVersion.contains('+')) {
-    return cleanVersion;
-  }
-  return '$cleanVersion+$cleanBuild';
+  return cleanVersion;
 }
 
-String _falconAppId(String packageName) {
-  final override = const String.fromEnvironment(
-    'FLUTTER_FALCON_RUNTIME_APP_ID',
-  );
-  final namespace =
-      const String.fromEnvironment(
-        'FLUTTER_FALCON_RUNTIME_APP_ID_NAMESPACE',
-      ).trim();
-  final fallback = packageName.trim();
-
-  final trimmedOverride = override.trim();
-  if (trimmedOverride.isNotEmpty) {
-    return trimmedOverride;
+String _falconAppId(String packageName, String flutterVersion) {
+  final user = _falconUserTokenFromPackage(packageName);
+  final normalizedVersion = _falconVersionToken(flutterVersion);
+  if (user.isNotEmpty) {
+    return '$user-$normalizedVersion';
   }
-  if (namespace.isNotEmpty) {
-    return '${namespace.trim()}.${fallback.isEmpty ? 'red_rect_app' : fallback}';
-  }
-  return fallback;
+  return normalizedVersion;
 }
 
 String _falconServerUrl() {
-  final override = const String.fromEnvironment(
-    'FLUTTER_FALCON_RUNTIME_SERVER_URL',
-  );
-  final fallback = const String.fromEnvironment('FLUTTER_FALCON_SERVER_URL');
-  final trimmedOverride = override.trim();
-  if (trimmedOverride.isNotEmpty) {
-    return trimmedOverride;
-  }
-  if (fallback.trim().isNotEmpty) {
-    return fallback;
-  }
   return _defaultServerUrl;
+}
+
+String _falconAppIdFromUser(String user) {
+  final token = user.trim().toLowerCase();
+  final cleaned = token.replaceAll(RegExp(r'[^a-z0-9._-]'), '-');
+  return cleaned.isEmpty ? 'falcon-user' : cleaned;
+}
+
+String _falconVersionToken(String rawVersion) {
+  final token = rawVersion.trim().toLowerCase();
+  return token.replaceAll(RegExp(r'[^a-z0-9._+-]'), '-');
+}
+
+String _falconUserTokenFromPackage(String packageName) {
+  final trimmed = packageName.trim().toLowerCase();
+  if (trimmed.isEmpty) {
+    return 'falcon-user';
+  }
+  final parts = trimmed.split('.').where((item) => item.isNotEmpty).toList();
+  if (parts.isEmpty) {
+    return 'falcon-user';
+  }
+  if (parts.length == 1) {
+    return _falconAppIdFromUser(parts.first);
+  }
+  if (parts.length >= 3) {
+    return _falconAppIdFromUser(parts[1]);
+  }
+  return _falconAppIdFromUser(parts.first);
 }
