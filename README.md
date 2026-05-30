@@ -16,6 +16,12 @@ It shows:
 - `serverUrl`: defaults to `https://flutterfalcon.com` from the `flutter_falcon` package
 - `channel`: fixed to `stable` in this example
 
+When this repo is built on hosted `https://flutterfalcon.com`, the build
+service now injects the hosted Falcon defaults automatically even without a
+committed `.flutter_falcon.json` or saved Falcon env block. That is what lets
+the hosted build auto-publish into the same effective stream that the app
+queries at runtime.
+
 Hosted FlutterFalcon builds may inject a separate runtime app id for tenant
 isolation. Runtime lookup and hosted publish use that same effective app id
 stream. This example now shows both values so operators can see which stream
