@@ -136,6 +136,15 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  const Text('Exact /releases/latest request'),
+                  Text(
+                    data.releaseLatestRequestUrl,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                      height: 1.2,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   const Text('What this means'),
                   Text(
                     data.statusExplanation,
@@ -144,7 +153,15 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                   const SizedBox(height: 12),
                   const Text('Request context sent to server'),
                   Text(
-                    'appId: ${data.appId}',
+                    'configuredAppId: ${data.configuredAppId}',
+                    style: const TextStyle(fontFamily: 'monospace'),
+                  ),
+                  Text(
+                    'effectiveAppId: ${data.effectiveAppId}',
+                    style: const TextStyle(fontFamily: 'monospace'),
+                  ),
+                  Text(
+                    'appIdSource: ${data.appIdSource}',
                     style: const TextStyle(fontFamily: 'monospace'),
                   ),
                   Text(
@@ -204,12 +221,24 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text('appId', style: TextStyle(fontSize: 13)),
+                  const Text('effective appId', style: TextStyle(fontSize: 13)),
                   const SizedBox(height: 4),
                   Text(
-                    data.appId,
+                    data.effectiveAppId,
                     style: const TextStyle(fontFamily: 'monospace'),
                   ),
+                  if (data.configuredAppId != data.effectiveAppId) ...[
+                    const SizedBox(height: 12),
+                    const Text(
+                      'configured appId',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      data.configuredAppId,
+                      style: const TextStyle(fontFamily: 'monospace'),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   const Text('server', style: TextStyle(fontSize: 13)),
                   const SizedBox(height: 4),
@@ -231,7 +260,9 @@ class _VersionInfo {
   const _VersionInfo({
     required this.installedVersion,
     required this.latestVersion,
-    required this.appId,
+    required this.configuredAppId,
+    required this.effectiveAppId,
+    required this.appIdSource,
     required this.serverUrl,
     required this.updateAvailable,
     required this.checkStatus,
@@ -242,11 +273,14 @@ class _VersionInfo {
     required this.failureStatusCode,
     required this.failureResponseBody,
     required this.updatesRequestUrl,
+    required this.releaseLatestRequestUrl,
   });
 
   final String installedVersion;
   final String latestVersion;
-  final String appId;
+  final String configuredAppId;
+  final String effectiveAppId;
+  final String appIdSource;
   final String serverUrl;
   final bool updateAvailable;
   final String checkStatus;
@@ -257,22 +291,24 @@ class _VersionInfo {
   final int? failureStatusCode;
   final String? failureResponseBody;
   final String updatesRequestUrl;
+  final String releaseLatestRequestUrl;
 }
 
 Future<_VersionInfo> _loadVersionInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final packageVersion = _falconPackageVersion(packageInfo.version);
   final serverUrl = _falconServerUrl();
-  final appId = _falconAppId(packageInfo.packageName);
+  final configuredAppId = _falconAppId(packageInfo.packageName);
 
   final client = FlutterFalconUpdateClient(
     config: FlutterFalconUpdateConfig(
       serverUrl: serverUrl,
-      appId: appId,
+      appId: configuredAppId,
       channel: _channel,
       baseVersion: packageVersion,
     ),
   );
+  final effectiveConfig = client.config;
 
   final checkResult = await client.check();
   if (!checkResult.configured) {
@@ -291,15 +327,22 @@ Future<_VersionInfo> _loadVersionInfo() async {
   return _VersionInfo(
     installedVersion: installedVersion,
     latestVersion: latestVersion,
-    appId: appId,
+    configuredAppId: effectiveConfig.configuredAppId,
+    effectiveAppId: effectiveConfig.effectiveAppId,
+    appIdSource: effectiveConfig.appIdSource.name,
     serverUrl: serverUrl,
     checkStatus: checkResult.status.name,
     failureMessage: checkResult.failureMessage,
     updatesRequestUrl: _falconUpdatesRequestUrl(
       serverUrl: serverUrl,
-      appId: appId,
+      appId: effectiveConfig.effectiveAppId,
       channel: _channel,
       baseVersion: packageVersion,
+    ),
+    releaseLatestRequestUrl: _falconReleaseLatestRequestUrl(
+      serverUrl: serverUrl,
+      appId: effectiveConfig.effectiveAppId,
+      channel: _channel,
     ),
     statusExplanation: _falconStatusExplanation(
       checkStatus: checkResult.status,
@@ -342,6 +385,28 @@ String _falconUpdatesRequestUrl({
           'channel': channel,
           'baseVersion': baseVersion,
         },
+      )
+      .toString();
+}
+
+String _falconReleaseLatestRequestUrl({
+  required String serverUrl,
+  required String appId,
+  required String channel,
+}) {
+  final parsed = Uri.tryParse(serverUrl);
+  if (parsed == null) {
+    return 'invalid server URL';
+  }
+  return parsed
+      .replace(
+        path: '/releases/latest',
+        queryParameters: {
+          'appId': appId,
+          'platform': _falconDefaultRuntimePlatform(),
+          'channel': channel,
+        },
+        fragment: null,
       )
       .toString();
 }
