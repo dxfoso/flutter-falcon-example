@@ -1,7 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon_api.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+
+import 'falcon_runtime_support_stub.dart'
+    if (dart.library.io) 'falcon_runtime_support_io.dart';
 
 const _defaultServerUrl = 'https://flutterfalcon.com';
 const _channel = 'stable';
@@ -30,6 +33,9 @@ class FalconVersionPage extends StatefulWidget {
 
 class _FalconVersionPageState extends State<FalconVersionPage> {
   late Future<_VersionInfo> _infoFuture;
+  bool _actionRunning = false;
+  String? _actionMessage;
+  String? _actionError;
 
   @override
   void initState() {
@@ -39,8 +45,63 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
 
   Future<void> _refresh() async {
     setState(() {
+      _actionMessage = null;
+      _actionError = null;
       _infoFuture = _loadVersionInfo();
     });
+  }
+
+  Future<void> _applyOrConfirm(_VersionInfo info) async {
+    setState(() {
+      _actionRunning = true;
+      _actionMessage = null;
+      _actionError = null;
+    });
+    try {
+      final client = _createClient(
+        serverUrl: info.serverUrl,
+        configuredAppId: info.configuredAppId,
+        baseVersion: info.baseVersion,
+      );
+      if (info.requiresBootConfirmation) {
+        final result = await falconConfirmBoot(client: client);
+        setState(() {
+          _actionMessage =
+              result.changed
+                  ? 'Boot confirmed for ${info.activePatchVersion ?? info.latestVersion}.'
+                  : result.message;
+        });
+      } else if (info.installableUpdateAvailable) {
+        final result = await falconApplyUpdate(
+          client: client,
+          installedVersion: info.installedVersion,
+        );
+        if (result.changed) {
+          setState(() {
+            _actionMessage = result.message;
+          });
+        } else {
+          setState(() {
+            _actionError = result.message;
+          });
+        }
+      } else {
+        setState(() {
+          _actionMessage = 'No installable Falcon update is available right now.';
+        });
+      }
+      await _refresh();
+    } catch (error) {
+      setState(() {
+        _actionError = error.toString();
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _actionRunning = false;
+        });
+      }
+    }
   }
 
   @override
@@ -48,7 +109,7 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F1EE),
       appBar: AppBar(
-        title: const Text('Flutter Falcon Version qqqqq'),
+        title: const Text('Flutter Falcon Version'),
         actions: [
           IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
@@ -75,7 +136,7 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
           final data = snapshot.data!;
           return Center(
             child: Container(
-              width: 360,
+              width: 420,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -104,6 +165,12 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                     ),
                   ),
                   const SizedBox(height: 12),
+                  const Text('Installable Falcon target'),
+                  Text(
+                    data.installableTargetVersion,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
                   const Text('Server check status'),
                   Text(
                     data.checkStatus,
@@ -116,14 +183,42 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                                   data.checkStatus == 'notConfigured'
                               ? Colors.red.shade700
                               : Colors.green.shade700,
-                      ),
                     ),
+                  ),
                   const SizedBox(height: 8),
-                  const Text('Installable Falcon target'),
+                  const Text('Runtime state'),
                   Text(
-                    data.installableTargetVersion,
+                    data.runtimeState,
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
+                  if (data.activePatchVersion != null) ...[
+                    const SizedBox(height: 8),
+                    const Text('Active patch version'),
+                    Text(
+                      data.activePatchVersion!,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                  if (_actionMessage != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      _actionMessage!,
+                      style: TextStyle(
+                        color: Colors.green.shade700,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                  if (_actionError != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      _actionError!,
+                      style: TextStyle(
+                        color: Colors.red.shade700,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                   if (data.failureMessage != null) ...[
                     const SizedBox(height: 8),
                     const Text('Check failure'),
@@ -132,6 +227,12 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                       style: TextStyle(color: Colors.red.shade700),
                     ),
                   ],
+                  const SizedBox(height: 12),
+                  const Text('What this means'),
+                  Text(
+                    data.statusExplanation,
+                    style: const TextStyle(height: 1.3),
+                  ),
                   const SizedBox(height: 12),
                   const Text('Exact /updates request'),
                   Text(
@@ -149,12 +250,6 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                       fontFamily: 'monospace',
                       height: 1.2,
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  const Text('What this means'),
-                  Text(
-                    data.statusExplanation,
-                    style: const TextStyle(height: 1.3),
                   ),
                   const SizedBox(height: 12),
                   const Text('Request context sent to server'),
@@ -207,11 +302,11 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Text(
                     data.updateAvailable
-                        ? 'Update available'
-                        : 'You are up to date',
+                        ? 'Newer hosted version exists'
+                        : 'Hosted version matches this build',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
@@ -225,9 +320,31 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton.icon(
-                      onPressed: _refresh,
-                      icon: const Icon(Icons.system_update_alt),
-                      label: const Text('Check for update'),
+                      onPressed:
+                          _actionRunning ||
+                                  (!data.installableUpdateAvailable &&
+                                      !data.requiresBootConfirmation)
+                              ? null
+                              : () => _applyOrConfirm(data),
+                      icon:
+                          _actionRunning
+                              ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : Icon(
+                                data.requiresBootConfirmation
+                                    ? Icons.verified
+                                    : Icons.system_update_alt,
+                              ),
+                      label: Text(
+                        data.requiresBootConfirmation
+                            ? 'Confirm updated boot'
+                            : 'Download and apply update',
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -276,6 +393,7 @@ class _VersionInfo {
     required this.appIdSource,
     required this.serverUrl,
     required this.updateAvailable,
+    required this.installableUpdateAvailable,
     required this.checkStatus,
     this.failureMessage,
     required this.statusExplanation,
@@ -286,6 +404,9 @@ class _VersionInfo {
     required this.updatesRequestUrl,
     required this.releaseLatestRequestUrl,
     required this.latestReleaseFound,
+    required this.runtimeState,
+    required this.requiresBootConfirmation,
+    required this.activePatchVersion,
   });
 
   final String installedVersion;
@@ -296,6 +417,7 @@ class _VersionInfo {
   final String appIdSource;
   final String serverUrl;
   final bool updateAvailable;
+  final bool installableUpdateAvailable;
   final String checkStatus;
   final String? failureMessage;
   final String statusExplanation;
@@ -306,26 +428,28 @@ class _VersionInfo {
   final String updatesRequestUrl;
   final String releaseLatestRequestUrl;
   final bool latestReleaseFound;
+  final String runtimeState;
+  final bool requiresBootConfirmation;
+  final String? activePatchVersion;
 }
 
 Future<_VersionInfo> _loadVersionInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
   final packageVersion = _falconPackageVersion(packageInfo.version);
-  final serverUrl = _falconServerUrl();
   final configuredAppId = _falconAppId(packageInfo.packageName);
-
-  final client = FlutterFalconUpdateClient(
-    config: FlutterFalconUpdateConfig(
-      serverUrl: serverUrl,
-      appId: configuredAppId,
-      channel: _channel,
-      baseVersion: packageVersion,
-    ),
+  final client = _createClient(
+    serverUrl: _falconServerUrl(),
+    configuredAppId: configuredAppId,
+    baseVersion: packageVersion,
   );
   final effectiveConfig = client.config;
 
   final latestReleaseResult = await client.latestRelease();
   final checkResult = await client.check();
+  final snapshot = await falconStatusSnapshot(
+    client: client,
+    checkResult: checkResult,
+  );
   if (!checkResult.configured) {
     throw Exception(
       checkResult.failureMessage ?? 'runtime configuration is incomplete',
@@ -353,20 +477,14 @@ Future<_VersionInfo> _loadVersionInfo() async {
     configuredAppId: effectiveConfig.configuredAppId,
     effectiveAppId: effectiveConfig.effectiveAppId,
     appIdSource: effectiveConfig.appIdSource.name,
-    serverUrl: serverUrl,
+    serverUrl: effectiveConfig.serverUrl,
+    updateAvailable:
+        packageVersion.isNotEmpty &&
+        latestVersion.isNotEmpty &&
+        installedVersion != latestVersion,
+    installableUpdateAvailable: checkResult.updateAvailable,
     checkStatus: checkResult.status.name,
     failureMessage: checkResult.failureMessage,
-    updatesRequestUrl: _falconUpdatesRequestUrl(
-      serverUrl: serverUrl,
-      appId: effectiveConfig.effectiveAppId,
-      channel: _channel,
-      baseVersion: packageVersion,
-    ),
-    releaseLatestRequestUrl: _falconReleaseLatestRequestUrl(
-      serverUrl: serverUrl,
-      appId: effectiveConfig.effectiveAppId,
-      channel: _channel,
-    ),
     statusExplanation: _falconStatusExplanation(
       checkStatus: checkResult.status,
       configured: checkResult.configured,
@@ -374,16 +492,42 @@ Future<_VersionInfo> _loadVersionInfo() async {
       installableTargetVersion: installableTargetVersion,
       latestReleaseFound: latestReleaseResult.found,
       failureMessage: checkResult.failureMessage,
+      requiresBootConfirmation: snapshot?.requiresBootConfirmation ?? false,
     ),
     baseVersion: packageVersion,
     configured: checkResult.configured,
     failureStatusCode: checkResult.failureStatusCode,
     failureResponseBody: checkResult.failureResponseBody,
+    updatesRequestUrl: _falconUpdatesRequestUrl(
+      serverUrl: effectiveConfig.serverUrl,
+      appId: effectiveConfig.effectiveAppId,
+      channel: _channel,
+      baseVersion: packageVersion,
+    ),
+    releaseLatestRequestUrl: _falconReleaseLatestRequestUrl(
+      serverUrl: effectiveConfig.serverUrl,
+      appId: effectiveConfig.effectiveAppId,
+      channel: _channel,
+    ),
     latestReleaseFound: latestReleaseResult.found,
-    updateAvailable:
-        packageVersion.isNotEmpty &&
-        latestVersion.isNotEmpty &&
-        installedVersion != latestVersion,
+    runtimeState: snapshot?.state.name ?? 'unsupported',
+    requiresBootConfirmation: snapshot?.requiresBootConfirmation ?? false,
+    activePatchVersion: snapshot?.activePatchVersion,
+  );
+}
+
+FlutterFalconUpdateClient _createClient({
+  required String serverUrl,
+  required String configuredAppId,
+  required String baseVersion,
+}) {
+  return FlutterFalconUpdateClient(
+    config: FlutterFalconUpdateConfig(
+      serverUrl: serverUrl,
+      appId: configuredAppId,
+      channel: _channel,
+      baseVersion: baseVersion,
+    ),
   );
 }
 
@@ -457,10 +601,14 @@ String _falconStatusExplanation({
   required String latestVersion,
   required String installableTargetVersion,
   required bool latestReleaseFound,
+  required bool requiresBootConfirmation,
   String? failureMessage,
 }) {
   if (!configured) {
     return 'Not configured: runtime config needs serverUrl, appId, and baseVersion.';
+  }
+  if (requiresBootConfirmation) {
+    return 'An update is staged. Restart this app, verify it boots correctly, then click Confirm updated boot.';
   }
   if (checkStatus == FlutterFalconUpdateStatus.current &&
       latestReleaseFound &&
@@ -470,9 +618,9 @@ String _falconStatusExplanation({
   }
   return switch (checkStatus) {
     FlutterFalconUpdateStatus.available =>
-      'A newer target version was found on the server for your installed version.',
+      'A newer installable Falcon update is available for this installed build. Click the button to download and activate it.',
     FlutterFalconUpdateStatus.current =>
-      'No newer patch was found. Server reports current as version "$latestVersion", so app is up to date relative to your current build.',
+      'No newer installable patch was found for this installed build.',
     FlutterFalconUpdateStatus.failed =>
       'The server check failed: ${failureMessage ?? 'unknown failure'}.',
     FlutterFalconUpdateStatus.notConfigured =>

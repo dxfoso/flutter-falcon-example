@@ -7,9 +7,11 @@ It shows:
 - Installed version (from app package metadata)
 - Latest hosted release version from `/releases/latest`
 - Installable Falcon target version from `/updates`
+- Runtime patch state for the current install
 - Effective hosted app id vs configured app id
 - Exact `GET /updates` and `GET /releases/latest` URLs for the current build
 - Whether an update is available from the hosted update stream
+- A button that downloads and activates the installable Falcon update when one exists
 
 `Falcon` runtime config is now derived from package metadata at runtime:
 
@@ -35,10 +37,21 @@ pass a read token through `FLUTTER_FALCON_RUNTIME_READ_TOKEN` at build time.
 
 Release flow this app expects:
 
-1. Build and publish the new version from the same effective app id and channel (`stable`).
-2. Ensure the hosted release stream exists for that effective app id and platform.
-3. Download the packaged Windows build and install it.
-4. Open the app and press refresh to compare local `baseVersion` vs the hosted stream.
+1. Build and publish an older Windows version from the same effective app id and channel (`stable`).
+2. Build and publish a newer Windows version from the same effective app id and channel.
+3. Download and run the older packaged Windows build.
+4. Open the app and press `Check for update` or refresh to compare local `baseVersion` vs the hosted stream.
+5. If `/updates` reports an installable Falcon patch, click `Download and apply update`.
+6. Restart the app, verify it boots correctly, then click `Confirm updated boot`.
+
+For the hosted sample stream, this repo now moves from `1.1.2+4` to `1.1.2+5`,
+so the intended proof path is:
+
+- download and run `1.1.2+4`
+- publish and query `1.1.2+5`
+- click `Download and apply update`
+- restart
+- click `Confirm updated boot`
 
 If update is not shown after publishing:
 
@@ -48,6 +61,9 @@ If update is not shown after publishing:
 - Remember that `/releases/latest` and `/updates` are different:
   `/releases/latest` is the newest hosted packaged build, while `/updates`
   is an installable Falcon runtime update for the current base version.
+- Remember that Windows installable Falcon patches only publish when the diff
+  stays inside patchable Dart and asset files. Native shell, engine, DLL, or
+  ICU changes still require a normal packaged release.
 
 Run:
 
