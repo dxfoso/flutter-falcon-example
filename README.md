@@ -5,6 +5,8 @@ Minimal Flutter Falcon Windows test app.
 It shows:
 
 - Installed version (from app package metadata)
+- Latest hosted release version from `/releases/latest`
+- Installable Falcon target version from `/updates`
 - Effective hosted app id vs configured app id
 - Exact `GET /updates` and `GET /releases/latest` URLs for the current build
 - Whether an update is available from the hosted update stream
@@ -43,6 +45,9 @@ If update is not shown after publishing:
 - Confirm the release uses the same effective `appId` and platform as the installed app.
 - Confirm channel is `stable`.
 - Confirm the downloaded package reports the expected `packageName` and version.
+- Remember that `/releases/latest` and `/updates` are different:
+  `/releases/latest` is the newest hosted packaged build, while `/updates`
+  is an installable Falcon runtime update for the current base version.
 
 Run:
 

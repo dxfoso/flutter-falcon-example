@@ -116,7 +116,13 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                                   data.checkStatus == 'notConfigured'
                               ? Colors.red.shade700
                               : Colors.green.shade700,
+                      ),
                     ),
+                  const SizedBox(height: 8),
+                  const Text('Installable Falcon target'),
+                  Text(
+                    data.installableTargetVersion,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   if (data.failureMessage != null) ...[
                     const SizedBox(height: 8),
@@ -170,6 +176,10 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                   ),
                   Text(
                     'baseVersion: ${data.baseVersion}',
+                    style: const TextStyle(fontFamily: 'monospace'),
+                  ),
+                  Text(
+                    'latestReleaseFound: ${data.latestReleaseFound ? 'yes' : 'no'}',
                     style: const TextStyle(fontFamily: 'monospace'),
                   ),
                   Text(
@@ -260,6 +270,7 @@ class _VersionInfo {
   const _VersionInfo({
     required this.installedVersion,
     required this.latestVersion,
+    required this.installableTargetVersion,
     required this.configuredAppId,
     required this.effectiveAppId,
     required this.appIdSource,
@@ -274,10 +285,12 @@ class _VersionInfo {
     required this.failureResponseBody,
     required this.updatesRequestUrl,
     required this.releaseLatestRequestUrl,
+    required this.latestReleaseFound,
   });
 
   final String installedVersion;
   final String latestVersion;
+  final String installableTargetVersion;
   final String configuredAppId;
   final String effectiveAppId;
   final String appIdSource;
@@ -292,6 +305,7 @@ class _VersionInfo {
   final String? failureResponseBody;
   final String updatesRequestUrl;
   final String releaseLatestRequestUrl;
+  final bool latestReleaseFound;
 }
 
 Future<_VersionInfo> _loadVersionInfo() async {
@@ -310,6 +324,7 @@ Future<_VersionInfo> _loadVersionInfo() async {
   );
   final effectiveConfig = client.config;
 
+  final latestReleaseResult = await client.latestRelease();
   final checkResult = await client.check();
   if (!checkResult.configured) {
     throw Exception(
@@ -319,14 +334,22 @@ Future<_VersionInfo> _loadVersionInfo() async {
 
   final installedVersion =
       packageVersion.isEmpty ? _buildUnknownVersion : packageVersion;
+  final installableTargetVersion = checkResult.targetVersion?.trim() ?? '';
+  final latestReleaseVersion = latestReleaseResult.version?.trim() ?? '';
   final latestVersion =
-      checkResult.targetVersion?.trim().isNotEmpty == true
-          ? checkResult.targetVersion!.trim()
+      latestReleaseVersion.isNotEmpty
+          ? latestReleaseVersion
+          : installableTargetVersion.isNotEmpty
+          ? installableTargetVersion
           : installedVersion;
 
   return _VersionInfo(
     installedVersion: installedVersion,
     latestVersion: latestVersion,
+    installableTargetVersion:
+        installableTargetVersion.isEmpty
+            ? installedVersion
+            : installableTargetVersion,
     configuredAppId: effectiveConfig.configuredAppId,
     effectiveAppId: effectiveConfig.effectiveAppId,
     appIdSource: effectiveConfig.appIdSource.name,
@@ -348,12 +371,15 @@ Future<_VersionInfo> _loadVersionInfo() async {
       checkStatus: checkResult.status,
       configured: checkResult.configured,
       latestVersion: latestVersion,
+      installableTargetVersion: installableTargetVersion,
+      latestReleaseFound: latestReleaseResult.found,
       failureMessage: checkResult.failureMessage,
     ),
     baseVersion: packageVersion,
     configured: checkResult.configured,
     failureStatusCode: checkResult.failureStatusCode,
     failureResponseBody: checkResult.failureResponseBody,
+    latestReleaseFound: latestReleaseResult.found,
     updateAvailable:
         packageVersion.isNotEmpty &&
         latestVersion.isNotEmpty &&
@@ -429,10 +455,18 @@ String _falconStatusExplanation({
   required FlutterFalconUpdateStatus checkStatus,
   required bool configured,
   required String latestVersion,
+  required String installableTargetVersion,
+  required bool latestReleaseFound,
   String? failureMessage,
 }) {
   if (!configured) {
     return 'Not configured: runtime config needs serverUrl, appId, and baseVersion.';
+  }
+  if (checkStatus == FlutterFalconUpdateStatus.current &&
+      latestReleaseFound &&
+      latestVersion.isNotEmpty &&
+      latestVersion != installableTargetVersion) {
+    return 'Latest hosted release is "$latestVersion". No installable Falcon update is published for this installed base version yet, so /updates is still current.';
   }
   return switch (checkStatus) {
     FlutterFalconUpdateStatus.available =>
