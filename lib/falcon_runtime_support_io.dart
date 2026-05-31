@@ -12,10 +12,18 @@ Future<FlutterFalconAppUpdateSnapshot?> falconStatusSnapshot({
   FlutterFalconUpdateCheckResult? checkResult,
 }) async {
   final installDir = _falconInstallDir();
-  return client.statusSnapshot(
+  final snapshot = await client.statusSnapshot(
     installDir: installDir,
     checkResult: checkResult,
   );
+  if (snapshot?.requiresBootConfirmation ?? false) {
+    await client.markBootSuccessful(installDir: installDir);
+    return client.statusSnapshot(
+      installDir: installDir,
+      checkResult: checkResult,
+    );
+  }
+  return snapshot;
 }
 
 Future<FalconApplyResult> falconApplyUpdate({
@@ -67,8 +75,12 @@ Future<FalconApplyResult> falconApplyUpdate({
   final targetVersion = activation.update.targetVersion;
   final message =
       snapshot.requiresBootConfirmation
-          ? 'Downloaded and activated Falcon update $targetVersion. Restart the app, verify it boots, then click Confirm updated boot.'
+          ? 'Downloaded and activated Falcon update $targetVersion. Restarting into the updated build now.'
           : 'Activated Falcon update $targetVersion.';
+  if (snapshot.requiresBootConfirmation) {
+    await _restartCurrentExecutable();
+    exit(0);
+  }
   return (changed: true, message: message);
 }
 
@@ -86,4 +98,42 @@ Directory _falconRuntimeRoot(Directory installDir) {
   return Directory(
     '${installDir.path}${Platform.pathSeparator}.flutter_falcon_runtime',
   );
+}
+
+Future<void> _restartCurrentExecutable() async {
+  final executable = Platform.resolvedExecutable;
+  final arguments = Platform.executableArguments;
+  if (Platform.isWindows) {
+    final script = '''
+Start-Sleep -Milliseconds 700
+Start-Process -FilePath '${_powershellQuoted(executable)}'${arguments.isEmpty ? '' : ' -ArgumentList @(${arguments.map(_powershellSingleQuoted).join(', ')})'}
+''';
+    await Process.start(
+      'powershell',
+      [
+        '-NoProfile',
+        '-ExecutionPolicy',
+        'Bypass',
+        '-WindowStyle',
+        'Hidden',
+        '-Command',
+        script,
+      ],
+      mode: ProcessStartMode.detached,
+    );
+    return;
+  }
+  await Process.start(
+    executable,
+    arguments,
+    mode: ProcessStartMode.detached,
+  );
+}
+
+String _powershellQuoted(String value) {
+  return value.replaceAll("'", "''");
+}
+
+String _powershellSingleQuoted(String value) {
+  return "'${_powershellQuoted(value)}'";
 }
