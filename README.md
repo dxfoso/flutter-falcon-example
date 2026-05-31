@@ -42,7 +42,7 @@ Release flow this app expects:
 3. Download and run the older packaged Windows build.
 4. Open the app and press `Check for update` or refresh to compare local `baseVersion` vs the hosted stream.
 5. If `/updates` reports an installable Falcon patch, click `Download and apply update`.
-6. Restart the app, verify it boots correctly, then click `Confirm updated boot`.
+6. The example app restarts itself into the updated runtime and auto-confirms the boot on the relaunched app.
 
 For the hosted sample stream, this repo now moves from `1.1.2+6` to `1.1.2+7`,
 so the intended proof path is:
@@ -50,8 +50,7 @@ so the intended proof path is:
 - download and run `1.1.2+6`
 - publish and query `1.1.2+7`
 - click `Download and apply update`
-- restart
-- click `Confirm updated boot`
+- let the example app restart itself
 
 If update is not shown after publishing:
 
