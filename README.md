@@ -44,11 +44,11 @@ Release flow this app expects:
 5. If `/updates` reports an installable Falcon patch, click `Download and apply update`.
 6. Restart the app, verify it boots correctly, then click `Confirm updated boot`.
 
-For the hosted sample stream, this repo now moves from `1.1.2+4` to `1.1.2+5`,
+For the hosted sample stream, this repo now moves from `1.1.2+6` to `1.1.2+7`,
 so the intended proof path is:
 
-- download and run `1.1.2+4`
-- publish and query `1.1.2+5`
+- download and run `1.1.2+6`
+- publish and query `1.1.2+7`
 - click `Download and apply update`
 - restart
 - click `Confirm updated boot`

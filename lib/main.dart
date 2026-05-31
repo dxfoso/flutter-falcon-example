@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon_api.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'falcon_versioning.dart';
 import 'falcon_runtime_support_stub.dart'
     if (dart.library.io) 'falcon_runtime_support_io.dart';
 
@@ -87,7 +88,8 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
         }
       } else {
         setState(() {
-          _actionMessage = 'No installable Falcon update is available right now.';
+          _actionMessage =
+              'No installable Falcon update is available right now.';
         });
       }
       await _refresh();
@@ -109,7 +111,7 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F1EE),
       appBar: AppBar(
-        title: const Text('Flutter Falcon Version AAAAAAAAA'),
+        title: const Text('Flutter Falcon Version'),
         actions: [
           IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
@@ -435,7 +437,10 @@ class _VersionInfo {
 
 Future<_VersionInfo> _loadVersionInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
-  final packageVersion = _falconPackageVersion(packageInfo.version);
+  final packageVersion = falconPackageVersion(
+    packageInfo.version,
+    packageInfo.buildNumber,
+  );
   final configuredAppId = _falconAppId(packageInfo.packageName);
   final client = _createClient(
     serverUrl: _falconServerUrl(),
@@ -630,14 +635,6 @@ String _falconStatusExplanation({
     FlutterFalconUpdateStatus.active =>
       'An update is active and marked as current runtime state.',
   };
-}
-
-String _falconPackageVersion(String version) {
-  final cleanVersion = version.trim();
-  if (cleanVersion.isEmpty) {
-    return '';
-  }
-  return cleanVersion;
 }
 
 String _falconAppId(String packageName) {
