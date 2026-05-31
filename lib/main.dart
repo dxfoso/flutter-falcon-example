@@ -613,7 +613,7 @@ String _falconStatusExplanation({
     return 'Not configured: runtime config needs serverUrl, appId, and baseVersion.';
   }
   if (requiresBootConfirmation) {
-    return 'An update is staged. Restart this app, verify it boots correctly, then click Confirm updated boot.';
+    return 'An update is staged and this example will confirm it automatically after the restarted app boots.';
   }
   if (checkStatus == FlutterFalconUpdateStatus.current &&
       latestReleaseFound &&
@@ -623,7 +623,7 @@ String _falconStatusExplanation({
   }
   return switch (checkStatus) {
     FlutterFalconUpdateStatus.available =>
-      'A newer installable Falcon update is available for this installed build. Click the button to download and activate it.',
+      'A newer installable Falcon update is available for this installed build. Click the button to download it and restart into the updated runtime automatically.',
     FlutterFalconUpdateStatus.current =>
       'No newer installable patch was found for this installed build.',
     FlutterFalconUpdateStatus.failed =>
