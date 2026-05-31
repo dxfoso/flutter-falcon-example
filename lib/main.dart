@@ -111,7 +111,7 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF6F1EE),
       appBar: AppBar(
-        title: const Text('Flutter Falcon Version tttttttttttt'),
+        title: const Text('Flutter Falcon Version uuuuuuuuuuuuuu'),
         actions: [
           IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
