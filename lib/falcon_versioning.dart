@@ -9,3 +9,14 @@ String falconPackageVersion(String version, String buildNumber) {
   }
   return '$cleanVersion+$cleanBuildNumber';
 }
+
+String falconEffectiveBaseVersion(
+  String packageVersion,
+  String? activePatchVersion,
+) {
+  final cleanActivePatchVersion = activePatchVersion?.trim() ?? '';
+  if (cleanActivePatchVersion.isNotEmpty) {
+    return cleanActivePatchVersion;
+  }
+  return packageVersion.trim();
+}

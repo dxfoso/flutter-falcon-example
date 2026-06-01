@@ -8,4 +8,10 @@ void main() {
     expect(falconPackageVersion('', '3'), '');
     expect(falconPackageVersion('1.0.1', ''), '1.0.1');
   });
+
+  test('effective base version prefers the active patch version', () {
+    expect(falconEffectiveBaseVersion('1.1.6+4', '1.1.6+5'), '1.1.6+5');
+    expect(falconEffectiveBaseVersion('1.1.6+4', '  '), '1.1.6+4');
+    expect(falconEffectiveBaseVersion('1.1.6+4', null), '1.1.6+4');
+  });
 }
