@@ -104,21 +104,10 @@ Future<void> _restartCurrentExecutable() async {
   final executable = Platform.resolvedExecutable;
   final arguments = Platform.executableArguments;
   if (Platform.isWindows) {
-    final script = '''
-Start-Sleep -Milliseconds 700
-Start-Process -FilePath '${_powershellEscaped(executable)}'${arguments.isEmpty ? '' : ' -ArgumentList @(${arguments.map(_powershellSingleQuoted).join(', ')})'}
-''';
     await Process.start(
-      'powershell',
-      [
-        '-NoProfile',
-        '-ExecutionPolicy',
-        'Bypass',
-        '-WindowStyle',
-        'Hidden',
-        '-Command',
-        script,
-      ],
+      executable,
+      arguments,
+      workingDirectory: File(executable).parent.path,
       mode: ProcessStartMode.detached,
     );
     return;
@@ -128,12 +117,4 @@ Start-Process -FilePath '${_powershellEscaped(executable)}'${arguments.isEmpty ?
     arguments,
     mode: ProcessStartMode.detached,
   );
-}
-
-String _powershellEscaped(String value) {
-  return value.replaceAll("'", "''");
-}
-
-String _powershellSingleQuoted(String value) {
-  return "'${_powershellEscaped(value)}'";
 }
