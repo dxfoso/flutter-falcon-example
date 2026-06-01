@@ -17,7 +17,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   // plugins.
   ::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
 
-  flutter::DartProject project(L"data");
+  flutter::DartProject project = []() {
+    const auto active_aot_library = ResolveFalconActiveAotLibraryPath();
+    if (active_aot_library.has_value()) {
+      return flutter::DartProject(
+          L"data\\flutter_assets", L"data\\icudtl.dat",
+          active_aot_library.value());
+    }
+    return flutter::DartProject(L"data");
+  }();
 
   std::vector<std::string> command_line_arguments =
       GetCommandLineArguments();
