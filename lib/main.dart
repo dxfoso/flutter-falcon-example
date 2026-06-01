@@ -109,9 +109,9 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green,
+      backgroundColor: const Color.fromARGB(255, 90, 59, 11),
       appBar: AppBar(
-        title: const Text('Flutter Falcon Version ffff'),
+        title: const Text('Flutter Falcon Version gfdsgfgfg'),
         actions: [
           IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
