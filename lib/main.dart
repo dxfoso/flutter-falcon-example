@@ -75,7 +75,7 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
       } else if (info.installableUpdateAvailable) {
         final result = await falconApplyUpdate(
           client: client,
-          installedVersion: info.installedVersion,
+          installedVersion: info.currentRuntimeVersion,
         );
         if (result.changed) {
           setState(() {
@@ -156,6 +156,12 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text('Current Falcon runtime'),
+                  Text(
+                    data.currentRuntimeVersion,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 16),
                   const Text('Latest version on server'),
@@ -388,6 +394,7 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
 class _VersionInfo {
   const _VersionInfo({
     required this.installedVersion,
+    required this.currentRuntimeVersion,
     required this.latestVersion,
     required this.installableTargetVersion,
     required this.configuredAppId,
@@ -412,6 +419,7 @@ class _VersionInfo {
   });
 
   final String installedVersion;
+  final String currentRuntimeVersion;
   final String latestVersion;
   final String installableTargetVersion;
   final String configuredAppId;
@@ -442,10 +450,20 @@ Future<_VersionInfo> _loadVersionInfo() async {
     packageInfo.buildNumber,
   );
   final configuredAppId = _falconAppId(packageInfo.packageName);
-  final client = _createClient(
+  final initialClient = _createClient(
     serverUrl: _falconServerUrl(),
     configuredAppId: configuredAppId,
     baseVersion: packageVersion,
+  );
+  final initialSnapshot = await falconStatusSnapshot(client: initialClient);
+  final effectiveBaseVersion = falconEffectiveBaseVersion(
+    packageVersion,
+    initialSnapshot?.activePatchVersion,
+  );
+  final client = _createClient(
+    serverUrl: _falconServerUrl(),
+    configuredAppId: configuredAppId,
+    baseVersion: effectiveBaseVersion,
   );
   final effectiveConfig = client.config;
 
@@ -463,6 +481,8 @@ Future<_VersionInfo> _loadVersionInfo() async {
 
   final installedVersion =
       packageVersion.isEmpty ? _buildUnknownVersion : packageVersion;
+  final currentRuntimeVersion =
+      effectiveBaseVersion.isEmpty ? installedVersion : effectiveBaseVersion;
   final installableTargetVersion = checkResult.targetVersion?.trim() ?? '';
   final latestReleaseVersion = latestReleaseResult.version?.trim() ?? '';
   final latestVersion =
@@ -470,23 +490,24 @@ Future<_VersionInfo> _loadVersionInfo() async {
           ? latestReleaseVersion
           : installableTargetVersion.isNotEmpty
           ? installableTargetVersion
-          : installedVersion;
+          : currentRuntimeVersion;
 
   return _VersionInfo(
     installedVersion: installedVersion,
+    currentRuntimeVersion: currentRuntimeVersion,
     latestVersion: latestVersion,
     installableTargetVersion:
         installableTargetVersion.isEmpty
-            ? installedVersion
+            ? currentRuntimeVersion
             : installableTargetVersion,
     configuredAppId: effectiveConfig.configuredAppId,
     effectiveAppId: effectiveConfig.effectiveAppId,
     appIdSource: effectiveConfig.appIdSource.name,
     serverUrl: effectiveConfig.serverUrl,
     updateAvailable:
-        packageVersion.isNotEmpty &&
+        currentRuntimeVersion.isNotEmpty &&
         latestVersion.isNotEmpty &&
-        installedVersion != latestVersion,
+        currentRuntimeVersion != latestVersion,
     installableUpdateAvailable: checkResult.updateAvailable,
     checkStatus: checkResult.status.name,
     failureMessage: checkResult.failureMessage,
@@ -499,7 +520,7 @@ Future<_VersionInfo> _loadVersionInfo() async {
       failureMessage: checkResult.failureMessage,
       requiresBootConfirmation: snapshot?.requiresBootConfirmation ?? false,
     ),
-    baseVersion: packageVersion,
+    baseVersion: effectiveBaseVersion,
     configured: checkResult.configured,
     failureStatusCode: checkResult.failureStatusCode,
     failureResponseBody: checkResult.failureResponseBody,
@@ -507,7 +528,7 @@ Future<_VersionInfo> _loadVersionInfo() async {
       serverUrl: effectiveConfig.serverUrl,
       appId: effectiveConfig.effectiveAppId,
       channel: _channel,
-      baseVersion: packageVersion,
+      baseVersion: effectiveBaseVersion,
     ),
     releaseLatestRequestUrl: _falconReleaseLatestRequestUrl(
       serverUrl: effectiveConfig.serverUrl,
