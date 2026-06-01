@@ -105,9 +105,16 @@ Future<void> _restartCurrentExecutable() async {
   final arguments = Platform.executableArguments;
   if (Platform.isWindows) {
     await Process.start(
-      executable,
-      arguments,
-      workingDirectory: File(executable).parent.path,
+      'cmd',
+      [
+        '/c',
+        'start',
+        '',
+        '/d',
+        File(executable).parent.path,
+        executable,
+        ...arguments,
+      ],
       mode: ProcessStartMode.detached,
     );
     return;
