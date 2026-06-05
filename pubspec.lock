@@ -89,9 +89,11 @@ packages:
   flutter_falcon:
     dependency: "direct main"
     description:
-      path: "../.."
-      relative: true
-    source: path
+      path: flutter_falcon
+      ref: HEAD
+      resolved-ref: "5f1e3ab71ccbc89e2a0779a506f3f3f36f7a2b75"
+      url: "https://github.com/dxfoso/flutterfalcon.git"
+    source: git
     version: "0.1.0"
   flutter_lints:
     dependency: "direct dev"
@@ -184,7 +186,7 @@ packages:
     source: hosted
     version: "1.16.0"
   package_info_plus:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: package_info_plus
       sha256: "16eee997588c60225bda0488b6dcfac69280a6b7a3cf02c741895dd370a02968"
