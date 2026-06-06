@@ -16,6 +16,8 @@ It shows:
 `Falcon` runtime config is now derived from package metadata at runtime:
 
 - `appId`: package name from app metadata, kept stable across releases
+  (`flutter_falcon_example` on desktop/web and `com.example.flutter_falcon_example`
+  on Android)
 - `baseVersion`: from app package `version` in `pubspec.yaml`
 - `serverUrl`: defaults to `https://flutterfalcon.com` from the `flutter_falcon` package
 - `channel`: fixed to `stable` in this example

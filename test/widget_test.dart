@@ -7,13 +7,13 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:red_rect_app/main.dart';
+import 'package:flutter_falcon_example/main.dart';
 
 void main() {
   testWidgets('Version screen loads and shows the app title', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const RedRectApp());
+    await tester.pumpWidget(const FlutterFalconExampleApp());
 
     expect(find.text('Flutter Falcon Version'), findsOneWidget);
   });

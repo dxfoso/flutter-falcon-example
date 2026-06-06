@@ -1,11 +1,11 @@
 {
-    "name": "red_rect_app",
-    "short_name": "red_rect_app",
+    "name": "flutter_falcon_example",
+    "short_name": "flutter_falcon_example",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Minimal Flutter Falcon test app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
