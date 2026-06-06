@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon_api.dart';
 
-const _controller = FlutterFalconExampleController();
+const _controller = FlutterFalconController();
 
 void main() => runApp(const FlutterFalconExampleApp());
 
@@ -25,7 +25,7 @@ class FalconVersionPage extends StatefulWidget {
 }
 
 class _FalconVersionPageState extends State<FalconVersionPage> {
-  late Future<FlutterFalconExampleVersionInfo> _infoFuture;
+  late Future<FlutterFalconVersionInfo> _infoFuture;
   bool _actionRunning = false;
   String? _actionMessage;
   String? _actionError;
@@ -44,7 +44,7 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
     });
   }
 
-  Future<void> _applyOrConfirm(FlutterFalconExampleVersionInfo info) async {
+  Future<void> _applyOrConfirm(FlutterFalconVersionInfo info) async {
     setState(() {
       _actionRunning = true;
       _actionMessage = null;
@@ -83,7 +83,7 @@ class _FalconVersionPageState extends State<FalconVersionPage> {
           IconButton(onPressed: _refresh, icon: const Icon(Icons.refresh)),
         ],
       ),
-      body: FutureBuilder<FlutterFalconExampleVersionInfo>(
+      body: FutureBuilder<FlutterFalconVersionInfo>(
         future: _infoFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {

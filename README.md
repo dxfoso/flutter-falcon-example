@@ -69,5 +69,6 @@ If update is not shown after publishing:
 Run:
 
 ```powershell
+flutter pub get
 .\run.ps1
 ```
