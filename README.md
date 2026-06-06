@@ -15,7 +15,8 @@ It shows:
 
 `Falcon` runtime config is now derived from package metadata at runtime:
 
-- `appId`: package name from app metadata, kept stable across releases
+- `appId`: package name from app metadata by default, or an explicit
+  `FlutterFalconController(appId: ...)` override in production apps
   (`flutter_falcon_example` on desktop/web and `com.example.flutter_falcon_example`
   on Android)
 - `baseVersion`: from app package `version` in `pubspec.yaml`
