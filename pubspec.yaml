@@ -1,7 +1,7 @@
 name: flutter_falcon_example
 description: Minimal Flutter Falcon test app.
 publish_to: 'none'
-version: 1.1.6+10
+version: 1.1.6+11
 
 environment:
   sdk: ^3.7.0
