@@ -80,7 +80,7 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Review the installed runtime and safely apply updates '
+                    'Review the installed runtime and apply verified updates '
                     'from the stable channel.',
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
