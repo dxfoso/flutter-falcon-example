@@ -12,7 +12,6 @@ dependencies:
   flutter_falcon:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: master
       path: flutter_falcon
 
 dev_dependencies:

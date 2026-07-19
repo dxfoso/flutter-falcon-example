@@ -1,75 +1,82 @@
 # flutter-falcon-example
 
-Minimal Flutter Falcon Windows test app.
+A minimal Flutter app with a production-connected **Check for updates** page for
+Flutter Falcon.
 
-It shows:
+The app uses its own `pubspec.yaml` as the deployable target and includes
+`flutter_falcon` only as a Git package dependency. Runtime configuration is
+defined directly in Dart—there is no separate runtime-config asset, legacy
+adapter, or fallback reader.
 
-- Installed version (from app package metadata)
-- Latest hosted release version from `/releases/latest`
-- Installable Falcon target version from `/updates`
-- Runtime patch state for the current install
-- Effective hosted app id vs configured app id
-- Exact `GET /updates` and `GET /releases/latest` URLs for the current build
-- Whether an update is available from the hosted update stream
-- A button that downloads and activates the installable Falcon update when one exists
+## Runtime stream
 
-`Falcon` runtime config is now derived from package metadata at runtime:
+- Server: `https://flutterfalcon.com`
+- Configured app ID: `flutter-falcon-example`
+- Channel: `stable`
+- Saved public build variable:
+  `FLUTTER_FALCON_SERVER_URL=https://flutterfalcon.com`
 
-- `appId`: package name from app metadata by default, or an explicit
-  `FlutterFalconController(appId: ...)` override in production apps
-  (`flutter_falcon_example` on desktop/web and `com.example.flutter_falcon_example`
-  on Android)
-- `baseVersion`: from app package `version` in `pubspec.yaml`
-- `serverUrl`: defaults to `https://flutterfalcon.com` from the `flutter_falcon` package
-- `channel`: fixed to `stable` in this example
+`FlutterFalconController` derives the installed version and build number from
+package metadata and detects the runtime platform. Hosted builds may override
+the effective app ID for tenant isolation, so the Updates page displays both
+the effective app ID and its source in the request diagnostics.
 
-When this repo is built on hosted `https://flutterfalcon.com`, the build
-service now injects the hosted Falcon defaults automatically even without a
-committed `.flutter_falcon.json` or saved Falcon env block. That is what lets
-the hosted build auto-publish into the same effective stream that the app
-queries at runtime.
+`FlutterFalconUpdateSession` owns check/action/reload orchestration, concurrency
+locking, retry state, typed action outcomes, and semantic status presentation.
+The app keeps only navigation and Material rendering.
 
-Hosted FlutterFalcon builds may inject a separate runtime app id for tenant
-isolation. Runtime lookup and hosted publish use that same effective app id
-stream. This example now shows both values so operators can see which stream
-the installed app is actually querying.
+The app never contains publish tokens, registry credentials, or other secrets.
 
-Hosted FlutterFalcon builds do not need a client read token for app update
-checks. If you use a private Falcon server that still protects `/updates`,
-pass a read token through `FLUTTER_FALCON_RUNTIME_READ_TOKEN` at build time.
+## Update page
 
-Release flow this app expects:
+The `/updates` route opens on launch and is also reachable from the app's home
+page. It:
 
-1. Build and publish an older Windows version from the same effective app id and channel (`stable`).
-2. Build and publish a newer Windows version from the same effective app id and channel.
-3. Download and run the older packaged Windows build.
-4. Open the app and press `Check for update` or refresh to compare local `baseVersion` vs the hosted stream.
-5. If `/updates` reports an installable Falcon patch, click `Download and apply update`.
-6. The example app restarts itself into the updated runtime and auto-confirms the boot on the relaunched app.
+- checks automatically on page load and supports manual checks and retry;
+- shows installed, active runtime, and latest hosted versions;
+- shows check status, explanation, effective app ID, runtime state, and full
+  failure details;
+- distinguishes current, available, applying, boot confirmation, success, and
+  failure states;
+- disables repeated actions while a request is running;
+- calls the controller's real primary action only for an installable update or
+  boot confirmation, reports the returned message, and reloads status.
 
-For the hosted sample stream, this repo now moves from `1.1.2+6` to `1.1.2+7`,
-so the intended proof path is:
-
-- download and run `1.1.2+6`
-- publish and query `1.1.2+7`
-- click `Download and apply update`
-- let the example app restart itself
-
-If update is not shown after publishing:
-
-- Confirm the release uses the same effective `appId` and platform as the installed app.
-- Confirm channel is `stable`.
-- Confirm the downloaded package reports the expected `packageName` and version.
-- Remember that `/releases/latest` and `/updates` are different:
-  `/releases/latest` is the newest hosted packaged build, while `/updates`
-  is an installable Falcon runtime update for the current base version.
-- Remember that Windows installable Falcon patches only publish when the diff
-  stays inside patchable Dart and asset files. Native shell, engine, DLL, or
-  ICU changes still require a normal packaged release.
-
-Run:
+## Run and verify
 
 ```powershell
 flutter pub get
-.\run.ps1
+flutter analyze
+flutter test
+flutter run -d windows
 ```
+
+Passing widget or API tests are not an end-to-end update result. An end-to-end
+claim requires launching the shipped artifact on its real target platform,
+opening the update page, and exercising the real runtime action.
+
+## Operator create-update flow
+
+1. Build and install the first Falcon-ready base app.
+2. Make the next app change and build the newer version.
+3. Publish and promote the hosted Falcon update for the same effective app ID,
+   runtime platform, and `stable` channel.
+4. Open the already installed base app and trigger its update check.
+
+Publish and promote from a trusted operator environment (never from the app):
+
+```text
+flutter_falcon publish-index --server-url https://flutterfalcon.com --publish-token <publish> --index flutter_falcon_update_index.json
+flutter_falcon promote-update --server-url https://flutterfalcon.com --publish-token <publish> --app-id flutter-falcon-example --platform <platform-id> --channel stable --target-version <new-version>
+```
+
+Operator check URL:
+
+```text
+https://flutterfalcon.com/updates?appId=flutter-falcon-example&platform=<platform-id>&channel=stable&baseVersion=<installed-base-version>
+```
+
+The effective hosted app ID must stay stable for the app stream. Platform,
+channel, and installed base version must match the published update. Native
+runner, plugin, permission, dependency, signing, or installer changes require a
+new full package build rather than a Falcon patch.
