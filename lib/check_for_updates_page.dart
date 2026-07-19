@@ -92,13 +92,7 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                     label: status.title,
                     child: _StatusPanel(
                       presentation: status,
-                      showProgress:
-                          sessionState.operation ==
-                              FlutterFalconSessionOperation.checking ||
-                          sessionState.operation ==
-                              FlutterFalconSessionOperation.applying ||
-                          sessionState.operation ==
-                              FlutterFalconSessionOperation.confirmingBoot,
+                      showProgress: sessionState.showProgress,
                     ),
                   ),
                   if (sessionState.actionResult?.succeeded ?? false) ...[
@@ -571,7 +565,7 @@ class _Diagnostics extends StatelessWidget {
           _DiagnosticValue('Configured app ID', info.configuredAppId),
           _DiagnosticValue('Effective app ID', info.effectiveAppId),
           _DiagnosticValue('App ID source', info.appIdSource.name),
-          const _DiagnosticValue('Channel', 'stable'),
+          _DiagnosticValue('Channel', info.channel),
           _DiagnosticValue('Server', info.serverUrl),
           _DiagnosticValue('Base version', info.baseVersion),
           _DiagnosticValue('Installable target', info.installableTargetVersion),

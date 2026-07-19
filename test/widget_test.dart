@@ -140,6 +140,24 @@ void main() {
     expect(find.text('Update available'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('diagnostics display the controller effective channel', (
+    tester,
+  ) async {
+    final controller = _FakeFalconController(
+      loadResults: [Future.value(_versionInfo(channel: 'beta'))],
+    );
+
+    await tester.pumpWidget(_testApp(controller));
+    await tester.pumpAndSettle();
+    final diagnostics = find.text('Request diagnostics');
+    await tester.ensureVisible(diagnostics);
+    await tester.tap(diagnostics);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Channel'), findsOneWidget);
+    expect(find.text('beta'), findsOneWidget);
+  });
 }
 
 Widget _testApp(FlutterFalconControllerApi controller) {
@@ -183,6 +201,7 @@ class _FakeFalconController implements FlutterFalconControllerApi {
 FlutterFalconVersionInfo _versionInfo({
   bool updateAvailable = false,
   bool requiresBootConfirmation = false,
+  String channel = 'stable',
   FlutterFalconAppUpdateState runtimeState =
       FlutterFalconAppUpdateState.noPatch,
 }) {
@@ -195,6 +214,7 @@ FlutterFalconVersionInfo _versionInfo({
     effectiveAppId: 'flutter-falcon-example',
     appIdSource: FlutterFalconAppIdSource.configured,
     serverUrl: 'https://flutterfalcon.com',
+    channel: channel,
     updateAvailable: updateAvailable,
     installableUpdateAvailable: updateAvailable,
     checkStatus:
