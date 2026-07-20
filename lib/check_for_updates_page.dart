@@ -64,100 +64,94 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
         ],
       ),
       body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 760),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Flutter Falcon updates',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+        child: LayoutBuilder(
+          builder: (context, viewport) {
+            final compact = viewport.maxWidth < 600;
+            final sectionGap = compact ? 12.0 : 24.0;
+            return Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    compact ? 12 : 20,
+                    compact ? 8 : 16,
+                    compact ? 12 : 20,
+                    compact ? 24 : 40,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Review the installed runtime and apply verified updates '
-                    'from the stable channel.',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Semantics(
-                    liveRegion: true,
-                    label: status.title,
-                    child: _StatusPanel(
-                      presentation: status,
-                      showProgress: sessionState.showProgress,
-                    ),
-                  ),
-                  if (sessionState.actionResult?.succeeded ?? false) ...[
-                    const SizedBox(height: 12),
-                    _FeedbackPanel(
-                      message: sessionState.actionResult!.message,
-                      success: true,
-                    ),
-                  ],
-                  if (sessionState.failureMessage != null) ...[
-                    const SizedBox(height: 12),
-                    _FailurePanel(
-                      message: sessionState.failureMessage!,
-                      statusCode: info?.failureStatusCode,
-                      responseBody: info?.failureResponseBody,
-                      onRetry:
-                          sessionState.isBusy ? null : () => _session.check(),
-                    ),
-                  ],
-                  if (info != null) ...[
-                    const SizedBox(height: 24),
-                    _VersionSummary(info: info),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Update status',
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (!compact) ...[
+                        Text(
+                          'Flutter Falcon updates',
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Review the installed runtime and apply verified '
+                          'updates from the stable channel.',
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                      Semantics(
+                        liveRegion: true,
+                        label: status.title,
+                        child: _StatusPanel(
+                          presentation: status,
+                          showProgress: sessionState.showProgress,
+                          compact: compact,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    _InfoRow(
-                      label: 'Check status',
-                      value: info.checkStatus.name,
-                    ),
-                    _InfoRow(
-                      label: 'Runtime state',
-                      value: info.runtimeState.name,
-                    ),
-                    _InfoRow(
-                      label: 'Effective app ID',
-                      value: info.effectiveAppId,
-                      monospace: true,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      info.statusExplanation,
-                      style: theme.textTheme.bodyLarge?.copyWith(height: 1.45),
-                    ),
-                  ],
-                  const SizedBox(height: 24),
-                  _ActionBar(
-                    presentation: status,
-                    hasInfo: info != null,
-                    busy: sessionState.isBusy,
-                    onCheck: () => _session.check(),
-                    onPrimaryAction: _session.runPrimaryAction,
+                      if (sessionState.actionResult?.succeeded ?? false) ...[
+                        const SizedBox(height: 8),
+                        _FeedbackPanel(
+                          message: sessionState.actionResult!.message,
+                          success: true,
+                        ),
+                      ],
+                      if (sessionState.failureMessage != null) ...[
+                        const SizedBox(height: 8),
+                        _FailurePanel(
+                          message: sessionState.failureMessage!,
+                          statusCode: info?.failureStatusCode,
+                          responseBody: info?.failureResponseBody,
+                          onRetry:
+                              sessionState.isBusy
+                                  ? null
+                                  : () => _session.check(),
+                        ),
+                      ],
+                      if (info != null) ...[
+                        SizedBox(height: sectionGap),
+                        _VersionSummary(info: info, compact: compact),
+                        SizedBox(height: sectionGap),
+                        _RuntimeSummary(info: info, compact: compact),
+                      ],
+                      SizedBox(height: sectionGap),
+                      _ActionBar(
+                        presentation: status,
+                        hasInfo: info != null,
+                        busy: sessionState.isBusy,
+                        compact: compact,
+                        onCheck: () => _session.check(),
+                        onPrimaryAction: _session.runPrimaryAction,
+                      ),
+                      if (info != null) ...[
+                        SizedBox(height: sectionGap),
+                        _Diagnostics(info: info, compact: compact),
+                      ],
+                    ],
                   ),
-                  if (info != null) ...[
-                    const SizedBox(height: 24),
-                    _Diagnostics(info: info),
-                  ],
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
@@ -165,10 +159,15 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
 }
 
 class _StatusPanel extends StatelessWidget {
-  const _StatusPanel({required this.presentation, required this.showProgress});
+  const _StatusPanel({
+    required this.presentation,
+    required this.showProgress,
+    required this.compact,
+  });
 
   final FlutterFalconUpdatePresentation presentation;
   final bool showProgress;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -211,12 +210,12 @@ class _StatusPanel extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(compact ? 14 : 20),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(icon, color: foreground, size: 28),
-                const SizedBox(width: 16),
+                Icon(icon, color: foreground, size: compact ? 24 : 28),
+                SizedBox(width: compact ? 12 : 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,12 +227,12 @@ class _StatusPanel extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: compact ? 3 : 6),
                       Text(
                         presentation.detail,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: foreground,
-                          height: 1.4,
+                          height: compact ? 1.25 : 1.4,
                         ),
                       ),
                     ],
@@ -364,93 +363,161 @@ class _FailurePanel extends StatelessWidget {
 }
 
 class _VersionSummary extends StatelessWidget {
-  const _VersionSummary({required this.info});
+  const _VersionSummary({required this.info, required this.compact});
 
   final FlutterFalconVersionInfo info;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      ('Installed', info.installedVersion),
-      ('Current runtime', info.currentRuntimeVersion),
-      ('Latest hosted', info.latestVersion),
+    final items = <({String fullLabel, String shortLabel, String value})>[
+      (
+        fullLabel: 'Installed',
+        shortLabel: 'Installed',
+        value: info.installedVersion,
+      ),
+      (
+        fullLabel: 'Current runtime',
+        shortLabel: 'Running',
+        value: info.currentRuntimeVersion,
+      ),
+      (
+        fullLabel: 'Latest hosted',
+        shortLabel: 'Latest',
+        value: info.latestVersion,
+      ),
     ];
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final narrow = constraints.maxWidth < 560;
-        return Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child:
-              narrow
-                  ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (var index = 0; index < items.length; index++) ...[
-                        Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: _VersionValue(
-                            label: items[index].$1,
-                            value: items[index].$2,
-                          ),
-                        ),
-                        if (index < items.length - 1) const Divider(height: 1),
-                      ],
-                    ],
-                  )
-                  : IntrinsicHeight(
-                    child: Row(
-                      children: [
-                        for (var index = 0; index < items.length; index++) ...[
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: _VersionValue(
-                                label: items[index].$1,
-                                value: items[index].$2,
-                              ),
-                            ),
-                          ),
-                          if (index < items.length - 1)
-                            const VerticalDivider(width: 1),
-                        ],
-                      ],
-                    ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            for (var index = 0; index < items.length; index++) ...[
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: compact ? 10 : 16,
+                    vertical: compact ? 11 : 16,
                   ),
-        );
-      },
+                  child: _VersionValue(
+                    label:
+                        compact
+                            ? items[index].shortLabel
+                            : items[index].fullLabel,
+                    value: items[index].value,
+                    compact: compact,
+                  ),
+                ),
+              ),
+              if (index < items.length - 1) const VerticalDivider(width: 1),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
 
 class _VersionValue extends StatelessWidget {
-  const _VersionValue({required this.label, required this.value});
+  const _VersionValue({
+    required this.label,
+    required this.value,
+    required this.compact,
+  });
 
   final String label;
   final String value;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: Theme.of(context).textTheme.labelLarge),
-        const SizedBox(height: 5),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style:
+              compact
+                  ? Theme.of(context).textTheme.labelMedium
+                  : Theme.of(context).textTheme.labelLarge,
+        ),
+        SizedBox(height: compact ? 3 : 5),
         SelectableText(
           value,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontSize: compact ? 14 : null,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ],
     );
   }
 }
 
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
+class _RuntimeSummary extends StatelessWidget {
+  const _RuntimeSummary({required this.info, required this.compact});
+
+  final FlutterFalconVersionInfo info;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: EdgeInsets.all(compact ? 12 : 16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: _CompactFact(
+                  label: 'Check status',
+                  value: info.checkStatus.name,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _CompactFact(
+                  label: 'Runtime state',
+                  value: info.runtimeState.name,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: compact ? 10 : 14),
+          _CompactFact(
+            label: 'Effective app ID',
+            value: info.effectiveAppId,
+            monospace: true,
+          ),
+          SizedBox(height: compact ? 10 : 14),
+          Divider(height: 1, color: theme.colorScheme.outlineVariant),
+          SizedBox(height: compact ? 9 : 13),
+          Text(
+            info.statusExplanation,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.3,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CompactFact extends StatelessWidget {
+  const _CompactFact({
     required this.label,
     required this.value,
     this.monospace = false,
@@ -462,32 +529,25 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 152,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: SelectableText(
-              value,
-              style: TextStyle(
-                fontFamily: monospace ? 'monospace' : null,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+        ),
+        const SizedBox(height: 2),
+        SelectableText(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontFamily: monospace ? 'monospace' : null,
+            fontWeight: FontWeight.w600,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -497,6 +557,7 @@ class _ActionBar extends StatelessWidget {
     required this.presentation,
     required this.hasInfo,
     required this.busy,
+    required this.compact,
     required this.onCheck,
     required this.onPrimaryAction,
   });
@@ -504,6 +565,7 @@ class _ActionBar extends StatelessWidget {
   final FlutterFalconUpdatePresentation presentation;
   final bool hasInfo;
   final bool busy;
+  final bool compact;
   final VoidCallback onCheck;
   final VoidCallback onPrimaryAction;
 
@@ -514,41 +576,53 @@ class _ActionBar extends StatelessWidget {
     final confirming =
         presentation.action == FlutterFalconPrimaryAction.confirmBoot;
 
+    final checkButton = OutlinedButton.icon(
+      key: const Key('check-updates-button'),
+      onPressed: busy ? null : onCheck,
+      icon: const Icon(Icons.refresh),
+      label: Text(hasInfo ? 'Check again' : 'Check for updates'),
+    );
+    final primaryButton = FilledButton.icon(
+      key: const Key('falcon-primary-action-button'),
+      onPressed: busy ? null : onPrimaryAction,
+      icon:
+          busy
+              ? const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+              : Icon(confirming ? Icons.verified_outlined : Icons.downloading),
+      label: Text(presentation.actionLabel),
+    );
+
+    if (compact) {
+      return SizedBox(
+        height: 48,
+        child: Row(
+          children: [
+            Expanded(child: checkButton),
+            if (hasPrimaryAction) ...[
+              const SizedBox(width: 8),
+              Expanded(flex: 2, child: primaryButton),
+            ],
+          ],
+        ),
+      );
+    }
     return Wrap(
       spacing: 12,
       runSpacing: 12,
       alignment: WrapAlignment.end,
-      children: [
-        OutlinedButton.icon(
-          key: const Key('check-updates-button'),
-          onPressed: busy ? null : onCheck,
-          icon: const Icon(Icons.refresh),
-          label: Text(hasInfo ? 'Check again' : 'Check for updates'),
-        ),
-        if (hasPrimaryAction)
-          FilledButton.icon(
-            key: const Key('falcon-primary-action-button'),
-            onPressed: busy ? null : onPrimaryAction,
-            icon:
-                busy
-                    ? const SizedBox.square(
-                      dimension: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                    : Icon(
-                      confirming ? Icons.verified_outlined : Icons.downloading,
-                    ),
-            label: Text(presentation.actionLabel),
-          ),
-      ],
+      children: [checkButton, if (hasPrimaryAction) primaryButton],
     );
   }
 }
 
 class _Diagnostics extends StatelessWidget {
-  const _Diagnostics({required this.info});
+  const _Diagnostics({required this.info, required this.compact});
 
   final FlutterFalconVersionInfo info;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -557,9 +631,19 @@ class _Diagnostics extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
+        dense: compact,
+        visualDensity: compact ? VisualDensity.compact : null,
         title: const Text('Request diagnostics'),
-        subtitle: const Text('App stream, channel, and exact check URLs'),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        subtitle:
+            compact
+                ? null
+                : const Text('App stream, channel, and exact check URLs'),
+        childrenPadding: EdgeInsets.fromLTRB(
+          compact ? 12 : 16,
+          0,
+          compact ? 12 : 16,
+          compact ? 12 : 16,
+        ),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _DiagnosticValue('Configured app ID', info.configuredAppId),

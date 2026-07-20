@@ -138,6 +138,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Update available'), findsOneWidget);
+    expect(tester.getTopLeft(find.text('Update available')).dy, lessThan(160));
+    final installedY = tester.getTopLeft(find.text('Installed')).dy;
+    expect(tester.getTopLeft(find.text('Running')).dy, installedY);
+    expect(tester.getTopLeft(find.text('Latest')).dy, installedY);
+    expect(
+      tester.getBottomRight(find.text('Request diagnostics')).dy,
+      lessThanOrEqualTo(800),
+    );
     expect(tester.takeException(), isNull);
   });
 
