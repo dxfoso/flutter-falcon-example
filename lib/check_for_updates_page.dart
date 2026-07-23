@@ -3,6 +3,44 @@ import 'package:flutter_falcon/flutter_falcon_api.dart';
 
 import 'flutter_falcon_updates.dart';
 
+class _UpdateMessageText {
+  const _UpdateMessageText({required this.title, required this.detail});
+
+  final String title;
+  final String detail;
+}
+
+_UpdateMessageText _updateMessageText(
+  BuildContext context,
+  FlutterFalconUpdatePresentation presentation,
+) {
+  final arabic = Localizations.localeOf(context).languageCode == 'ar';
+  if (!arabic) {
+    return _UpdateMessageText(
+      title: presentation.title,
+      detail: presentation.detail,
+    );
+  }
+  return switch (presentation.code) {
+    'flutter_falcon.update.up_to_date' => const _UpdateMessageText(
+        title: 'تطبيقك محدّث',
+        detail: 'لا يوجد تحديث متوافق متاح لهذا الإصدار من التطبيق.',
+      ),
+    'flutter_falcon.update.available' => const _UpdateMessageText(
+        title: 'يتوفر تحديث',
+        detail: 'يتوفر تحديث متوافق ويمكن تنزيله الآن.',
+      ),
+    'flutter_falcon.update.checking' => const _UpdateMessageText(
+        title: 'جارٍ البحث عن تحديثات',
+        detail: 'يتم تحميل حالة التحديث من الجهاز والخادم.',
+      ),
+    _ => _UpdateMessageText(
+        title: presentation.title,
+        detail: presentation.detail,
+      ),
+  };
+}
+
 class CheckForUpdatesPage extends StatefulWidget {
   const CheckForUpdatesPage({super.key, this.controller = falconController});
 
@@ -101,7 +139,7 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                       ],
                       Semantics(
                         liveRegion: true,
-                        label: status.title,
+                        label: _updateMessageText(context, status).title,
                         child: _StatusPanel(
                           presentation: status,
                           showProgress: sessionState.showProgress,
@@ -221,7 +259,7 @@ class _StatusPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        presentation.title,
+                        _updateMessageText(context, presentation).title,
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           color: foreground,
                           fontWeight: FontWeight.w700,
@@ -229,11 +267,25 @@ class _StatusPanel extends StatelessWidget {
                       ),
                       SizedBox(height: compact ? 3 : 6),
                       Text(
-                        presentation.detail,
+                        _updateMessageText(context, presentation).detail,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: foreground,
                           height: compact ? 1.25 : 1.4,
                         ),
+                      ),
+                      const SizedBox(height: 8),
+                      SelectableText(
+                        presentation.code,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: foreground,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        presentation.explanation,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: foreground,
+                            ),
                       ),
                     ],
                   ),
