@@ -72,7 +72,7 @@ class _HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Flutter Falcon runtime updates',
+                  'Flutter Falcon runtime updates.',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w700,
