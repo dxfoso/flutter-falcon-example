@@ -101,6 +101,55 @@ void main() {
     expect(controller.actionCalls, 1);
   });
 
+  testWidgets('starts a full app update through the package store action', (
+    tester,
+  ) async {
+    final controller = _FakeFalconController(
+      loadResults: [
+        Future.value(
+          _versionInfo(
+            newerReleaseAvailable: true,
+            storeUpdate: const FlutterFalconStoreUpdateInfo(
+              store: FlutterFalconStoreKind.googlePlay,
+              availability: FlutterFalconStoreUpdateAvailability.available,
+              immediateAllowed: true,
+              flexibleAllowed: true,
+            ),
+          ),
+        ),
+        Future.value(
+          _versionInfo(
+            newerReleaseAvailable: true,
+            storeUpdate: const FlutterFalconStoreUpdateInfo(
+              store: FlutterFalconStoreKind.googlePlay,
+              availability: FlutterFalconStoreUpdateAvailability.inProgress,
+            ),
+          ),
+        ),
+      ],
+      actionResult: Future.value(
+        const FlutterFalconActionResult(
+          outcome: FlutterFalconActionOutcome.succeeded,
+          message: 'Google Play update flow started.',
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(_testApp(controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Google Play update available'), findsOneWidget);
+    final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
+    await tester.ensureVisible(primaryAction);
+    expect(find.text('Update from Google Play'), findsOneWidget);
+    await tester.tap(primaryAction);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Store update started'), findsOneWidget);
+    expect(find.text('Google Play update flow started.'), findsNWidgets(2));
+    expect(controller.actionCalls, 1);
+  });
+
   testWidgets('preserves failure details and retries the update check', (
     tester,
   ) async {
@@ -115,7 +164,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Update request failed'), findsOneWidget);
-    expect(find.textContaining('connection refused'), findsOneWidget);
+    expect(find.textContaining('connection refused'), findsWidgets);
 
     final retry = find.byKey(const Key('retry-update-check-button'));
     await tester.tap(retry);
@@ -208,31 +257,33 @@ class _FakeFalconController implements FlutterFalconControllerApi {
 
 FlutterFalconVersionInfo _versionInfo({
   bool updateAvailable = false,
+  bool newerReleaseAvailable = false,
   bool requiresBootConfirmation = false,
   String channel = 'stable',
   FlutterFalconAppUpdateState runtimeState =
       FlutterFalconAppUpdateState.noPatch,
+  FlutterFalconStoreUpdateInfo storeUpdate =
+      const FlutterFalconStoreUpdateInfo.unsupported(),
 }) {
+  final latestAvailable = updateAvailable || newerReleaseAvailable;
   return FlutterFalconVersionInfo(
     installedVersion: '1.1.6+11',
     currentRuntimeVersion: '1.1.6+11',
-    latestVersion: updateAvailable ? '1.1.7+12' : '1.1.6+11',
+    latestVersion: latestAvailable ? '1.1.7+12' : '1.1.6+11',
     installableTargetVersion: updateAvailable ? '1.1.7+12' : '1.1.6+11',
     configuredAppId: 'flutter-falcon-example',
     effectiveAppId: 'flutter-falcon-example',
     appIdSource: FlutterFalconAppIdSource.configured,
     serverUrl: 'https://flutterfalcon.com',
     channel: channel,
-    updateAvailable: updateAvailable,
+    updateAvailable: latestAvailable,
     installableUpdateAvailable: updateAvailable,
-    checkStatus:
-        updateAvailable
-            ? FlutterFalconUpdateStatus.available
-            : FlutterFalconUpdateStatus.current,
-    statusExplanation:
-        updateAvailable
-            ? 'An installable update is available.'
-            : 'No installable patch was found.',
+    checkStatus: updateAvailable
+        ? FlutterFalconUpdateStatus.available
+        : FlutterFalconUpdateStatus.current,
+    statusExplanation: updateAvailable
+        ? 'An installable update is available.'
+        : 'No installable patch was found.',
     baseVersion: '1.1.6+11',
     configured: true,
     updatesRequestUrl:
@@ -240,15 +291,15 @@ FlutterFalconVersionInfo _versionInfo({
     releaseLatestRequestUrl:
         'https://flutterfalcon.com/releases/latest?appId=flutter-falcon-example',
     latestReleaseFound: true,
-    runtimeState:
-        requiresBootConfirmation
-            ? FlutterFalconAppUpdateState.pendingBoot
-            : runtimeState,
+    runtimeState: requiresBootConfirmation
+        ? FlutterFalconAppUpdateState.pendingBoot
+        : runtimeState,
     requiresBootConfirmation: requiresBootConfirmation,
     activePatchVersion:
         requiresBootConfirmation ||
-                runtimeState == FlutterFalconAppUpdateState.active
-            ? '1.1.7+12'
-            : null,
+            runtimeState == FlutterFalconAppUpdateState.active
+        ? '1.1.7+12'
+        : null,
+    storeUpdate: storeUpdate,
   );
 }
