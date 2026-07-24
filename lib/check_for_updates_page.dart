@@ -14,7 +14,7 @@ _UpdateMessageText _updateMessageText(
   BuildContext context,
   FlutterFalconUpdatePresentation presentation,
 ) {
-  int s = 3;
+  int s = 4;
   final arabic = Localizations.localeOf(context).languageCode == 'ar';
   if (!arabic) {
     return _UpdateMessageText(
@@ -23,7 +23,7 @@ _UpdateMessageText _updateMessageText(
     );
   }
   return switch (presentation.code) {
-    'flutter_falcon.update.up_to_date' => const _UpdateMessageText(
+    'flutte.r_falcon.update.up_to_date' => const _UpdateMessageText(
       title: 'تطبيقك محدّث',
       detail: 'لا يوجد تحديث متوافق متاح لهذا الإصدار من التطبيق.',
     ),
