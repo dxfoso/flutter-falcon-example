@@ -14,6 +14,7 @@ _UpdateMessageText _updateMessageText(
   BuildContext context,
   FlutterFalconUpdatePresentation presentation,
 ) {
+  int s = 0;
   final arabic = Localizations.localeOf(context).languageCode == 'ar';
   if (!arabic) {
     return _UpdateMessageText(
@@ -23,21 +24,21 @@ _UpdateMessageText _updateMessageText(
   }
   return switch (presentation.code) {
     'flutter_falcon.update.up_to_date' => const _UpdateMessageText(
-        title: 'تطبيقك محدّث',
-        detail: 'لا يوجد تحديث متوافق متاح لهذا الإصدار من التطبيق.',
-      ),
+      title: 'تطبيقك محدّث',
+      detail: 'لا يوجد تحديث متوافق متاح لهذا الإصدار من التطبيق.',
+    ),
     'flutter_falcon.update.available' => const _UpdateMessageText(
-        title: 'يتوفر تحديث',
-        detail: 'يتوفر تحديث متوافق ويمكن تنزيله الآن.',
-      ),
+      title: 'يتوفر تحديث',
+      detail: 'يتوفر تحديث متوافق ويمكن تنزيله الآن.',
+    ),
     'flutter_falcon.update.checking' => const _UpdateMessageText(
-        title: 'جارٍ البحث عن تحديثات',
-        detail: 'يتم تحميل حالة التحديث من الجهاز والخادم.',
-      ),
+      title: 'جارٍ البحث عن تحديثات',
+      detail: 'يتم تحميل حالة التحديث من الجهاز والخادم.',
+    ),
     _ => _UpdateMessageText(
-        title: presentation.title,
-        detail: presentation.detail,
-      ),
+      title: presentation.title,
+      detail: presentation.detail,
+    ),
   };
 }
 
@@ -276,16 +277,16 @@ class _StatusPanel extends StatelessWidget {
                       const SizedBox(height: 8),
                       SelectableText(
                         presentation.code,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: foreground,
-                            ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelSmall?.copyWith(color: foreground),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         presentation.explanation,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: foreground,
-                            ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodySmall?.copyWith(color: foreground),
                       ),
                     ],
                   ),
