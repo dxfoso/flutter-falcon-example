@@ -91,7 +91,7 @@ packages:
     description:
       path: flutter_falcon
       ref: HEAD
-      resolved-ref: bb08530d6ac6b63211130c30e3857ca6ae8992c2
+      resolved-ref: "7a60342ddce8c886c3850d3ee54cdce173dba329"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "0.2.0"
