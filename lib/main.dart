@@ -81,6 +81,7 @@ class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
             ),
         CheckForUpdatesPage.routeName:
             (context) => CheckForUpdatesPage(
+              key: ValueKey(_captureRuntimeLogs),
               controller: _updateController,
               captureRuntimeLogs: _captureRuntimeLogs,
               onCaptureRuntimeLogsChanged: _setCaptureRuntimeLogs,
