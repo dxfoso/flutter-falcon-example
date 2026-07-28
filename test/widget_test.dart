@@ -45,6 +45,7 @@ void main() {
     await tester.pumpWidget(_testApp(controller));
     await tester.pumpAndSettle();
     expect(find.text('Update available'), findsOneWidget);
+    expect(find.text('Update to 1.1.7+12'), findsOneWidget);
 
     final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
     await tester.ensureVisible(primaryAction);
@@ -141,7 +142,7 @@ void main() {
     expect(find.text('Google Play update available'), findsOneWidget);
     final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
     await tester.ensureVisible(primaryAction);
-    expect(find.text('Update from Google Play'), findsOneWidget);
+    expect(find.text('Update to 1.1.7+12'), findsOneWidget);
     await tester.tap(primaryAction);
     await tester.pumpAndSettle();
 

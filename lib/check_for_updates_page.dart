@@ -190,6 +190,7 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                       SizedBox(height: sectionGap),
                       _ActionBar(
                         presentation: status,
+                        info: info,
                         hasInfo: info != null,
                         busy: sessionState.isBusy,
                         compact: compact,
@@ -624,6 +625,7 @@ class _CompactFact extends StatelessWidget {
 class _ActionBar extends StatelessWidget {
   const _ActionBar({
     required this.presentation,
+    required this.info,
     required this.hasInfo,
     required this.busy,
     required this.compact,
@@ -632,6 +634,7 @@ class _ActionBar extends StatelessWidget {
   });
 
   final FlutterFalconUpdatePresentation presentation;
+  final FlutterFalconVersionInfo? info;
   final bool hasInfo;
   final bool busy;
   final bool compact;
@@ -644,6 +647,11 @@ class _ActionBar extends StatelessWidget {
         presentation.action != FlutterFalconPrimaryAction.none;
     final confirming =
         presentation.action == FlutterFalconPrimaryAction.confirmBoot;
+    final targetVersion = switch (presentation.action) {
+      FlutterFalconPrimaryAction.applyUpdate => info?.installableTargetVersion,
+      FlutterFalconPrimaryAction.startStoreUpdate => info?.latestVersion,
+      _ => null,
+    };
 
     final checkButton = OutlinedButton.icon(
       key: const Key('check-updates-button'),
@@ -660,7 +668,11 @@ class _ActionBar extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2),
             )
           : Icon(confirming ? Icons.verified_outlined : Icons.downloading),
-      label: Text(presentation.actionLabel),
+      label: Text(
+        busy || confirming || targetVersion == null || targetVersion.isEmpty
+            ? presentation.actionLabel
+            : 'Update to $targetVersion',
+      ),
     );
 
     if (compact) {
