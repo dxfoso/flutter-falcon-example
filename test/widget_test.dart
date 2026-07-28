@@ -26,6 +26,15 @@ void main() {
     expect(find.text('1.1.6+11'), findsNWidgets(3));
     expect(find.text('current'), findsOneWidget);
     expect(find.text('flutter-falcon-example'), findsOneWidget);
+    expect(find.text('Update app'), findsOneWidget);
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.byKey(const Key('falcon-primary-action-button')),
+          )
+          .onPressed,
+      isNull,
+    );
   });
 
   testWidgets('runs an available update once and reloads after real success', (

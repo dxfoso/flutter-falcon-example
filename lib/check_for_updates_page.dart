@@ -643,7 +643,7 @@ class _ActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasPrimaryAction =
+    final canRunPrimaryAction =
         presentation.action != FlutterFalconPrimaryAction.none;
     final confirming =
         presentation.action == FlutterFalconPrimaryAction.confirmBoot;
@@ -661,7 +661,7 @@ class _ActionBar extends StatelessWidget {
     );
     final primaryButton = FilledButton.icon(
       key: const Key('falcon-primary-action-button'),
-      onPressed: busy ? null : onPrimaryAction,
+      onPressed: busy || !canRunPrimaryAction ? null : onPrimaryAction,
       icon: busy
           ? const SizedBox.square(
               dimension: 18,
@@ -669,8 +669,10 @@ class _ActionBar extends StatelessWidget {
             )
           : Icon(confirming ? Icons.verified_outlined : Icons.downloading),
       label: Text(
-        busy || confirming || targetVersion == null || targetVersion.isEmpty
+        busy || confirming
             ? presentation.actionLabel
+            : targetVersion == null || targetVersion.isEmpty
+            ? 'Update app'
             : 'Update to $targetVersion',
       ),
     );
@@ -681,10 +683,8 @@ class _ActionBar extends StatelessWidget {
         child: Row(
           children: [
             Expanded(child: checkButton),
-            if (hasPrimaryAction) ...[
-              const SizedBox(width: 8),
-              Expanded(flex: 2, child: primaryButton),
-            ],
+            const SizedBox(width: 8),
+            Expanded(flex: 2, child: primaryButton),
           ],
         ),
       );
@@ -693,7 +693,7 @@ class _ActionBar extends StatelessWidget {
       spacing: 12,
       runSpacing: 12,
       alignment: WrapAlignment.end,
-      children: [checkButton, if (hasPrimaryAction) primaryButton],
+      children: [checkButton, primaryButton],
     );
   }
 }
