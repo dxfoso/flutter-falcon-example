@@ -14,6 +14,7 @@ _UpdateMessageText _updateMessageText(
   BuildContext context,
   FlutterFalconUpdatePresentation presentation,
 ) {
+  int i = 0;
   final arabic = Localizations.localeOf(context).languageCode == 'ar';
   if (!arabic) {
     return _UpdateMessageText(
@@ -176,9 +177,10 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                           message: sessionState.failureMessage!,
                           statusCode: info?.failureStatusCode,
                           responseBody: info?.failureResponseBody,
-                          onRetry: sessionState.isBusy
-                              ? null
-                              : () => _session.check(),
+                          onRetry:
+                              sessionState.isBusy
+                                  ? null
+                                  : () => _session.check(),
                         ),
                       ],
                       if (info != null) ...[
@@ -239,10 +241,8 @@ class _StatusPanel extends StatelessWidget {
       FlutterFalconStatusTone.available ||
       FlutterFalconStatusTone.staged ||
       FlutterFalconStatusTone.warning ||
-      FlutterFalconStatusTone.rollback => (
-        colors.secondaryContainer,
-        colors.onSecondaryContainer,
-      ),
+      FlutterFalconStatusTone
+          .rollback => (colors.secondaryContainer, colors.onSecondaryContainer),
       FlutterFalconStatusTone.neutral => (
         colors.primaryContainer,
         colors.onPrimaryContainer,
@@ -333,9 +333,8 @@ class _FeedbackPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final foreground = success
-        ? colors.onTertiaryContainer
-        : colors.onErrorContainer;
+    final foreground =
+        success ? colors.onTertiaryContainer : colors.onErrorContainer;
     return Semantics(
       liveRegion: true,
       child: Container(
@@ -475,9 +474,10 @@ class _VersionSummary extends StatelessWidget {
                     vertical: compact ? 11 : 16,
                   ),
                   child: _VersionValue(
-                    label: compact
-                        ? items[index].shortLabel
-                        : items[index].fullLabel,
+                    label:
+                        compact
+                            ? items[index].shortLabel
+                            : items[index].fullLabel,
                     value: items[index].value,
                     compact: compact,
                   ),
@@ -512,9 +512,10 @@ class _VersionValue extends StatelessWidget {
           label,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: compact
-              ? Theme.of(context).textTheme.labelMedium
-              : Theme.of(context).textTheme.labelLarge,
+          style:
+              compact
+                  ? Theme.of(context).textTheme.labelMedium
+                  : Theme.of(context).textTheme.labelLarge,
         ),
         SizedBox(height: compact ? 3 : 5),
         SelectableText(
@@ -662,12 +663,13 @@ class _ActionBar extends StatelessWidget {
     final primaryButton = FilledButton.icon(
       key: const Key('falcon-primary-action-button'),
       onPressed: busy || !canRunPrimaryAction ? null : onPrimaryAction,
-      icon: busy
-          ? const SizedBox.square(
-              dimension: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : Icon(confirming ? Icons.verified_outlined : Icons.downloading),
+      icon:
+          busy
+              ? const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+              : Icon(confirming ? Icons.verified_outlined : Icons.downloading),
       label: Text(
         busy || confirming
             ? presentation.actionLabel
@@ -714,9 +716,10 @@ class _Diagnostics extends StatelessWidget {
         dense: compact,
         visualDensity: compact ? VisualDensity.compact : null,
         title: const Text('Request diagnostics'),
-        subtitle: compact
-            ? null
-            : const Text('App stream, channel, and exact check URLs'),
+        subtitle:
+            compact
+                ? null
+                : const Text('App stream, channel, and exact check URLs'),
         childrenPadding: EdgeInsets.fromLTRB(
           compact ? 12 : 16,
           0,
