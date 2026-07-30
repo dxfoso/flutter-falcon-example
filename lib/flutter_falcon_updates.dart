@@ -6,3 +6,15 @@ const falconController = FlutterFalconController(
   channel: 'stable',
   appleAppStoreId: String.fromEnvironment('FLUTTER_FALCON_APP_STORE_ID'),
 );
+
+FlutterFalconController createFalconController({
+  required bool captureRuntimeLogs,
+}) {
+  return FlutterFalconController(
+    serverUrl: 'https://flutterfalcon.com',
+    appId: 'flutter-falcon-example',
+    channel: 'stable',
+    captureRuntimeLogs: captureRuntimeLogs,
+    appleAppStoreId: String.fromEnvironment('FLUTTER_FALCON_APP_STORE_ID'),
+  );
+}

@@ -60,11 +60,18 @@ _UpdateMessageText _updateMessageText(
 }
 
 class CheckForUpdatesPage extends StatefulWidget {
-  const CheckForUpdatesPage({super.key, this.controller = falconController});
+  const CheckForUpdatesPage({
+    super.key,
+    this.controller = falconController,
+    this.captureRuntimeLogs = false,
+    this.onCaptureRuntimeLogsChanged,
+  });
 
   static const routeName = '/updates';
 
   final FlutterFalconControllerApi controller;
+  final bool captureRuntimeLogs;
+  final ValueChanged<bool>? onCaptureRuntimeLogsChanged;
 
   @override
   State<CheckForUpdatesPage> createState() => _CheckForUpdatesPageState();
@@ -202,6 +209,17 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                       if (info != null) ...[
                         SizedBox(height: sectionGap),
                         _Diagnostics(info: info, compact: compact),
+                      ],
+                      if (widget.onCaptureRuntimeLogsChanged != null) ...[
+                        SizedBox(height: sectionGap),
+                        SwitchListTile.adaptive(
+                          value: widget.captureRuntimeLogs,
+                          onChanged: widget.onCaptureRuntimeLogsChanged,
+                          title: const Text('Send diagnostic logs'),
+                          subtitle: const Text(
+                            'Optional redacted logs help diagnose app failures.',
+                          ),
+                        ),
                       ],
                     ],
                   ),

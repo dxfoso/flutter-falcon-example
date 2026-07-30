@@ -225,6 +225,33 @@ void main() {
     expect(find.text('Channel'), findsOneWidget);
     expect(find.text('beta'), findsOneWidget);
   });
+
+  testWidgets('shows and changes the diagnostic log consent control', (
+    tester,
+  ) async {
+    final controller = _FakeFalconController(
+      loadResults: [Future.value(_versionInfo())],
+    );
+    var enabled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CheckForUpdatesPage(
+          controller: controller,
+          captureRuntimeLogs: enabled,
+          onCaptureRuntimeLogsChanged: (value) => enabled = value,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final consent = find.byType(SwitchListTile);
+    await tester.ensureVisible(consent);
+    expect(find.text('Send diagnostic logs'), findsOneWidget);
+    await tester.tap(consent);
+
+    expect(enabled, isTrue);
+  });
 }
 
 Widget _testApp(FlutterFalconControllerApi controller) {
@@ -288,12 +315,14 @@ FlutterFalconVersionInfo _versionInfo({
     channel: channel,
     updateAvailable: latestAvailable,
     installableUpdateAvailable: updateAvailable,
-    checkStatus: updateAvailable
-        ? FlutterFalconUpdateStatus.available
-        : FlutterFalconUpdateStatus.current,
-    statusExplanation: updateAvailable
-        ? 'An installable update is available.'
-        : 'No installable patch was found.',
+    checkStatus:
+        updateAvailable
+            ? FlutterFalconUpdateStatus.available
+            : FlutterFalconUpdateStatus.current,
+    statusExplanation:
+        updateAvailable
+            ? 'An installable update is available.'
+            : 'No installable patch was found.',
     baseVersion: '1.1.6+11',
     configured: true,
     updatesRequestUrl:
@@ -301,15 +330,16 @@ FlutterFalconVersionInfo _versionInfo({
     releaseLatestRequestUrl:
         'https://flutterfalcon.com/releases/latest?appId=flutter-falcon-example',
     latestReleaseFound: true,
-    runtimeState: requiresBootConfirmation
-        ? FlutterFalconAppUpdateState.pendingBoot
-        : runtimeState,
+    runtimeState:
+        requiresBootConfirmation
+            ? FlutterFalconAppUpdateState.pendingBoot
+            : runtimeState,
     requiresBootConfirmation: requiresBootConfirmation,
     activePatchVersion:
         requiresBootConfirmation ||
-            runtimeState == FlutterFalconAppUpdateState.active
-        ? '1.1.7+12'
-        : null,
+                runtimeState == FlutterFalconAppUpdateState.active
+            ? '1.1.7+12'
+            : null,
     storeUpdate: storeUpdate,
   );
 }

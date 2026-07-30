@@ -1,20 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon_api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'check_for_updates_page.dart';
 import 'flutter_falcon_updates.dart';
 
-void main() => runApp(const FlutterFalconExampleApp());
+const _captureRuntimeLogsPreference = 'capture_runtime_logs';
 
-class FlutterFalconExampleApp extends StatelessWidget {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final preferences = await SharedPreferences.getInstance();
+  runApp(
+    FlutterFalconExampleApp(
+      captureRuntimeLogs:
+          preferences.getBool(_captureRuntimeLogsPreference) ?? false,
+    ),
+  );
+}
+
+class FlutterFalconExampleApp extends StatefulWidget {
   const FlutterFalconExampleApp({
     super.key,
-    this.updateController = falconController,
+    this.updateController,
+    this.captureRuntimeLogs = false,
     this.initialRoute = CheckForUpdatesPage.routeName,
   });
 
-  final FlutterFalconControllerApi updateController;
+  final FlutterFalconControllerApi? updateController;
+  final bool captureRuntimeLogs;
   final String initialRoute;
+
+  @override
+  State<FlutterFalconExampleApp> createState() =>
+      _FlutterFalconExampleAppState();
+}
+
+class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
+  late bool _captureRuntimeLogs = widget.captureRuntimeLogs;
+
+  FlutterFalconControllerApi get _updateController =>
+      widget.updateController ??
+      createFalconController(captureRuntimeLogs: _captureRuntimeLogs);
+
+  Future<void> _setCaptureRuntimeLogs(bool enabled) async {
+    setState(() => _captureRuntimeLogs = enabled);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_captureRuntimeLogsPreference, enabled);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,18 +72,33 @@ class FlutterFalconExampleApp extends StatelessWidget {
           border: OutlineInputBorder(),
         ),
       ),
-      initialRoute: initialRoute,
+      initialRoute: widget.initialRoute,
       routes: {
-        '/': (context) => const _HomePage(),
+        '/':
+            (context) => _HomePage(
+              captureRuntimeLogs: _captureRuntimeLogs,
+              onCaptureRuntimeLogsChanged: _setCaptureRuntimeLogs,
+            ),
         CheckForUpdatesPage.routeName:
-            (context) => CheckForUpdatesPage(controller: updateController),
+            (context) => CheckForUpdatesPage(
+              key: ValueKey(_captureRuntimeLogs),
+              controller: _updateController,
+              captureRuntimeLogs: _captureRuntimeLogs,
+              onCaptureRuntimeLogsChanged: _setCaptureRuntimeLogs,
+            ),
       },
     );
   }
 }
 
 class _HomePage extends StatelessWidget {
-  const _HomePage();
+  const _HomePage({
+    required this.captureRuntimeLogs,
+    required this.onCaptureRuntimeLogsChanged,
+  });
+
+  final bool captureRuntimeLogs;
+  final ValueChanged<bool> onCaptureRuntimeLogsChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -94,6 +141,15 @@ class _HomePage extends StatelessWidget {
                       ),
                   icon: const Icon(Icons.system_update_alt),
                   label: const Text('Check for updates'),
+                ),
+                const SizedBox(height: 16),
+                SwitchListTile.adaptive(
+                  value: captureRuntimeLogs,
+                  onChanged: onCaptureRuntimeLogsChanged,
+                  title: const Text('Send diagnostic logs'),
+                  subtitle: const Text(
+                    'Optional redacted logs help diagnose app failures.',
+                  ),
                 ),
               ],
             ),
