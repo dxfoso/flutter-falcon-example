@@ -23,7 +23,9 @@ the effective app ID and its source in the request diagnostics.
 
 `FlutterFalconUpdateSession` owns check/action/reload orchestration, concurrency
 locking, retry state, typed action outcomes, and semantic status presentation.
-The app keeps only navigation and Material rendering.
+It also selects Falcon patching, Google Play in-app update, Google Play listing,
+or App Store listing as the primary action. The app uses the package-provided
+label and action and keeps only navigation and Material rendering.
 
 The app never contains publish tokens, registry credentials, or other secrets.
 
@@ -39,8 +41,8 @@ page. It:
 - distinguishes current, available, applying, boot confirmation, success, and
   failure states;
 - disables repeated actions while a request is running;
-- calls the controller's real primary action only for an installable update or
-  boot confirmation, reports the returned message, and reloads status.
+- calls the package's real primary action for Falcon, boot-confirmation, or
+  platform-store updates, reports the returned message, and reloads status.
 
 ## Run and verify
 

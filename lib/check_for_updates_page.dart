@@ -14,7 +14,6 @@ _UpdateMessageText _updateMessageText(
   BuildContext context,
   FlutterFalconUpdatePresentation presentation,
 ) {
-  int i = 3;
   final arabic = Localizations.localeOf(context).languageCode == 'ar';
   if (!arabic) {
     return _UpdateMessageText(
@@ -199,7 +198,6 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                       SizedBox(height: sectionGap),
                       _ActionBar(
                         presentation: status,
-                        info: info,
                         hasInfo: info != null,
                         busy: sessionState.isBusy,
                         compact: compact,
@@ -266,16 +264,7 @@ class _StatusPanel extends StatelessWidget {
         colors.onPrimaryContainer,
       ),
     };
-    final icon = switch (presentation.glyph) {
-      FlutterFalconStatusGlyph.config => Icons.settings_outlined,
-      FlutterFalconStatusGlyph.verified => Icons.check_circle_outline,
-      FlutterFalconStatusGlyph.download => Icons.downloading,
-      FlutterFalconStatusGlyph.packageReady => Icons.inventory_2_outlined,
-      FlutterFalconStatusGlyph.active => Icons.task_alt,
-      FlutterFalconStatusGlyph.pending => Icons.restart_alt,
-      FlutterFalconStatusGlyph.rollback => Icons.restore,
-      FlutterFalconStatusGlyph.failure => Icons.error_outline,
-    };
+    final icon = _iconForStatusGlyph(presentation.glyph);
     return Container(
       decoration: BoxDecoration(
         color: background,
@@ -644,7 +633,6 @@ class _CompactFact extends StatelessWidget {
 class _ActionBar extends StatelessWidget {
   const _ActionBar({
     required this.presentation,
-    required this.info,
     required this.hasInfo,
     required this.busy,
     required this.compact,
@@ -653,7 +641,6 @@ class _ActionBar extends StatelessWidget {
   });
 
   final FlutterFalconUpdatePresentation presentation;
-  final FlutterFalconVersionInfo? info;
   final bool hasInfo;
   final bool busy;
   final bool compact;
@@ -664,13 +651,6 @@ class _ActionBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final canRunPrimaryAction =
         presentation.action != FlutterFalconPrimaryAction.none;
-    final confirming =
-        presentation.action == FlutterFalconPrimaryAction.confirmBoot;
-    final targetVersion = switch (presentation.action) {
-      FlutterFalconPrimaryAction.applyUpdate => info?.installableTargetVersion,
-      FlutterFalconPrimaryAction.startStoreUpdate => info?.latestVersion,
-      _ => null,
-    };
 
     final checkButton = OutlinedButton.icon(
       key: const Key('check-updates-button'),
@@ -687,14 +667,8 @@ class _ActionBar extends StatelessWidget {
                 dimension: 18,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-              : Icon(confirming ? Icons.verified_outlined : Icons.downloading),
-      label: Text(
-        busy || confirming
-            ? presentation.actionLabel
-            : targetVersion == null || targetVersion.isEmpty
-            ? 'Update app'
-            : 'Update to $targetVersion',
-      ),
+              : Icon(_iconForStatusGlyph(presentation.glyph)),
+      label: Text(presentation.actionLabel),
     );
 
     if (compact) {
@@ -717,6 +691,17 @@ class _ActionBar extends StatelessWidget {
     );
   }
 }
+
+IconData _iconForStatusGlyph(FlutterFalconStatusGlyph glyph) => switch (glyph) {
+  FlutterFalconStatusGlyph.config => Icons.settings_outlined,
+  FlutterFalconStatusGlyph.verified => Icons.check_circle_outline,
+  FlutterFalconStatusGlyph.download => Icons.downloading,
+  FlutterFalconStatusGlyph.packageReady => Icons.inventory_2_outlined,
+  FlutterFalconStatusGlyph.active => Icons.task_alt,
+  FlutterFalconStatusGlyph.pending => Icons.restart_alt,
+  FlutterFalconStatusGlyph.rollback => Icons.restore,
+  FlutterFalconStatusGlyph.failure => Icons.error_outline,
+};
 
 class _Diagnostics extends StatelessWidget {
   const _Diagnostics({required this.info, required this.compact});
