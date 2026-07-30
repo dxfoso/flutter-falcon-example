@@ -14,7 +14,7 @@ _UpdateMessageText _updateMessageText(
   BuildContext context,
   FlutterFalconUpdatePresentation presentation,
 ) {
-  int i = 0;
+  int i = 2;
   final arabic = Localizations.localeOf(context).languageCode == 'ar';
   if (!arabic) {
     return _UpdateMessageText(
