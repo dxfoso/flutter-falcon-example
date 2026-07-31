@@ -193,6 +193,8 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                         SizedBox(height: sectionGap),
                         _VersionSummary(info: info, compact: compact),
                         SizedBox(height: sectionGap),
+                        _UpdateDeliverySummary(info: info, compact: compact),
+                        SizedBox(height: sectionGap),
                         _RuntimeSummary(info: info, compact: compact),
                       ],
                       SizedBox(height: sectionGap),
@@ -587,6 +589,67 @@ class _RuntimeSummary extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
               height: 1.3,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UpdateDeliverySummary extends StatelessWidget {
+  const _UpdateDeliverySummary({required this.info, required this.compact});
+
+  final FlutterFalconVersionInfo info;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final usesFalconPatch =
+        info.primaryAction == FlutterFalconPrimaryAction.applyUpdate ||
+        info.primaryAction == FlutterFalconPrimaryAction.confirmBoot;
+    final replacesApk =
+        info.primaryAction == FlutterFalconPrimaryAction.installApk;
+    return Container(
+      padding: EdgeInsets.fromLTRB(
+        compact ? 8 : 12,
+        compact ? 10 : 14,
+        compact ? 8 : 12,
+        compact ? 6 : 10,
+      ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              'Update delivery',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          CheckboxListTile(
+            key: const Key('falcon-patch-delivery-checkbox'),
+            value: usesFalconPatch,
+            onChanged: null,
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+            dense: compact,
+            title: const Text('FlutterFalcon patch'),
+          ),
+          CheckboxListTile(
+            key: const Key('replace-apk-delivery-checkbox'),
+            value: replacesApk,
+            onChanged: null,
+            controlAffinity: ListTileControlAffinity.leading,
+            contentPadding: EdgeInsets.zero,
+            dense: compact,
+            title: const Text('Replace installed APK'),
           ),
         ],
       ),

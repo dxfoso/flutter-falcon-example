@@ -55,6 +55,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Update available'), findsOneWidget);
     expect(find.text('Download and restart'), findsOneWidget);
+    final falconDelivery = tester.widget<CheckboxListTile>(
+      find.byKey(const Key('falcon-patch-delivery-checkbox')),
+    );
+    final apkDelivery = tester.widget<CheckboxListTile>(
+      find.byKey(const Key('replace-apk-delivery-checkbox')),
+    );
+    expect(falconDelivery.value, isTrue);
+    expect(falconDelivery.onChanged, isNull);
+    expect(apkDelivery.value, isFalse);
+    expect(apkDelivery.onChanged, isNull);
 
     final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
     await tester.ensureVisible(primaryAction);
@@ -238,6 +248,16 @@ void main() {
 
     expect(find.text('Android app update available'), findsOneWidget);
     expect(find.text('Download APK update'), findsOneWidget);
+    final falconDelivery = tester.widget<CheckboxListTile>(
+      find.byKey(const Key('falcon-patch-delivery-checkbox')),
+    );
+    final apkDelivery = tester.widget<CheckboxListTile>(
+      find.byKey(const Key('replace-apk-delivery-checkbox')),
+    );
+    expect(falconDelivery.value, isFalse);
+    expect(falconDelivery.onChanged, isNull);
+    expect(apkDelivery.value, isTrue);
+    expect(apkDelivery.onChanged, isNull);
     final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
     expect(tester.widget<FilledButton>(primaryAction).onPressed, isNotNull);
 
@@ -292,9 +312,13 @@ void main() {
     expect(tester.getTopLeft(find.text('Running')).dy, installedY);
     expect(tester.getTopLeft(find.text('Latest')).dy, installedY);
     expect(
-      tester.getBottomRight(find.text('Request diagnostics')).dy,
+      tester.getBottomRight(find.text('Replace installed APK')).dy,
       lessThanOrEqualTo(800),
     );
+    final diagnostics = find.text('Request diagnostics');
+    await tester.ensureVisible(diagnostics);
+    await tester.pumpAndSettle();
+    expect(tester.getBottomRight(diagnostics).dy, lessThanOrEqualTo(800));
     expect(tester.takeException(), isNull);
   });
 
