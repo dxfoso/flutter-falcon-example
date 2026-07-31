@@ -200,6 +200,56 @@ void main() {
     expect(find.text('Google Play opened.'), findsNWidgets(2));
   });
 
+  testWidgets('uses the package-selected hosted APK update action', (
+    tester,
+  ) async {
+    final controller = _FakeFalconController(
+      loadResults: [
+        Future.value(
+          _versionInfo(
+            newerReleaseAvailable: true,
+            storeUpdate: const FlutterFalconStoreUpdateInfo(
+              store: FlutterFalconStoreKind.googlePlay,
+              availability: FlutterFalconStoreUpdateAvailability.available,
+              opensStoreListing: true,
+              listingId: 'com.example.flutter_falcon_example',
+            ),
+            apkUpdate: const FlutterFalconApkUpdateInfo(
+              available: true,
+              artifactPath: 'releases/example/android/update.apk',
+              sha256:
+                  'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+              expectedPackageName: 'com.example.flutter_falcon_example',
+            ),
+          ),
+        ),
+        Future.value(_versionInfo()),
+      ],
+      actionResult: Future.value(
+        const FlutterFalconActionResult(
+          outcome: FlutterFalconActionOutcome.restartInitiated,
+          message: 'Android package installer opened.',
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(_testApp(controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Android app update available'), findsOneWidget);
+    expect(find.text('Download APK update'), findsOneWidget);
+    final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
+    expect(tester.widget<FilledButton>(primaryAction).onPressed, isNotNull);
+
+    await tester.ensureVisible(primaryAction);
+    await tester.tap(primaryAction);
+    await tester.pumpAndSettle();
+
+    expect(controller.actionCalls, 1);
+    expect(find.text('Continue in Android'), findsOneWidget);
+    expect(find.text('Android package installer opened.'), findsNWidgets(2));
+  });
+
   testWidgets('preserves failure details and retries the update check', (
     tester,
   ) async {
@@ -341,6 +391,8 @@ FlutterFalconVersionInfo _versionInfo({
       FlutterFalconAppUpdateState.noPatch,
   FlutterFalconStoreUpdateInfo storeUpdate =
       const FlutterFalconStoreUpdateInfo.unsupported(),
+  FlutterFalconApkUpdateInfo apkUpdate =
+      const FlutterFalconApkUpdateInfo.unavailable(),
 }) {
   final latestAvailable = updateAvailable || newerReleaseAvailable;
   return FlutterFalconVersionInfo(
@@ -355,12 +407,14 @@ FlutterFalconVersionInfo _versionInfo({
     channel: channel,
     updateAvailable: latestAvailable,
     installableUpdateAvailable: updateAvailable,
-    checkStatus: updateAvailable
-        ? FlutterFalconUpdateStatus.available
-        : FlutterFalconUpdateStatus.current,
-    statusExplanation: updateAvailable
-        ? 'An installable update is available.'
-        : 'No installable patch was found.',
+    checkStatus:
+        updateAvailable
+            ? FlutterFalconUpdateStatus.available
+            : FlutterFalconUpdateStatus.current,
+    statusExplanation:
+        updateAvailable
+            ? 'An installable update is available.'
+            : 'No installable patch was found.',
     baseVersion: '1.1.6+11',
     configured: true,
     updatesRequestUrl:
@@ -368,15 +422,17 @@ FlutterFalconVersionInfo _versionInfo({
     releaseLatestRequestUrl:
         'https://flutterfalcon.com/releases/latest?appId=flutter-falcon-example',
     latestReleaseFound: true,
-    runtimeState: requiresBootConfirmation
-        ? FlutterFalconAppUpdateState.pendingBoot
-        : runtimeState,
+    runtimeState:
+        requiresBootConfirmation
+            ? FlutterFalconAppUpdateState.pendingBoot
+            : runtimeState,
     requiresBootConfirmation: requiresBootConfirmation,
     activePatchVersion:
         requiresBootConfirmation ||
-            runtimeState == FlutterFalconAppUpdateState.active
-        ? '1.1.7+12'
-        : null,
+                runtimeState == FlutterFalconAppUpdateState.active
+            ? '1.1.7+12'
+            : null,
     storeUpdate: storeUpdate,
+    apkUpdate: apkUpdate,
   );
 }

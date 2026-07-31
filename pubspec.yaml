@@ -1,7 +1,7 @@
 name: flutter_falcon_example
 description: Minimal Flutter Falcon test app.
 publish_to: 'none'
-version: 1.1.10+28
+version: 1.1.10+29
 
 environment:
   sdk: ^3.7.0
@@ -12,7 +12,7 @@ dependencies:
   flutter_falcon:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: f30b556575eeb1e00dda3b9002564498adc9e340
+      ref: 10b38c3bbaffaa14654332720071df56f90ad9ae
       path: flutter_falcon
   shared_preferences: ^2.3.2
 
