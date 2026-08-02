@@ -199,12 +199,20 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                       ],
                       SizedBox(height: sectionGap),
                       _ActionBar(
-                        presentation: status,
-                        hasInfo: info != null,
+                        info: info,
                         busy: sessionState.isBusy,
                         compact: compact,
                         onCheck: () => _session.check(),
-                        onPrimaryAction: _session.runPrimaryAction,
+                        onFalconUpdate:
+                            () => _session.runAction(
+                              info?.requiresBootConfirmation ?? false
+                                  ? FlutterFalconPrimaryAction.confirmBoot
+                                  : FlutterFalconPrimaryAction.applyUpdate,
+                            ),
+                        onApkUpdate:
+                            () => _session.runAction(
+                              FlutterFalconPrimaryAction.installApk,
+                            ),
                       ),
                       if (info != null) ...[
                         SizedBox(height: sectionGap),
@@ -605,11 +613,8 @@ class _UpdateDeliverySummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final usesFalconPatch =
-        info.primaryAction == FlutterFalconPrimaryAction.applyUpdate ||
-        info.primaryAction == FlutterFalconPrimaryAction.confirmBoot;
-    final replacesApk =
-        info.primaryAction == FlutterFalconPrimaryAction.installApk;
+    final usesFalconPatch = info.installableUpdateAvailable;
+    final replacesApk = info.apkUpdate.canInstall;
     return Container(
       padding: EdgeInsets.fromLTRB(
         compact ? 8 : 12,
@@ -695,62 +700,68 @@ class _CompactFact extends StatelessWidget {
 
 class _ActionBar extends StatelessWidget {
   const _ActionBar({
-    required this.presentation,
-    required this.hasInfo,
+    required this.info,
     required this.busy,
     required this.compact,
     required this.onCheck,
-    required this.onPrimaryAction,
+    required this.onFalconUpdate,
+    required this.onApkUpdate,
   });
 
-  final FlutterFalconUpdatePresentation presentation;
-  final bool hasInfo;
+  final FlutterFalconVersionInfo? info;
   final bool busy;
   final bool compact;
   final VoidCallback onCheck;
-  final VoidCallback onPrimaryAction;
+  final VoidCallback onFalconUpdate;
+  final VoidCallback onApkUpdate;
 
   @override
   Widget build(BuildContext context) {
-    final canRunPrimaryAction =
-        presentation.action != FlutterFalconPrimaryAction.none;
+    final canApplyFalconPatch =
+        (info?.installableUpdateAvailable ?? false) ||
+        (info?.requiresBootConfirmation ?? false);
+    final canInstallApk = info?.apkUpdate.canInstall ?? false;
 
     final checkButton = OutlinedButton.icon(
       key: const Key('check-updates-button'),
       onPressed: busy ? null : onCheck,
       icon: const Icon(Icons.refresh),
-      label: Text(hasInfo ? 'Check again' : 'Check for updates'),
+      label: Text(info == null ? 'Check for updates' : 'Check again'),
     );
-    final primaryButton = FilledButton.icon(
-      key: const Key('falcon-primary-action-button'),
-      onPressed: busy || !canRunPrimaryAction ? null : onPrimaryAction,
-      icon:
-          busy
-              ? const SizedBox.square(
-                dimension: 18,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-              : Icon(_iconForStatusGlyph(presentation.glyph)),
-      label: Text(presentation.actionLabel),
+    final falconButton = FilledButton.icon(
+      key: const Key('falcon-update-button'),
+      onPressed: busy || !canApplyFalconPatch ? null : onFalconUpdate,
+      icon: const Icon(Icons.bolt),
+      label: Text(
+        info?.requiresBootConfirmation ?? false
+            ? 'Confirm FlutterFalcon update'
+            : 'Update with FlutterFalcon',
+      ),
+    );
+    final apkButton = OutlinedButton.icon(
+      key: const Key('apk-replace-button'),
+      onPressed: busy || !canInstallApk ? null : onApkUpdate,
+      icon: const Icon(Icons.android),
+      label: const Text('Download and replace APK'),
     );
 
     if (compact) {
-      return SizedBox(
-        height: 48,
-        child: Row(
-          children: [
-            Expanded(child: checkButton),
-            const SizedBox(width: 8),
-            Expanded(flex: 2, child: primaryButton),
-          ],
-        ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          falconButton,
+          const SizedBox(height: 8),
+          apkButton,
+          const SizedBox(height: 8),
+          checkButton,
+        ],
       );
     }
     return Wrap(
       spacing: 12,
       runSpacing: 12,
       alignment: WrapAlignment.end,
-      children: [checkButton, primaryButton],
+      children: [checkButton, falconButton, apkButton],
     );
   }
 }

@@ -29,9 +29,7 @@ void main() {
     expect(find.text('Check again'), findsWidgets);
     expect(
       tester
-          .widget<FilledButton>(
-            find.byKey(const Key('falcon-primary-action-button')),
-          )
+          .widget<FilledButton>(find.byKey(const Key('falcon-update-button')))
           .onPressed,
       isNull,
     );
@@ -43,7 +41,18 @@ void main() {
     final action = Completer<FlutterFalconActionResult>();
     final controller = _FakeFalconController(
       loadResults: [
-        Future.value(_versionInfo(updateAvailable: true)),
+        Future.value(
+          _versionInfo(
+            updateAvailable: true,
+            apkUpdate: const FlutterFalconApkUpdateInfo(
+              available: true,
+              artifactPath: 'releases/example/android/update.apk',
+              sha256:
+                  'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+              expectedPackageName: 'com.example.flutter_falcon_example',
+            ),
+          ),
+        ),
         Future.value(
           _versionInfo(runtimeState: FlutterFalconAppUpdateState.active),
         ),
@@ -54,7 +63,8 @@ void main() {
     await tester.pumpWidget(_testApp(controller));
     await tester.pumpAndSettle();
     expect(find.text('Update available'), findsOneWidget);
-    expect(find.text('Download and restart'), findsOneWidget);
+    expect(find.text('Update with FlutterFalcon'), findsOneWidget);
+    expect(find.text('Download and replace APK'), findsOneWidget);
     final falconDelivery = tester.widget<CheckboxListTile>(
       find.byKey(const Key('falcon-patch-delivery-checkbox')),
     );
@@ -63,17 +73,20 @@ void main() {
     );
     expect(falconDelivery.value, isTrue);
     expect(falconDelivery.onChanged, isNull);
-    expect(apkDelivery.value, isFalse);
+    expect(apkDelivery.value, isTrue);
     expect(apkDelivery.onChanged, isNull);
 
-    final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
-    await tester.ensureVisible(primaryAction);
-    await tester.tap(primaryAction);
+    final apkAction = find.byKey(const Key('apk-replace-button'));
+    expect(tester.widget<OutlinedButton>(apkAction).onPressed, isNotNull);
+
+    final falconAction = find.byKey(const Key('falcon-update-button'));
+    await tester.ensureVisible(falconAction);
+    await tester.tap(falconAction);
     await tester.pump();
 
     expect(find.text('Applying update'), findsOneWidget);
     expect(controller.actionCalls, 1);
-    final button = tester.widget<FilledButton>(primaryAction);
+    final button = tester.widget<FilledButton>(falconAction);
     expect(button.onPressed, isNull);
 
     action.complete(
@@ -111,103 +124,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Boot confirmation required'), findsOneWidget);
-    final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
-    await tester.ensureVisible(primaryAction);
-    expect(find.text('Confirm updated boot'), findsOneWidget);
-    await tester.tap(primaryAction);
+    final falconAction = find.byKey(const Key('falcon-update-button'));
+    await tester.ensureVisible(falconAction);
+    expect(find.text('Confirm FlutterFalcon update'), findsOneWidget);
+    await tester.tap(falconAction);
     await tester.pumpAndSettle();
 
     expect(find.text('Boot confirmed.'), findsOneWidget);
     expect(controller.actionCalls, 1);
-  });
-
-  testWidgets('starts a full app update through the package store action', (
-    tester,
-  ) async {
-    final controller = _FakeFalconController(
-      loadResults: [
-        Future.value(
-          _versionInfo(
-            newerReleaseAvailable: true,
-            storeUpdate: const FlutterFalconStoreUpdateInfo(
-              store: FlutterFalconStoreKind.googlePlay,
-              availability: FlutterFalconStoreUpdateAvailability.available,
-              immediateAllowed: true,
-              flexibleAllowed: true,
-            ),
-          ),
-        ),
-        Future.value(
-          _versionInfo(
-            newerReleaseAvailable: true,
-            storeUpdate: const FlutterFalconStoreUpdateInfo(
-              store: FlutterFalconStoreKind.googlePlay,
-              availability: FlutterFalconStoreUpdateAvailability.inProgress,
-            ),
-          ),
-        ),
-      ],
-      actionResult: Future.value(
-        const FlutterFalconActionResult(
-          outcome: FlutterFalconActionOutcome.succeeded,
-          message: 'Google Play update flow started.',
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(_testApp(controller));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Google Play update available'), findsOneWidget);
-    final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
-    await tester.ensureVisible(primaryAction);
-    expect(find.text('Update from Google Play'), findsOneWidget);
-    await tester.tap(primaryAction);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Store update started'), findsOneWidget);
-    expect(find.text('Google Play update flow started.'), findsNWidgets(2));
-    expect(controller.actionCalls, 1);
-  });
-
-  testWidgets('opens Google Play through the package-selected primary action', (
-    tester,
-  ) async {
-    final controller = _FakeFalconController(
-      loadResults: [
-        Future.value(
-          _versionInfo(
-            newerReleaseAvailable: true,
-            storeUpdate: const FlutterFalconStoreUpdateInfo(
-              store: FlutterFalconStoreKind.googlePlay,
-              availability: FlutterFalconStoreUpdateAvailability.available,
-              opensStoreListing: true,
-            ),
-          ),
-        ),
-        Future.value(_versionInfo()),
-      ],
-      actionResult: Future.value(
-        const FlutterFalconActionResult(
-          outcome: FlutterFalconActionOutcome.succeeded,
-          message: 'Google Play opened.',
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(_testApp(controller));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Open Google Play'), findsOneWidget);
-    final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
-    expect(tester.widget<FilledButton>(primaryAction).onPressed, isNotNull);
-
-    await tester.ensureVisible(primaryAction);
-    await tester.tap(primaryAction);
-    await tester.pumpAndSettle();
-
-    expect(controller.actionCalls, 1);
-    expect(find.text('Google Play opened.'), findsNWidgets(2));
   });
 
   testWidgets('uses the package-selected hosted APK update action', (
@@ -247,7 +171,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Android app update available'), findsOneWidget);
-    expect(find.text('Download APK update'), findsOneWidget);
+    expect(find.text('Download and replace APK'), findsOneWidget);
     final falconDelivery = tester.widget<CheckboxListTile>(
       find.byKey(const Key('falcon-patch-delivery-checkbox')),
     );
@@ -258,11 +182,11 @@ void main() {
     expect(falconDelivery.onChanged, isNull);
     expect(apkDelivery.value, isTrue);
     expect(apkDelivery.onChanged, isNull);
-    final primaryAction = find.byKey(const Key('falcon-primary-action-button'));
-    expect(tester.widget<FilledButton>(primaryAction).onPressed, isNotNull);
+    final apkAction = find.byKey(const Key('apk-replace-button'));
+    expect(tester.widget<OutlinedButton>(apkAction).onPressed, isNotNull);
 
-    await tester.ensureVisible(primaryAction);
-    await tester.tap(primaryAction);
+    await tester.ensureVisible(apkAction);
+    await tester.tap(apkAction);
     await tester.pumpAndSettle();
 
     expect(controller.actionCalls, 1);
@@ -400,6 +324,14 @@ class _FakeFalconController implements FlutterFalconControllerApi {
   @override
   Future<FlutterFalconActionResult> runPrimaryAction(
     FlutterFalconVersionInfo info,
+  ) {
+    return runAction(info, info.primaryAction);
+  }
+
+  @override
+  Future<FlutterFalconActionResult> runAction(
+    FlutterFalconVersionInfo info,
+    FlutterFalconPrimaryAction action,
   ) {
     actionCalls += 1;
     return _actionResult;
