@@ -5,7 +5,7 @@
   "channel": "stable",
   "distributionProfile": "windows-direct",
   "version": "2.0.0",
-  "buildNumber": "53",
+  "buildNumber": "54",
   "architectures": ["x64"],
   "minimumOsVersion": "17763",
   "directPackageIdentity": "com.example.flutter_falcon_example",

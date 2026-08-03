@@ -5,7 +5,7 @@
   "channel": "stable",
   "distributionProfile": "android-play",
   "version": "2.0.0",
-  "buildNumber": "53",
+  "buildNumber": "54",
   "architectures": ["arm64-v8a", "armeabi-v7a", "x86_64"],
   "minimumOsVersion": "24",
   "storeListingId": "com.example.flutter_falcon_example_play",

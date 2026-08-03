@@ -22,7 +22,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('You are up to date'), findsOneWidget);
-    expect(find.text('2.0.0+53'), findsNWidgets(2));
+    expect(find.text('2.0.0+54'), findsNWidgets(2));
     expect(find.text('android-direct'), findsOneWidget);
     expect(find.text('No update'), findsOneWidget);
     expect(find.text('Check again'), findsWidgets);
@@ -238,7 +238,7 @@ FlutterFalconInstalledApp _installed(FlutterFalconDistributionProfile profile) {
     appId: flutterFalconExamplePubspecName,
     packageName: 'com.example.flutter_falcon_example',
     version: '2.0.0',
-    buildNumber: '53',
+    buildNumber: '54',
     platform: FlutterFalconPlatform.android,
     architecture: 'arm64-v8a',
     osVersion: 'Android 16',
