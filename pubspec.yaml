@@ -1,7 +1,7 @@
 name: flutter_falcon_example
 description: Minimal Flutter Falcon test app.
 publish_to: 'none'
-version: 2.0.0+49
+version: 2.0.0+50
 
 environment:
   sdk: ^3.7.0
@@ -12,37 +12,37 @@ dependencies:
   flutter_falcon:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 9fd1528
+      ref: da194e5
       path: flutter_falcon
   flutter_falcon_android_direct:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 9fd1528
+      ref: da194e5
       path: flutter_falcon_android_direct
   flutter_falcon_ios_app_store:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 9fd1528
+      ref: da194e5
       path: flutter_falcon_ios_app_store
   flutter_falcon_macos_app_store:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 9fd1528
+      ref: da194e5
       path: flutter_falcon_macos_app_store
   flutter_falcon_windows_direct:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 9fd1528
+      ref: da194e5
       path: flutter_falcon_windows_direct
   flutter_falcon_linux_flatpak:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 9fd1528
+      ref: da194e5
       path: flutter_falcon_linux_flatpak
   flutter_falcon_web_pwa:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 9fd1528
+      ref: da194e5
       path: flutter_falcon_web_pwa
   shared_preferences: ^2.3.2
 

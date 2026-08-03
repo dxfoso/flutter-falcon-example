@@ -6,7 +6,7 @@
   "channel": "stable",
   "distributionProfile": "web-pwa",
   "version": "2.0.0",
-  "buildNumber": "49",
+  "buildNumber": "50",
   "architectures": ["javascript"],
   "minimumOsVersion": "Evergreen browsers",
   "directPackageIdentity": "flutter-falcon-example-web"

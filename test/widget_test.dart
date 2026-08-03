@@ -22,7 +22,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('You are up to date'), findsOneWidget);
-    expect(find.text('2.0.0+49'), findsNWidgets(2));
+    expect(find.text('2.0.0+50'), findsNWidgets(2));
     expect(find.text('android-direct'), findsOneWidget);
     expect(find.text('No update'), findsOneWidget);
     expect(find.text('Check again'), findsWidgets);
@@ -238,7 +238,7 @@ FlutterFalconInstalledApp _installed(FlutterFalconDistributionProfile profile) {
     appId: flutterFalconExampleAppId,
     packageName: 'com.example.flutter_falcon_example',
     version: '2.0.0',
-    buildNumber: '49',
+    buildNumber: '50',
     platform: FlutterFalconPlatform.android,
     architecture: 'arm64-v8a',
     osVersion: 'Android 16',
@@ -248,14 +248,14 @@ FlutterFalconInstalledApp _installed(FlutterFalconDistributionProfile profile) {
 
 FlutterFalconUpdatePlan _directPlan() {
   return FlutterFalconUpdatePlan(
-    releaseId: 'android-direct-2.0.1-50',
+    releaseId: 'android-direct-2.0.1-51',
     appId: flutterFalconExampleAppId,
     platform: FlutterFalconPlatform.android,
     architecture: 'arm64-v8a',
     profile: FlutterFalconDistributionProfile.androidDirect,
     route: FlutterFalconDeliveryRoute.androidPackageInstaller,
-    sourceVersion: '2.0.0+49',
-    targetVersion: '2.0.1+50',
+    sourceVersion: '2.0.0+50',
+    targetVersion: '2.0.1+51',
     capabilities: const {
       FlutterFalconUpdateCapability.check,
       FlutterFalconUpdateCapability.start,
@@ -269,14 +269,14 @@ FlutterFalconUpdatePlan _directPlan() {
 
 FlutterFalconUpdatePlan _storePlan() {
   return FlutterFalconUpdatePlan(
-    releaseId: 'android-play-2.0.1-50',
+    releaseId: 'android-play-2.0.1-51',
     appId: flutterFalconExampleAppId,
     platform: FlutterFalconPlatform.android,
     architecture: 'arm64-v8a',
     profile: FlutterFalconDistributionProfile.androidPlay,
     route: FlutterFalconDeliveryRoute.googlePlay,
-    sourceVersion: '2.0.0+49',
-    targetVersion: '2.0.1+50',
+    sourceVersion: '2.0.0+50',
+    targetVersion: '2.0.1+51',
     capabilities: const {
       FlutterFalconUpdateCapability.check,
       FlutterFalconUpdateCapability.openStore,
