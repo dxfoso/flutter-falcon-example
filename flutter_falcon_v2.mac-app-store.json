@@ -6,7 +6,7 @@
   "channel": "stable",
   "distributionProfile": "mac-app-store",
   "version": "2.0.0",
-  "buildNumber": "50",
+  "buildNumber": "51",
   "architectures": ["x64", "arm64"],
   "minimumOsVersion": "12.0",
   "storeListingId": "com.example.flutterFalconExample",

@@ -74,8 +74,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon
-      ref: da194e5
-      resolved-ref: da194e52d1308c756c8a9148168caddad5e6352f
+      ref: "25d3467"
+      resolved-ref: "25d3467e5f92550741e3dd96f72e0c4664bb2434"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
@@ -83,8 +83,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon_android_play
-      ref: da194e5
-      resolved-ref: da194e52d1308c756c8a9148168caddad5e6352f
+      ref: "25d3467"
+      resolved-ref: "25d3467e5f92550741e3dd96f72e0c4664bb2434"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
@@ -92,8 +92,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_falcon_platform_interface
-      ref: da194e52d1308c756c8a9148168caddad5e6352f
-      resolved-ref: da194e52d1308c756c8a9148168caddad5e6352f
+      ref: "25d3467e5f92550741e3dd96f72e0c4664bb2434"
+      resolved-ref: "25d3467e5f92550741e3dd96f72e0c4664bb2434"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
