@@ -80,20 +80,20 @@ run_docker_validation() {
       flutter analyze
       flutter test
       for item in \
-        "android android-direct" \
-        "ios ios-app-store" \
-        "macos mac-app-store" \
-        "windows windows-direct" \
-        "linux linux-flatpak" \
-        "web web-pwa"; do
+        "android apk" \
+        "ios ipa" \
+        "macos app" \
+        "windows portable" \
+        "linux flatpak" \
+        "web web"; do
         set -- $item
         dart run flutter_falcon:flutter_falcon_v2_prebuild \
           --project . --platform "$1" \
-          --build-manifest "flutter_falcon_v2.$2.json"
+          --artifact-type "$2"
       done
       dart run flutter_falcon:flutter_falcon_v2_prebuild \
         --project . --platform android \
-        --build-manifest flutter_falcon_v2.android-direct.json
+        --artifact-type apk
       flutter build apk --release \
         --dart-define-from-file=.dart_tool/flutter_falcon_v2_defines.json
       cd apps/android_play
@@ -102,7 +102,7 @@ run_docker_validation() {
       flutter test
       dart run flutter_falcon:flutter_falcon_v2_prebuild \
         --project . --platform android \
-        --build-manifest flutter_falcon_v2.android-play.json
+        --artifact-type aab
       flutter build appbundle --release \
         --dart-define-from-file=.dart_tool/flutter_falcon_v2_defines.json
     ' >"$artifact_dir/docker-build.log" 2>&1

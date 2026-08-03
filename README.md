@@ -5,9 +5,9 @@ FlutterFalcon v2 example applications connected to
 
 ## Distribution targets
 
-The root Flutter application is the cross-platform target. It contains one
-adapter for each operating system and one profile-named build manifest for
-each artifact:
+The root Flutter application is the cross-platform target. Its pubspec contains
+one adapter for each operating system; FlutterFalcon derives each profile and
+generates disposable build metadata under `.dart_tool`:
 
 - Android Direct APK
 - iOS App Store
@@ -47,12 +47,12 @@ flutter pub get
 dart run flutter_falcon:flutter_falcon_v2_prebuild \
   --project . \
   --platform android \
-  --build-manifest flutter_falcon_v2.android-direct.json
+  --artifact-type apk
 flutter build apk --release \
   --dart-define-from-file=.dart_tool/flutter_falcon_v2_defines.json
 ```
 
-Replace the platform and manifest for iOS, macOS, Windows, Linux, or Web. The
+Replace the platform and artifact type for iOS, macOS, Windows, Linux, or Web. The
 prebuild fails before compilation if the selected profile, OS adapter, version,
 route identity, architecture, minimum OS, or signing declaration drifts.
 
@@ -64,7 +64,7 @@ flutter pub get
 dart run flutter_falcon:flutter_falcon_v2_prebuild \
   --project . \
   --platform android \
-  --build-manifest flutter_falcon_v2.android-play.json
+  --artifact-type aab
 flutter build appbundle --release \
   --dart-define-from-file=.dart_tool/flutter_falcon_v2_defines.json
 ```
