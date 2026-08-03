@@ -23,7 +23,7 @@ void main() {
           'flutter_falcon',
           'flutter_falcon_android_play',
         },
-        pubspecVersion: '2.0.0+51',
+        pubspecVersion: '2.0.0+52',
       ),
       returnsNormally,
     );

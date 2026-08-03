@@ -6,7 +6,7 @@
   "channel": "stable",
   "distributionProfile": "linux-flatpak",
   "version": "2.0.0",
-  "buildNumber": "51",
+  "buildNumber": "52",
   "architectures": ["x64"],
   "minimumOsVersion": "glibc-2.35",
   "storeListingId": "com.example.flutter_falcon_example",
