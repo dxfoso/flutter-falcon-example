@@ -11,7 +11,10 @@ void main() {
               File('flutter_falcon_v2.android-play.json').readAsStringSync(),
             )
             as Map<String, dynamic>;
-    final configuration = FlutterFalconV2BuildConfiguration.fromJson(manifest);
+    final configuration = FlutterFalconV2BuildConfiguration.fromJson(
+      manifest,
+      appId: 'flutter_falcon_example_play',
+    );
 
     expect(configuration.profile, FlutterFalconDistributionProfile.androidPlay);
     expect(configuration.storeListingId, isNotEmpty);
@@ -23,7 +26,7 @@ void main() {
           'flutter_falcon',
           'flutter_falcon_android_play',
         },
-        pubspecVersion: '2.0.0+52',
+        pubspecVersion: '2.0.0+53',
       ),
       returnsNormally,
     );

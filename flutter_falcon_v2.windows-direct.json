@@ -1,12 +1,11 @@
 {
   "schemaVersion": "flutter_falcon_build_v2",
   "protocolVersion": 2,
-  "appId": "flutter-falcon-example",
   "serverUrl": "https://flutterfalcon.com",
   "channel": "stable",
   "distributionProfile": "windows-direct",
   "version": "2.0.0",
-  "buildNumber": "52",
+  "buildNumber": "53",
   "architectures": ["x64"],
   "minimumOsVersion": "17763",
   "directPackageIdentity": "com.example.flutter_falcon_example",

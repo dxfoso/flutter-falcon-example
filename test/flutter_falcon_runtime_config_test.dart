@@ -5,13 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('shared v2 application identity uses the public hosted service', () {
     const configuration = FlutterFalconV2Configuration(
-      appId: flutterFalconExampleAppId,
+      appId: flutterFalconExamplePubspecName,
       serverUrl: flutterFalconServerUrl,
       profile: FlutterFalconDistributionProfile.androidDirect,
       channel: flutterFalconChannel,
     );
 
-    expect(configuration.appId, 'flutter-falcon-example');
+    expect(configuration.appId, 'flutter_falcon_example');
     expect(configuration.serverUrl, 'https://flutterfalcon.com');
     expect(configuration.channel, 'stable');
     expect(
@@ -22,7 +22,7 @@ void main() {
 
   test('v2 configuration never falls back to another platform route', () {
     const configuration = FlutterFalconV2Configuration(
-      appId: flutterFalconExampleAppId,
+      appId: flutterFalconExamplePubspecName,
       serverUrl: flutterFalconServerUrl,
       profile: FlutterFalconDistributionProfile.androidDirect,
     );

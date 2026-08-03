@@ -36,7 +36,6 @@ class _UpdatePage extends StatefulWidget {
 class _UpdatePageState extends State<_UpdatePage> {
   late final FlutterFalconV2Configuration _configuration =
       FlutterFalconV2Configuration.fromEnvironment(
-        appId: 'flutter-falcon-example',
         serverUrl: _serverUrl,
         storeListingId: const String.fromEnvironment('FLUTTER_FALCON_STORE_ID'),
       );

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_falcon/flutter_falcon.dart';
 
-const flutterFalconExampleAppId = 'flutter-falcon-example';
+const flutterFalconExamplePubspecName = 'flutter_falcon_example';
 const flutterFalconServerUrl = 'https://flutterfalcon.com';
 const flutterFalconChannel = 'stable';
 
@@ -36,7 +36,6 @@ class HostedFlutterFalconExampleUpdateClient
     required bool captureRuntimeLogs,
   }) {
     final configuration = FlutterFalconV2Configuration.fromEnvironment(
-      appId: flutterFalconExampleAppId,
       serverUrl: flutterFalconServerUrl,
       channel: flutterFalconChannel,
       storeListingId: const String.fromEnvironment('FLUTTER_FALCON_STORE_ID'),

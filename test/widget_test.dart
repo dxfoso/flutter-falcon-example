@@ -22,7 +22,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('You are up to date'), findsOneWidget);
-    expect(find.text('2.0.0+52'), findsNWidgets(2));
+    expect(find.text('2.0.0+53'), findsNWidgets(2));
     expect(find.text('android-direct'), findsOneWidget);
     expect(find.text('No update'), findsOneWidget);
     expect(find.text('Check again'), findsWidgets);
@@ -171,7 +171,7 @@ class _FakeUpdateClient implements FlutterFalconExampleUpdateClient {
   @override
   FlutterFalconV2Configuration get configuration =>
       FlutterFalconV2Configuration(
-        appId: flutterFalconExampleAppId,
+        appId: flutterFalconExamplePubspecName,
         serverUrl: flutterFalconServerUrl,
         profile: profile,
         channel: flutterFalconChannel,
@@ -235,10 +235,10 @@ FlutterFalconUpdateInfo _info({
 FlutterFalconInstalledApp _installed(FlutterFalconDistributionProfile profile) {
   return FlutterFalconInstalledApp(
     clientId: 'client-example-0001',
-    appId: flutterFalconExampleAppId,
+    appId: flutterFalconExamplePubspecName,
     packageName: 'com.example.flutter_falcon_example',
     version: '2.0.0',
-    buildNumber: '52',
+    buildNumber: '53',
     platform: FlutterFalconPlatform.android,
     architecture: 'arm64-v8a',
     osVersion: 'Android 16',
@@ -249,7 +249,7 @@ FlutterFalconInstalledApp _installed(FlutterFalconDistributionProfile profile) {
 FlutterFalconUpdatePlan _directPlan() {
   return FlutterFalconUpdatePlan(
     releaseId: 'android-direct-2.0.1-51',
-    appId: flutterFalconExampleAppId,
+    appId: flutterFalconExamplePubspecName,
     platform: FlutterFalconPlatform.android,
     architecture: 'arm64-v8a',
     profile: FlutterFalconDistributionProfile.androidDirect,
@@ -270,7 +270,7 @@ FlutterFalconUpdatePlan _directPlan() {
 FlutterFalconUpdatePlan _storePlan() {
   return FlutterFalconUpdatePlan(
     releaseId: 'android-play-2.0.1-51',
-    appId: flutterFalconExampleAppId,
+    appId: flutterFalconExamplePubspecName,
     platform: FlutterFalconPlatform.android,
     architecture: 'arm64-v8a',
     profile: FlutterFalconDistributionProfile.androidPlay,
