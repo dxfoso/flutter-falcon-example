@@ -1,84 +1,82 @@
 # flutter-falcon-example
 
-A minimal Flutter app with a production-connected **Check for updates** page for
-Flutter Falcon.
+FlutterFalcon v2 example applications connected to
+`https://flutterfalcon.com` on the `stable` channel.
 
-The app uses its own `pubspec.yaml` as the deployable target and includes
-`flutter_falcon` only as a Git package dependency. Runtime configuration is
-defined directly in Dart—there is no separate runtime-config asset, legacy
-adapter, or fallback reader.
+## Distribution targets
 
-## Runtime stream
+The root Flutter application is the cross-platform target. It contains one
+adapter for each operating system and one profile-named build manifest for
+each artifact:
 
-- Server: `https://flutterfalcon.com`
-- Configured app ID: `flutter-falcon-example`
-- Channel: `stable`
-- Saved public build variable:
-  `FLUTTER_FALCON_SERVER_URL=https://flutterfalcon.com`
+- Android Direct APK
+- iOS App Store
+- macOS App Store
+- Windows Direct App Installer
+- Linux Flatpak
+- Web PWA
 
-`FlutterFalconController` derives the installed version and build number from
-package metadata and detects the runtime platform. Hosted builds may override
-the effective app ID for tenant isolation, so the Updates page displays both
-the effective app ID and its source in the request diagnostics.
+Android Play is a separate application target at `apps/android_play`. Android
+Play and Android Direct cannot share one pubspec because that would compile
+store and package-installer code into the same Android dependency graph.
 
-`FlutterFalconUpdateSession` owns check/action/reload orchestration, concurrency
-locking, retry state, typed action outcomes, and semantic status presentation.
-It also selects Falcon patching, Google Play in-app update, Google Play listing,
-or App Store listing as the primary action. The app uses the package-provided
-label and action and keeps only navigation and Material rendering.
+No target contains the old patch runtime, sidecar, v1 endpoints, route
+fallbacks, publish credentials, or signing secrets.
 
-The app never contains publish tokens, registry credentials, or other secrets.
+## Runtime behavior
 
-## Update page
+Each app uses `FlutterFalconUpdateController` with the v2 HTTP release source,
+native method-channel adapter, and per-client event reporter. The UI enables an
+action only when the exact-profile update plan declares its capability:
 
-The `/updates` route opens on launch and is also reachable from the app's home
-page. It:
+- Direct targets start the signed operating-system installer route.
+- Store targets open only their official store route.
+- Web asks only the active service worker to update.
 
-- checks automatically on page load and supports manual checks and retry;
-- shows installed, active runtime, and latest hosted versions;
-- shows check status, explanation, effective app ID, runtime state, and full
-  failure details;
-- distinguishes current, available, applying, boot confirmation, success, and
-  failure states;
-- disables repeated actions while a request is running;
-- calls the package's real primary action for Falcon, boot-confirmation, or
-  platform-store updates, reports the returned message, and reloads status.
+The update page displays the installed and target versions, platform, profile,
+route, architecture, progress, full redacted failure reason, and client
+diagnostics. Optional application-log reporting is off by default and requires
+explicit consent inside the app.
 
-## Run and verify
+## Validate the root target
 
-```powershell
+Run prebuild for the artifact being built:
+
+```sh
 flutter pub get
-flutter analyze
-flutter test
-flutter run -d windows
+dart run flutter_falcon:flutter_falcon_v2_prebuild \
+  --project . \
+  --platform android \
+  --build-manifest flutter_falcon_v2.android-direct.json
+flutter build apk --release \
+  --dart-define-from-file=.dart_tool/flutter_falcon_v2_defines.json
 ```
 
-Passing widget or API tests are not an end-to-end update result. An end-to-end
-claim requires launching the shipped artifact on its real target platform,
-opening the update page, and exercising the real runtime action.
+Replace the platform and manifest for iOS, macOS, Windows, Linux, or Web. The
+prebuild fails before compilation if the selected profile, OS adapter, version,
+route identity, architecture, minimum OS, or signing declaration drifts.
 
-## Operator create-update flow
+## Validate Android Play
 
-1. Build and install the first Falcon-ready base app.
-2. Make the next app change and build the newer version.
-3. Publish and promote the hosted Falcon update for the same effective app ID,
-   runtime platform, and `stable` channel.
-4. Open the already installed base app and trigger its update check.
-
-Publish and promote from a trusted operator environment (never from the app):
-
-```text
-flutter_falcon publish-index --server-url https://flutterfalcon.com --publish-token <publish> --index flutter_falcon_update_index.json
-flutter_falcon promote-update --server-url https://flutterfalcon.com --publish-token <publish> --app-id flutter-falcon-example --platform <platform-id> --channel stable --target-version <new-version>
+```sh
+cd apps/android_play
+flutter pub get
+dart run flutter_falcon:flutter_falcon_v2_prebuild \
+  --project . \
+  --platform android \
+  --build-manifest flutter_falcon_v2.android-play.json
+flutter build appbundle --release \
+  --dart-define-from-file=.dart_tool/flutter_falcon_v2_defines.json
 ```
 
-Operator check URL:
+The Play AAB must not contain `REQUEST_INSTALL_PACKAGES`, FileProvider, APK
+MIME handling, or the Android Direct adapter. The Direct APK must contain the
+installer permission and adapter and must not contain Google Play update code.
 
-```text
-https://flutterfalcon.com/updates?appId=flutter-falcon-example&platform=<platform-id>&channel=stable&baseVersion=<installed-base-version>
-```
+## Verification boundary
 
-The effective hosted app ID must stay stable for the app stream. Platform,
-channel, and installed base version must match the published update. Native
-runner, plugin, permission, dependency, signing, or installer changes require a
-new full package build rather than a Falcon patch.
+Widget, contract, and artifact-isolation tests are not end-to-end update tests.
+End-to-end completion requires installing the shipped base artifact on its real
+target platform and completing its declared store or signed-installer route.
+Store-track acceptance additionally requires the real store application,
+publishing account, signing identity, and test device.

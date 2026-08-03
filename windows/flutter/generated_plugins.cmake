@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  flutter_falcon_windows_direct
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

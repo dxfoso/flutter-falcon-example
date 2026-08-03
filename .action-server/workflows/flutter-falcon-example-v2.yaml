@@ -1,0 +1,17 @@
+name: FlutterFalcon example v2
+"on":
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+  workflow_dispatch: {}
+  schedule:
+    - id: flutter-falcon-example-nightly
+      cron: "20 04 * * *"
+      ref: master
+jobs:
+  v2-example:
+    name: Validate isolated v2 example artifacts
+    runs-on: ubuntu-latest
+    run: .action-server/tasks/flutter-falcon-example-v2.sh
+    timeoutMinutes: 180

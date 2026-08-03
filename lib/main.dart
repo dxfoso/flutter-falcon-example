@@ -1,5 +1,6 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_falcon/flutter_falcon_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'check_for_updates_page.dart';
@@ -26,7 +27,7 @@ class FlutterFalconExampleApp extends StatefulWidget {
     this.initialRoute = CheckForUpdatesPage.routeName,
   });
 
-  final FlutterFalconControllerApi? updateController;
+  final FlutterFalconExampleUpdateClient? updateController;
   final bool captureRuntimeLogs;
   final String initialRoute;
 
@@ -37,15 +38,29 @@ class FlutterFalconExampleApp extends StatefulWidget {
 
 class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
   late bool _captureRuntimeLogs = widget.captureRuntimeLogs;
-
-  FlutterFalconControllerApi get _updateController =>
+  late FlutterFalconExampleUpdateClient _updateController =
       widget.updateController ??
       createFalconController(captureRuntimeLogs: _captureRuntimeLogs);
 
+  bool get _ownsController => widget.updateController == null;
+
   Future<void> _setCaptureRuntimeLogs(bool enabled) async {
-    setState(() => _captureRuntimeLogs = enabled);
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool(_captureRuntimeLogsPreference, enabled);
+    if (!mounted) return;
+    if (_ownsController) {
+      await _updateController.dispose();
+      _updateController = createFalconController(captureRuntimeLogs: enabled);
+    }
+    if (mounted) setState(() => _captureRuntimeLogs = enabled);
+  }
+
+  @override
+  void dispose() {
+    if (_ownsController) {
+      unawaited(_updateController.dispose());
+    }
+    super.dispose();
   }
 
   @override
@@ -81,7 +96,7 @@ class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
             ),
         CheckForUpdatesPage.routeName:
             (context) => CheckForUpdatesPage(
-              key: ValueKey(_captureRuntimeLogs),
+              key: ValueKey((_captureRuntimeLogs, _updateController)),
               controller: _updateController,
               captureRuntimeLogs: _captureRuntimeLogs,
               onCaptureRuntimeLogsChanged: _setCaptureRuntimeLogs,

@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "flutter_falcon_build_v2",
+  "protocolVersion": 2,
+  "appId": "flutter-falcon-example",
+  "serverUrl": "https://flutterfalcon.com",
+  "channel": "stable",
+  "distributionProfile": "ios-app-store",
+  "version": "2.0.0",
+  "buildNumber": "49",
+  "architectures": ["arm64"],
+  "minimumOsVersion": "15.0",
+  "storeListingId": "0000000000",
+  "signingSecretRef": "signing/flutter-falcon-example-ios-app-store"
+}

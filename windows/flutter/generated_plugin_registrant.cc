@@ -6,6 +6,9 @@
 
 #include "generated_plugin_registrant.h"
 
+#include <flutter_falcon_windows_direct/flutter_falcon_windows_direct_plugin_c_api.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
+  FlutterFalconWindowsDirectPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FlutterFalconWindowsDirectPluginCApi"));
 }

@@ -6,11 +6,11 @@ product
 
 ## Users
 
-Flutter Falcon application operators validating and applying hosted runtime updates from an already installed app. They need to understand the installed build, the active runtime, the hosted update stream, and the result of each real runtime action.
+FlutterFalcon application operators validating and applying exact-profile updates from an already installed app. They need to understand the installed build, selected distribution route, available release, and result of each real native action.
 
 ## Product Purpose
 
-Provide a small, trustworthy reference app for checking, applying, and confirming Flutter Falcon updates. Success means an operator can identify the effective hosted app stream, distinguish a full hosted release from an installable patch, take the correct primary action, and diagnose failures without exposing credentials.
+Provide a small, trustworthy reference app for checking, applying, and confirming FlutterFalcon v2 updates. Success means an operator can identify the exact platform profile, use only the declared store or signed-installer route, and diagnose failures without exposing credentials.
 
 ## Brand Personality
 
@@ -23,7 +23,7 @@ Avoid decorative dashboards, ambiguous success claims, hidden request context, c
 ## Design Principles
 
 - Make the current update state and next safe action immediately clear.
-- Report controller and runtime facts verbatim before interpreting them.
+- Report controller and native-adapter facts verbatim before interpreting them.
 - Treat progress, success, and failure as distinct states with honest feedback.
 - Keep operator diagnostics available without overwhelming the primary workflow.
 - Prefer familiar Material controls and predictable navigation.

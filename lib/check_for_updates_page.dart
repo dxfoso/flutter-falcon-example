@@ -1,74 +1,21 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_falcon/flutter_falcon_api.dart';
+import 'package:flutter_falcon/flutter_falcon.dart';
 
 import 'flutter_falcon_updates.dart';
-
-class _UpdateMessageText {
-  const _UpdateMessageText({required this.title, required this.detail});
-
-  final String title;
-  final String detail;
-}
-
-_UpdateMessageText _updateMessageText(
-  BuildContext context,
-  FlutterFalconUpdatePresentation presentation,
-) {
-  final arabic = Localizations.localeOf(context).languageCode == 'ar';
-  if (!arabic) {
-    return _UpdateMessageText(
-      title: presentation.title,
-      detail: presentation.detail,
-    );
-  }
-  return switch (presentation.code) {
-    'flutter_falcon.update.up_to_date' => const _UpdateMessageText(
-      title: 'تطبيقك محدّث',
-      detail: 'لا يوجد تحديث متوافق متاح لهذا الإصدار من التطبيق.',
-    ),
-    'flutter_falcon.update.available' => const _UpdateMessageText(
-      title: 'يتوفر تحديث',
-      detail: 'يتوفر تحديث متوافق ويمكن تنزيله الآن.',
-    ),
-    'flutter_falcon.update.checking' => const _UpdateMessageText(
-      title: 'جارٍ البحث عن تحديثات',
-      detail: 'يتم تحميل حالة التحديث من الجهاز والخادم.',
-    ),
-    'flutter_falcon.update.google_play_available' => const _UpdateMessageText(
-      title: 'يتوفر تحديث على Google Play',
-      detail: 'يتوفر إصدار كامل أحدث ويمكن تثبيته من Google Play.',
-    ),
-    'flutter_falcon.update.apple_app_store_available' =>
-      const _UpdateMessageText(
-        title: 'يتوفر تحديث على App Store',
-        detail: 'يتوفر إصدار كامل أحدث ويمكن فتحه في App Store.',
-      ),
-    'flutter_falcon.update.full_release_available' => const _UpdateMessageText(
-      title: 'يتوفر إصدار جديد من التطبيق',
-      detail: 'يوجد إصدار كامل أحدث، ولكن لا يتوفر مسار تحديث تلقائي.',
-    ),
-    'flutter_falcon.update.store_check_failed' => const _UpdateMessageText(
-      title: 'تعذر التحقق من تحديث المتجر',
-      detail: 'لم يتمكن متجر المنصة من تأكيد حالة التحديث.',
-    ),
-    _ => _UpdateMessageText(
-      title: presentation.title,
-      detail: presentation.detail,
-    ),
-  };
-}
 
 class CheckForUpdatesPage extends StatefulWidget {
   const CheckForUpdatesPage({
     super.key,
-    this.controller = falconController,
+    required this.controller,
     this.captureRuntimeLogs = false,
     this.onCaptureRuntimeLogsChanged,
   });
 
   static const routeName = '/updates';
 
-  final FlutterFalconControllerApi controller;
+  final FlutterFalconExampleUpdateClient controller;
   final bool captureRuntimeLogs;
   final ValueChanged<bool>? onCaptureRuntimeLogsChanged;
 
@@ -77,305 +24,296 @@ class CheckForUpdatesPage extends StatefulWidget {
 }
 
 class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
-  late final FlutterFalconUpdateSession _session;
+  StreamSubscription<FlutterFalconUpdateEvent>? _subscription;
+  FlutterFalconUpdateInfo? _info;
+  FlutterFalconUpdateEvent? _event;
+  String? _failure;
+  bool _checking = false;
+  bool _acting = false;
+
+  bool get _busy => _checking || _acting;
 
   @override
   void initState() {
     super.initState();
-    _session = FlutterFalconUpdateSession(controller: widget.controller)
-      ..addListener(_sessionChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _session.check(clearActionResult: false);
-      }
-    });
+    _listen();
+    unawaited(_check());
   }
 
-  void _sessionChanged() {
-    if (mounted) {
-      setState(() {});
+  @override
+  void didUpdateWidget(CheckForUpdatesPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.controller, widget.controller)) {
+      unawaited(_subscription?.cancel());
+      _info = null;
+      _event = null;
+      _failure = null;
+      _listen();
+      unawaited(_check());
+    }
+  }
+
+  void _listen() {
+    _subscription = widget.controller.events.listen(
+      (event) {
+        if (!mounted) return;
+        setState(() {
+          _event = event;
+          if (event.state == FlutterFalconUpdateState.failed) {
+            _failure = event.reason;
+          }
+        });
+      },
+      onError: (Object error) {
+        if (!mounted) return;
+        setState(() => _failure = error.toString());
+      },
+    );
+  }
+
+  Future<void> _check() async {
+    if (_busy) return;
+    setState(() {
+      _checking = true;
+      _failure = null;
+    });
+    try {
+      final info = await widget.controller.checkForUpdate();
+      if (!mounted) return;
+      setState(() => _info = info);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _failure = error.toString());
+    } finally {
+      if (mounted) setState(() => _checking = false);
+    }
+  }
+
+  Future<void> _runAction(Future<void> Function() action) async {
+    if (_busy) return;
+    setState(() {
+      _acting = true;
+      _failure = null;
+    });
+    try {
+      await action();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _failure = error.toString());
+    } finally {
+      if (mounted) setState(() => _acting = false);
     }
   }
 
   @override
   void dispose() {
-    _session
-      ..removeListener(_sessionChanged)
-      ..dispose();
+    unawaited(_subscription?.cancel());
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final sessionState = _session.state;
-    final info = sessionState.info;
-    final status = sessionState.presentation;
-
+    final compact = MediaQuery.sizeOf(context).width < 560;
+    final info = _info;
+    final plan = info?.plan;
+    final state = _visibleState;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('2  BXXXBBBB Check for updates'),
+        title: const Text('Check for updates'),
         actions: [
           IconButton(
             key: const Key('check-updates-icon-button'),
-            onPressed: sessionState.isBusy ? null : () => _session.check(),
+            onPressed: _busy ? null : _check,
             tooltip: 'Check again',
             icon: const Icon(Icons.refresh),
           ),
-          const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, viewport) {
-            final compact = viewport.maxWidth < 600;
-            final sectionGap = compact ? 12.0 : 24.0;
-            return Align(
-              alignment: Alignment.topCenter,
+        child: SelectionArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(compact ? 16 : 24),
+            child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 760),
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(
-                    compact ? 12 : 20,
-                    compact ? 8 : 16,
-                    compact ? 12 : 20,
-                    compact ? 24 : 40,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (!compact) ...[
-                        Text(
-                          'Flutter Falcon updates',
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Review the installed runtime and apply verified '
-                          'updates from the stable channel.',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                      ],
-                      Semantics(
-                        liveRegion: true,
-                        label: _updateMessageText(context, status).title,
-                        child: _StatusPanel(
-                          presentation: status,
-                          showProgress: sessionState.showProgress,
-                          compact: compact,
-                        ),
-                      ),
-                      if (sessionState.actionResult?.succeeded ?? false) ...[
-                        const SizedBox(height: 8),
-                        _FeedbackPanel(
-                          message: sessionState.actionResult!.message,
-                          success: true,
-                        ),
-                      ],
-                      if (sessionState.failureMessage != null) ...[
-                        const SizedBox(height: 8),
-                        _FailurePanel(
-                          message: sessionState.failureMessage!,
-                          statusCode: info?.failureStatusCode,
-                          responseBody: info?.failureResponseBody,
-                          onRetry:
-                              sessionState.isBusy
-                                  ? null
-                                  : () => _session.check(),
-                        ),
-                      ],
-                      if (info != null) ...[
-                        SizedBox(height: sectionGap),
-                        _VersionSummary(info: info, compact: compact),
-                        SizedBox(height: sectionGap),
-                        _UpdateDeliverySummary(info: info, compact: compact),
-                        SizedBox(height: sectionGap),
-                        _RuntimeSummary(info: info, compact: compact),
-                      ],
-                      SizedBox(height: sectionGap),
-                      _ActionBar(
-                        info: info,
-                        busy: sessionState.isBusy,
-                        compact: compact,
-                        onCheck: () => _session.check(),
-                        onFalconUpdate:
-                            () => _session.runAction(
-                              info?.requiresBootConfirmation ?? false
-                                  ? FlutterFalconPrimaryAction.confirmBoot
-                                  : FlutterFalconPrimaryAction.applyUpdate,
-                            ),
-                        onApkUpdate:
-                            () => _session.runAction(
-                              FlutterFalconPrimaryAction.installApk,
-                            ),
-                      ),
-                      if (info != null) ...[
-                        SizedBox(height: sectionGap),
-                        _Diagnostics(info: info, compact: compact),
-                      ],
-                      if (widget.onCaptureRuntimeLogsChanged != null) ...[
-                        SizedBox(height: sectionGap),
-                        SwitchListTile.adaptive(
-                          value: widget.captureRuntimeLogs,
-                          onChanged: widget.onCaptureRuntimeLogsChanged,
-                          title: const Text('Send diagnostic logs'),
-                          subtitle: const Text(
-                            'Optional redacted logs help diagnose app failures.',
-                          ),
-                        ),
-                      ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _StatusPanel(
+                      state: state,
+                      reason: _failure ?? _event?.reason ?? info?.reason,
+                      progress: _event?.progress,
+                    ),
+                    if (info != null) ...[
+                      const SizedBox(height: 16),
+                      _VersionSummary(info: info),
+                      const SizedBox(height: 16),
+                      _RouteSummary(info: info),
                     ],
-                  ),
+                    if (_failure != null) ...[
+                      const SizedBox(height: 16),
+                      _FailurePanel(message: _failure!, onRetry: _check),
+                    ],
+                    const SizedBox(height: 16),
+                    _ActionPanel(
+                      info: info,
+                      busy: _busy,
+                      compact: compact,
+                      onCheck: _check,
+                      onStart:
+                          plan?.capabilities.contains(
+                                    FlutterFalconUpdateCapability.start,
+                                  ) ==
+                                  true
+                              ? () => _runAction(
+                                () => widget.controller.startUpdate(info!),
+                              )
+                              : null,
+                      onStore:
+                          plan?.capabilities.contains(
+                                    FlutterFalconUpdateCapability.openStore,
+                                  ) ==
+                                  true
+                              ? () => _runAction(
+                                () => widget.controller.openStore(info!),
+                              )
+                              : null,
+                      onCancel:
+                          plan?.capabilities.contains(
+                                    FlutterFalconUpdateCapability.cancel,
+                                  ) ==
+                                  true
+                              ? () => _runAction(
+                                () => widget.controller.cancelUpdate(info!),
+                              )
+                              : null,
+                    ),
+                    if (info != null) ...[
+                      const SizedBox(height: 16),
+                      _Diagnostics(
+                        info: info,
+                        configuration: widget.controller.configuration,
+                      ),
+                    ],
+                    if (widget.onCaptureRuntimeLogsChanged != null) ...[
+                      const SizedBox(height: 12),
+                      SwitchListTile.adaptive(
+                        value: widget.captureRuntimeLogs,
+                        onChanged: widget.onCaptureRuntimeLogsChanged,
+                        title: const Text('Send diagnostic logs'),
+                        subtitle: const Text(
+                          'Optional redacted application logs. Error reports '
+                          'remain minimized and automatic.',
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            );
-          },
+            ),
+          ),
         ),
       ),
     );
+  }
+
+  FlutterFalconUpdateState get _visibleState {
+    if (_failure != null) return FlutterFalconUpdateState.failed;
+    if (_checking) return FlutterFalconUpdateState.checking;
+    if (_event != null) return _event!.state;
+    return _info?.state ?? FlutterFalconUpdateState.unavailable;
   }
 }
 
 class _StatusPanel extends StatelessWidget {
   const _StatusPanel({
-    required this.presentation,
-    required this.showProgress,
-    required this.compact,
+    required this.state,
+    required this.reason,
+    required this.progress,
   });
 
-  final FlutterFalconUpdatePresentation presentation;
-  final bool showProgress;
-  final bool compact;
+  final FlutterFalconUpdateState state;
+  final String? reason;
+  final double? progress;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final (background, foreground) = switch (presentation.tone) {
-      FlutterFalconStatusTone.failure => (
-        colors.errorContainer,
-        colors.onErrorContainer,
-      ),
-      FlutterFalconStatusTone.success || FlutterFalconStatusTone.stable => (
-        colors.tertiaryContainer,
-        colors.onTertiaryContainer,
-      ),
-      FlutterFalconStatusTone.available ||
-      FlutterFalconStatusTone.staged ||
-      FlutterFalconStatusTone.warning ||
-      FlutterFalconStatusTone
-          .rollback => (colors.secondaryContainer, colors.onSecondaryContainer),
-      FlutterFalconStatusTone.neutral => (
-        colors.primaryContainer,
-        colors.onPrimaryContainer,
-      ),
-    };
-    final icon = _iconForStatusGlyph(presentation.glyph);
-    return Container(
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(compact ? 14 : 20),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(icon, color: foreground, size: compact ? 24 : 28),
-                SizedBox(width: compact ? 12 : 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _updateMessageText(context, presentation).title,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: foreground,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      SizedBox(height: compact ? 3 : 6),
-                      Text(
-                        _updateMessageText(context, presentation).detail,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: foreground,
-                          height: compact ? 1.25 : 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SelectableText(
-                        presentation.code,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.labelSmall?.copyWith(color: foreground),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        presentation.explanation,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.bodySmall?.copyWith(color: foreground),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (showProgress)
-            LinearProgressIndicator(
-              minHeight: 3,
-              color: foreground,
-              backgroundColor: background,
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FeedbackPanel extends StatelessWidget {
-  const _FeedbackPanel({required this.message, required this.success});
-
-  final String message;
-  final bool success;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
+    final failed = state == FlutterFalconUpdateState.failed;
+    final current = state == FlutterFalconUpdateState.current;
+    final background =
+        failed
+            ? colors.errorContainer
+            : current
+            ? colors.tertiaryContainer
+            : colors.primaryContainer;
     final foreground =
-        success ? colors.onTertiaryContainer : colors.onErrorContainer;
+        failed
+            ? colors.onErrorContainer
+            : current
+            ? colors.onTertiaryContainer
+            : colors.onPrimaryContainer;
+    final progressValue = progress?.clamp(0.0, 1.0).toDouble();
     return Semantics(
       liveRegion: true,
       child: Container(
-        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: success ? colors.tertiaryContainer : colors.errorContainer,
-          borderRadius: BorderRadius.circular(12),
+          color: background,
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Row(
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(
-              success ? Icons.task_alt : Icons.info_outline,
-              color: foreground,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: TextStyle(
-                  color: foreground,
-                  fontWeight: FontWeight.w600,
-                ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(_stateIcon(state), color: foreground, size: 30),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _stateTitle(state),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.headlineSmall?.copyWith(
+                            color: foreground,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        SelectableText(
+                          reason?.trim().isNotEmpty == true
+                              ? reason!
+                              : _stateDescription(state),
+                          style: TextStyle(color: foreground, height: 1.35),
+                        ),
+                        if (progressValue != null) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            '${(progressValue * 100).round()}%',
+                            style: TextStyle(
+                              color: foreground,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
+            if (_stateIsActive(state))
+              LinearProgressIndicator(
+                value: progressValue,
+                color: foreground,
+                backgroundColor: background,
+              ),
           ],
         ),
       ),
@@ -383,18 +321,83 @@ class _FeedbackPanel extends StatelessWidget {
   }
 }
 
+class _VersionSummary extends StatelessWidget {
+  const _VersionSummary({required this.info});
+
+  final FlutterFalconUpdateInfo info;
+
+  @override
+  Widget build(BuildContext context) {
+    final installed = info.installed.displayVersion;
+    final target = info.plan?.targetVersion ?? installed;
+    return Row(
+      children: [
+        Expanded(child: _Fact(label: 'Installed', value: installed)),
+        const SizedBox(width: 12),
+        Expanded(child: _Fact(label: 'Available', value: target)),
+      ],
+    );
+  }
+}
+
+class _RouteSummary extends StatelessWidget {
+  const _RouteSummary({required this.info});
+
+  final FlutterFalconUpdateInfo info;
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = info.plan;
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        _Fact(label: 'Platform', value: info.installed.platform.name),
+        _Fact(label: 'Profile', value: info.installed.profile.wireName),
+        _Fact(label: 'Route', value: plan?.route.name ?? 'No update'),
+        _Fact(label: 'Architecture', value: info.installed.architecture),
+      ],
+    );
+  }
+}
+
+class _Fact extends StatelessWidget {
+  const _Fact({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 130),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.labelMedium),
+          const SizedBox(height: 4),
+          SelectableText(
+            value,
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _FailurePanel extends StatelessWidget {
-  const _FailurePanel({
-    required this.message,
-    required this.statusCode,
-    required this.responseBody,
-    required this.onRetry,
-  });
+  const _FailurePanel({required this.message, required this.onRetry});
 
   final String message;
-  final int? statusCode;
-  final String? responseBody;
-  final VoidCallback? onRetry;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -420,23 +423,6 @@ class _FailurePanel extends StatelessWidget {
             message,
             style: TextStyle(color: colors.onErrorContainer),
           ),
-          if (statusCode != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              'HTTP status: $statusCode',
-              style: TextStyle(color: colors.onErrorContainer),
-            ),
-          ],
-          if (responseBody?.isNotEmpty ?? false) ...[
-            const SizedBox(height: 8),
-            SelectableText(
-              responseBody!,
-              style: TextStyle(
-                color: colors.onErrorContainer,
-                fontFamily: 'monospace',
-              ),
-            ),
-          ],
           const SizedBox(height: 12),
           FilledButton.tonalIcon(
             key: const Key('retry-update-check-button'),
@@ -450,338 +436,81 @@ class _FailurePanel extends StatelessWidget {
   }
 }
 
-class _VersionSummary extends StatelessWidget {
-  const _VersionSummary({required this.info, required this.compact});
-
-  final FlutterFalconVersionInfo info;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final items = <({String fullLabel, String shortLabel, String value})>[
-      (
-        fullLabel: 'Installed',
-        shortLabel: 'Installed',
-        value: info.installedVersion,
-      ),
-      (
-        fullLabel: 'Current runtime',
-        shortLabel: 'Running',
-        value: info.currentRuntimeVersion,
-      ),
-      (
-        fullLabel: 'Latest hosted',
-        shortLabel: 'Latest',
-        value: info.latestVersion,
-      ),
-    ];
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            for (var index = 0; index < items.length; index++) ...[
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: compact ? 10 : 16,
-                    vertical: compact ? 11 : 16,
-                  ),
-                  child: _VersionValue(
-                    label:
-                        compact
-                            ? items[index].shortLabel
-                            : items[index].fullLabel,
-                    value: items[index].value,
-                    compact: compact,
-                  ),
-                ),
-              ),
-              if (index < items.length - 1) const VerticalDivider(width: 1),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _VersionValue extends StatelessWidget {
-  const _VersionValue({
-    required this.label,
-    required this.value,
-    required this.compact,
-  });
-
-  final String label;
-  final String value;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style:
-              compact
-                  ? Theme.of(context).textTheme.labelMedium
-                  : Theme.of(context).textTheme.labelLarge,
-        ),
-        SizedBox(height: compact ? 3 : 5),
-        SelectableText(
-          value,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontSize: compact ? 14 : null,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RuntimeSummary extends StatelessWidget {
-  const _RuntimeSummary({required this.info, required this.compact});
-
-  final FlutterFalconVersionInfo info;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: EdgeInsets.all(compact ? 12 : 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _CompactFact(
-                  label: 'Check status',
-                  value: info.checkStatus.name,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _CompactFact(
-                  label: 'Runtime state',
-                  value: info.runtimeState.name,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: compact ? 10 : 14),
-          _CompactFact(
-            label: 'Effective app ID',
-            value: info.effectiveAppId,
-            monospace: true,
-          ),
-          SizedBox(height: compact ? 10 : 14),
-          Divider(height: 1, color: theme.colorScheme.outlineVariant),
-          SizedBox(height: compact ? 9 : 13),
-          Text(
-            info.statusExplanation,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              height: 1.3,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _UpdateDeliverySummary extends StatelessWidget {
-  const _UpdateDeliverySummary({required this.info, required this.compact});
-
-  final FlutterFalconVersionInfo info;
-  final bool compact;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final usesFalconPatch = info.installableUpdateAvailable;
-    final replacesApk = info.apkUpdate.canInstall;
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        compact ? 8 : 12,
-        compact ? 10 : 14,
-        compact ? 8 : 12,
-        compact ? 6 : 10,
-      ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              'Update delivery',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          CheckboxListTile(
-            key: const Key('falcon-patch-delivery-checkbox'),
-            value: usesFalconPatch,
-            onChanged: null,
-            controlAffinity: ListTileControlAffinity.leading,
-            contentPadding: EdgeInsets.zero,
-            dense: compact,
-            title: const Text('FlutterFalcon patch'),
-          ),
-          CheckboxListTile(
-            key: const Key('replace-apk-delivery-checkbox'),
-            value: replacesApk,
-            onChanged: null,
-            controlAffinity: ListTileControlAffinity.leading,
-            contentPadding: EdgeInsets.zero,
-            dense: compact,
-            title: const Text('Replace installed APK'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CompactFact extends StatelessWidget {
-  const _CompactFact({
-    required this.label,
-    required this.value,
-    this.monospace = false,
-  });
-
-  final String label;
-  final String value;
-  final bool monospace;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 2),
-        SelectableText(
-          value,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            fontFamily: monospace ? 'monospace' : null,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ActionBar extends StatelessWidget {
-  const _ActionBar({
+class _ActionPanel extends StatelessWidget {
+  const _ActionPanel({
     required this.info,
     required this.busy,
     required this.compact,
     required this.onCheck,
-    required this.onFalconUpdate,
-    required this.onApkUpdate,
+    required this.onStart,
+    required this.onStore,
+    required this.onCancel,
   });
 
-  final FlutterFalconVersionInfo? info;
+  final FlutterFalconUpdateInfo? info;
   final bool busy;
   final bool compact;
   final VoidCallback onCheck;
-  final VoidCallback onFalconUpdate;
-  final VoidCallback onApkUpdate;
+  final VoidCallback? onStart;
+  final VoidCallback? onStore;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
-    final canApplyFalconPatch =
-        (info?.installableUpdateAvailable ?? false) ||
-        (info?.requiresBootConfirmation ?? false);
-    final canInstallApk = info?.apkUpdate.canInstall ?? false;
-
-    final checkButton = OutlinedButton.icon(
-      key: const Key('check-updates-button'),
-      onPressed: busy ? null : onCheck,
-      icon: const Icon(Icons.refresh),
-      label: Text(info == null ? 'Check for updates' : 'Check again'),
-    );
-    final falconButton = FilledButton.icon(
-      key: const Key('falcon-update-button'),
-      onPressed: busy || !canApplyFalconPatch ? null : onFalconUpdate,
-      icon: const Icon(Icons.bolt),
-      label: Text(
-        info?.requiresBootConfirmation ?? false
-            ? 'Confirm FlutterFalcon update'
-            : 'Update with FlutterFalcon',
+    final buttons = <Widget>[
+      if (onStart != null)
+        FilledButton.icon(
+          key: const Key('falcon-update-button'),
+          onPressed: busy ? null : onStart,
+          icon: const Icon(Icons.system_update_alt),
+          label: Text(_startLabel(info?.plan?.route)),
+        ),
+      if (onStore != null)
+        FilledButton.icon(
+          key: const Key('store-update-button'),
+          onPressed: busy ? null : onStore,
+          icon: const Icon(Icons.storefront_outlined),
+          label: const Text('Open store'),
+        ),
+      if (onCancel != null)
+        OutlinedButton.icon(
+          key: const Key('cancel-update-button'),
+          onPressed: busy ? null : onCancel,
+          icon: const Icon(Icons.cancel_outlined),
+          label: const Text('Cancel update'),
+        ),
+      OutlinedButton.icon(
+        key: const Key('check-updates-button'),
+        onPressed: busy ? null : onCheck,
+        icon: const Icon(Icons.refresh),
+        label: Text(info == null ? 'Check for updates' : 'Check again'),
       ),
-    );
-    final apkButton = OutlinedButton.icon(
-      key: const Key('apk-replace-button'),
-      onPressed: busy || !canInstallApk ? null : onApkUpdate,
-      icon: const Icon(Icons.android),
-      label: const Text('Download and replace APK'),
-    );
-
+    ];
     if (compact) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          falconButton,
-          const SizedBox(height: 8),
-          apkButton,
-          const SizedBox(height: 8),
-          checkButton,
+          for (var index = 0; index < buttons.length; index++) ...[
+            buttons[index],
+            if (index != buttons.length - 1) const SizedBox(height: 8),
+          ],
         ],
       );
     }
     return Wrap(
+      alignment: WrapAlignment.end,
       spacing: 12,
       runSpacing: 12,
-      alignment: WrapAlignment.end,
-      children: [checkButton, falconButton, apkButton],
+      children: buttons,
     );
   }
 }
 
-IconData _iconForStatusGlyph(FlutterFalconStatusGlyph glyph) => switch (glyph) {
-  FlutterFalconStatusGlyph.config => Icons.settings_outlined,
-  FlutterFalconStatusGlyph.verified => Icons.check_circle_outline,
-  FlutterFalconStatusGlyph.download => Icons.downloading,
-  FlutterFalconStatusGlyph.packageReady => Icons.inventory_2_outlined,
-  FlutterFalconStatusGlyph.active => Icons.task_alt,
-  FlutterFalconStatusGlyph.pending => Icons.restart_alt,
-  FlutterFalconStatusGlyph.rollback => Icons.restore,
-  FlutterFalconStatusGlyph.failure => Icons.error_outline,
-};
-
 class _Diagnostics extends StatelessWidget {
-  const _Diagnostics({required this.info, required this.compact});
+  const _Diagnostics({required this.info, required this.configuration});
 
-  final FlutterFalconVersionInfo info;
-  final bool compact;
+  final FlutterFalconUpdateInfo info;
+  final FlutterFalconV2Configuration configuration;
 
   @override
   Widget build(BuildContext context) {
@@ -790,32 +519,19 @@ class _Diagnostics extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
-        dense: compact,
-        visualDensity: compact ? VisualDensity.compact : null,
         title: const Text('Request diagnostics'),
-        subtitle:
-            compact
-                ? null
-                : const Text('App stream, channel, and exact check URLs'),
-        childrenPadding: EdgeInsets.fromLTRB(
-          compact ? 12 : 16,
-          0,
-          compact ? 12 : 16,
-          compact ? 12 : 16,
-        ),
+        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _DiagnosticValue('Configured app ID', info.configuredAppId),
-          _DiagnosticValue('Effective app ID', info.effectiveAppId),
-          _DiagnosticValue('App ID source', info.appIdSource.name),
-          _DiagnosticValue('Channel', info.channel),
-          _DiagnosticValue('Server', info.serverUrl),
-          _DiagnosticValue('Base version', info.baseVersion),
-          _DiagnosticValue('Installable target', info.installableTargetVersion),
-          _DiagnosticValue('Updates request', info.updatesRequestUrl),
+          _DiagnosticValue('App ID', configuration.appId),
+          _DiagnosticValue('Client ID', info.installed.clientId),
+          _DiagnosticValue('Channel', configuration.channel),
+          _DiagnosticValue('Server', configuration.serverUrl),
+          _DiagnosticValue('Package', info.installed.packageName),
+          _DiagnosticValue('OS version', info.installed.osVersion),
           _DiagnosticValue(
-            'Latest release request',
-            info.releaseLatestRequestUrl,
+            'Release ID',
+            info.plan?.releaseId ?? 'No update selected',
           ),
         ],
       ),
@@ -847,3 +563,72 @@ class _DiagnosticValue extends StatelessWidget {
     );
   }
 }
+
+bool _stateIsActive(FlutterFalconUpdateState state) => switch (state) {
+  FlutterFalconUpdateState.checking ||
+  FlutterFalconUpdateState.waitingForUser ||
+  FlutterFalconUpdateState.downloading ||
+  FlutterFalconUpdateState.installing => true,
+  _ => false,
+};
+
+String _stateTitle(FlutterFalconUpdateState state) => switch (state) {
+  FlutterFalconUpdateState.checking => 'Checking for updates',
+  FlutterFalconUpdateState.current => 'You are up to date',
+  FlutterFalconUpdateState.available => 'Update available',
+  FlutterFalconUpdateState.waitingForUser => 'Waiting for approval',
+  FlutterFalconUpdateState.downloading => 'Downloading update',
+  FlutterFalconUpdateState.installing => 'Installing update',
+  FlutterFalconUpdateState.restartRequired => 'Restart required',
+  FlutterFalconUpdateState.completed => 'Update completed',
+  FlutterFalconUpdateState.cancelled => 'Update cancelled',
+  FlutterFalconUpdateState.failed => 'Update request failed',
+  FlutterFalconUpdateState.unavailable => 'Ready to check',
+};
+
+String _stateDescription(FlutterFalconUpdateState state) => switch (state) {
+  FlutterFalconUpdateState.checking =>
+    'Checking the exact distribution profile for this installed app.',
+  FlutterFalconUpdateState.current =>
+    'No newer release is available for this profile and channel.',
+  FlutterFalconUpdateState.available =>
+    'A compatible update is ready through the declared route.',
+  FlutterFalconUpdateState.waitingForUser =>
+    'Continue in the operating-system confirmation screen.',
+  FlutterFalconUpdateState.downloading =>
+    'The verified update artifact is downloading.',
+  FlutterFalconUpdateState.installing =>
+    'The operating system is installing the verified update.',
+  FlutterFalconUpdateState.restartRequired =>
+    'Restart the app to finish activating the update.',
+  FlutterFalconUpdateState.completed => 'The update finished successfully.',
+  FlutterFalconUpdateState.cancelled => 'The update was cancelled.',
+  FlutterFalconUpdateState.failed =>
+    'The complete failure reason is shown below.',
+  FlutterFalconUpdateState.unavailable =>
+    'Start a check to inspect the installed app and update route.',
+};
+
+IconData _stateIcon(FlutterFalconUpdateState state) => switch (state) {
+  FlutterFalconUpdateState.current ||
+  FlutterFalconUpdateState.completed => Icons.check_circle_outline,
+  FlutterFalconUpdateState.available => Icons.system_update_alt,
+  FlutterFalconUpdateState.checking ||
+  FlutterFalconUpdateState.downloading ||
+  FlutterFalconUpdateState.installing => Icons.downloading,
+  FlutterFalconUpdateState.waitingForUser => Icons.touch_app_outlined,
+  FlutterFalconUpdateState.restartRequired => Icons.restart_alt,
+  FlutterFalconUpdateState.cancelled => Icons.cancel_outlined,
+  FlutterFalconUpdateState.failed => Icons.error_outline,
+  FlutterFalconUpdateState.unavailable => Icons.update,
+};
+
+String _startLabel(FlutterFalconDeliveryRoute? route) => switch (route) {
+  FlutterFalconDeliveryRoute.androidPackageInstaller =>
+    'Download and install APK',
+  FlutterFalconDeliveryRoute.windowsAppInstaller => 'Open App Installer',
+  FlutterFalconDeliveryRoute.macDirectInstaller => 'Open Apple Installer',
+  FlutterFalconDeliveryRoute.linuxAppImage => 'Install AppImage update',
+  FlutterFalconDeliveryRoute.webPwa => 'Apply web update',
+  _ => 'Start update',
+};

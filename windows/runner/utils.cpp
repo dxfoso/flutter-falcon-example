@@ -1,7 +1,5 @@
 #include "utils.h"
 
-#include <filesystem>
-#include <fstream>
 #include <flutter_windows.h>
 #include <io.h>
 #include <stdio.h>
@@ -41,45 +39,6 @@ std::vector<std::string> GetCommandLineArguments() {
   ::LocalFree(argv);
 
   return command_line_arguments;
-}
-
-std::optional<std::wstring> ResolveFalconActiveAotLibraryPath() {
-  wchar_t executable_path[MAX_PATH];
-  const DWORD length =
-      ::GetModuleFileNameW(nullptr, executable_path, MAX_PATH);
-  if (length == 0 || length == MAX_PATH) {
-    return std::nullopt;
-  }
-
-  const std::filesystem::path install_dir =
-      std::filesystem::path(executable_path).parent_path();
-  const std::filesystem::path pointer_path =
-      install_dir / L".flutter_falcon" / L"active_aot_library_path.txt";
-  if (!std::filesystem::exists(pointer_path)) {
-    return std::nullopt;
-  }
-
-  std::wifstream pointer_file(pointer_path);
-  if (!pointer_file.is_open()) {
-    return std::nullopt;
-  }
-
-  std::wstring active_path;
-  std::getline(pointer_file, active_path);
-  while (!active_path.empty() &&
-         (active_path.back() == L'\r' || active_path.back() == L'\n' ||
-          active_path.back() == L' ' || active_path.back() == L'\t')) {
-    active_path.pop_back();
-  }
-  if (active_path.empty()) {
-    return std::nullopt;
-  }
-
-  const std::filesystem::path aot_path(active_path);
-  if (!std::filesystem::exists(aot_path)) {
-    return std::nullopt;
-  }
-  return aot_path.wstring();
 }
 
 std::string Utf8FromUtf16(const wchar_t* utf16_string) {
