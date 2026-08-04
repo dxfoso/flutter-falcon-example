@@ -178,6 +178,14 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                                 () => widget.controller.openStore(info!),
                               )
                               : null,
+                      onManualDownload:
+                          plan?.artifactUrl != null &&
+                                  plan?.profile.storeManaged == false
+                              ? () => _runAction(
+                                () =>
+                                    widget.controller.openManualDownload(info!),
+                              )
+                              : null,
                       onCancel:
                           plan?.capabilities.contains(
                                     FlutterFalconUpdateCapability.cancel,
@@ -444,6 +452,7 @@ class _ActionPanel extends StatelessWidget {
     required this.onCheck,
     required this.onStart,
     required this.onStore,
+    required this.onManualDownload,
     required this.onCancel,
   });
 
@@ -453,6 +462,7 @@ class _ActionPanel extends StatelessWidget {
   final VoidCallback onCheck;
   final VoidCallback? onStart;
   final VoidCallback? onStore;
+  final VoidCallback? onManualDownload;
   final VoidCallback? onCancel;
 
   @override
@@ -471,6 +481,13 @@ class _ActionPanel extends StatelessWidget {
           onPressed: busy ? null : onStore,
           icon: const Icon(Icons.storefront_outlined),
           label: const Text('Open store'),
+        ),
+      if (onManualDownload != null)
+        OutlinedButton.icon(
+          key: const Key('manual-download-button'),
+          onPressed: busy ? null : onManualDownload,
+          icon: const Icon(Icons.download_outlined),
+          label: const Text('Download APK manually'),
         ),
       if (onCancel != null)
         OutlinedButton.icon(
@@ -625,7 +642,7 @@ IconData _stateIcon(FlutterFalconUpdateState state) => switch (state) {
 
 String _startLabel(FlutterFalconDeliveryRoute? route) => switch (route) {
   FlutterFalconDeliveryRoute.androidPackageInstaller =>
-    'Download and install APK',
+    'Update through FlutterFalcon',
   FlutterFalconDeliveryRoute.windowsAppInstaller => 'Open App Installer',
   FlutterFalconDeliveryRoute.macDirectInstaller => 'Open Apple Installer',
   FlutterFalconDeliveryRoute.linuxAppImage => 'Install AppImage update',

@@ -17,6 +17,8 @@ abstract interface class FlutterFalconExampleUpdateClient {
 
   Future<void> openStore(FlutterFalconUpdateInfo info);
 
+  Future<void> openManualDownload(FlutterFalconUpdateInfo info);
+
   Future<void> cancelUpdate(FlutterFalconUpdateInfo info);
 
   Future<void> dispose();
@@ -91,6 +93,11 @@ class HostedFlutterFalconExampleUpdateClient
   @override
   Future<void> openStore(FlutterFalconUpdateInfo info) {
     return _controller.openStore(info);
+  }
+
+  @override
+  Future<void> openManualDownload(FlutterFalconUpdateInfo info) {
+    return _controller.openManualDownload(info);
   }
 
   @override

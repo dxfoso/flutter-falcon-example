@@ -39,7 +39,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Update available'), findsOneWidget);
-    expect(find.text('Download and install APK'), findsOneWidget);
+    expect(find.text('Update through FlutterFalcon'), findsOneWidget);
+    expect(find.text('Download APK manually'), findsOneWidget);
     expect(find.byKey(const Key('store-update-button')), findsNothing);
 
     await tester.tap(find.byKey(const Key('falcon-update-button')));
@@ -48,6 +49,10 @@ void main() {
     expect(controller.startCalls, 1);
     expect(find.text('Downloading update'), findsOneWidget);
     expect(find.text('45%'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('manual-download-button')));
+    await tester.pump();
+    expect(controller.manualDownloadCalls, 1);
   });
 
   testWidgets('opens only the store for a store-managed release', (
@@ -66,6 +71,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('falcon-update-button')), findsNothing);
+    expect(find.byKey(const Key('manual-download-button')), findsNothing);
     expect(find.text('Open store'), findsOneWidget);
     await tester.tap(find.byKey(const Key('store-update-button')));
     await tester.pump();
@@ -166,6 +172,7 @@ class _FakeUpdateClient implements FlutterFalconExampleUpdateClient {
   int checkCalls = 0;
   int startCalls = 0;
   int storeCalls = 0;
+  int manualDownloadCalls = 0;
   int cancelCalls = 0;
 
   @override
@@ -204,6 +211,11 @@ class _FakeUpdateClient implements FlutterFalconExampleUpdateClient {
   @override
   Future<void> openStore(FlutterFalconUpdateInfo info) async {
     storeCalls += 1;
+  }
+
+  @override
+  Future<void> openManualDownload(FlutterFalconUpdateInfo info) async {
+    manualDownloadCalls += 1;
   }
 
   @override
