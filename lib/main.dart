@@ -44,6 +44,14 @@ class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
 
   bool get _ownsController => widget.updateController == null;
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_updateController.confirmPendingBoot());
+    });
+  }
+
   Future<void> _setCaptureRuntimeLogs(bool enabled) async {
     final preferences = await SharedPreferences.getInstance();
     await preferences.setBool(_captureRuntimeLogsPreference, enabled);

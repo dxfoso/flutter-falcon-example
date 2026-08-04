@@ -183,6 +183,10 @@ class _FakeUpdateClient implements FlutterFalconExampleUpdateClient {
         profile: profile,
         channel: flutterFalconChannel,
         storeListingId: profile.storeManaged ? 'com.example.store' : null,
+        directSigningPublicKey:
+            profile == FlutterFalconDistributionProfile.androidDirect
+                ? List.filled(32, 'ab').join()
+                : null,
       );
 
   @override
@@ -222,6 +226,9 @@ class _FakeUpdateClient implements FlutterFalconExampleUpdateClient {
   Future<void> cancelUpdate(FlutterFalconUpdateInfo info) async {
     cancelCalls += 1;
   }
+
+  @override
+  Future<void> confirmPendingBoot() async {}
 
   @override
   Future<void> dispose() async {

@@ -1,5 +1,5 @@
 package com.example.flutter_falcon_example
 
-import io.flutter.embedding.android.FlutterActivity
+import com.flutterfalcon.android_direct.FlutterFalconActivity
 
-class MainActivity : FlutterActivity()
+class MainActivity : FlutterFalconActivity()

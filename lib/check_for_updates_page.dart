@@ -179,7 +179,8 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                               )
                               : null,
                       onManualDownload:
-                          plan?.artifactUrl != null &&
+                          (plan?.manualArtifactUrl != null ||
+                                      plan?.artifactUrl != null) &&
                                   plan?.profile.storeManaged == false
                               ? () => _runAction(
                                 () =>
@@ -643,6 +644,7 @@ IconData _stateIcon(FlutterFalconUpdateState state) => switch (state) {
 String _startLabel(FlutterFalconDeliveryRoute? route) => switch (route) {
   FlutterFalconDeliveryRoute.androidPackageInstaller =>
     'Update through FlutterFalcon',
+  FlutterFalconDeliveryRoute.androidDartPatch => 'Update through FlutterFalcon',
   FlutterFalconDeliveryRoute.windowsAppInstaller => 'Open App Installer',
   FlutterFalconDeliveryRoute.macDirectInstaller => 'Open Apple Installer',
   FlutterFalconDeliveryRoute.linuxAppImage => 'Install AppImage update',

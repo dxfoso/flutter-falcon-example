@@ -21,6 +21,8 @@ abstract interface class FlutterFalconExampleUpdateClient {
 
   Future<void> cancelUpdate(FlutterFalconUpdateInfo info);
 
+  Future<void> confirmPendingBoot();
+
   Future<void> dispose();
 }
 
@@ -103,6 +105,11 @@ class HostedFlutterFalconExampleUpdateClient
   @override
   Future<void> cancelUpdate(FlutterFalconUpdateInfo info) {
     return _controller.cancelUpdate(info);
+  }
+
+  @override
+  Future<void> confirmPendingBoot() {
+    return _controller.confirmPendingBoot();
   }
 
   @override

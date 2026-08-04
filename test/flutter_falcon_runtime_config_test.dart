@@ -9,6 +9,8 @@ void main() {
       serverUrl: flutterFalconServerUrl,
       profile: FlutterFalconDistributionProfile.androidDirect,
       channel: flutterFalconChannel,
+      directSigningPublicKey:
+          'abababababababababababababababababababababababababababababababab',
     );
 
     expect(configuration.appId, 'flutter_falcon_example');
@@ -25,6 +27,8 @@ void main() {
       appId: flutterFalconExamplePubspecName,
       serverUrl: flutterFalconServerUrl,
       profile: FlutterFalconDistributionProfile.androidDirect,
+      directSigningPublicKey:
+          'abababababababababababababababababababababababababababababababab',
     );
 
     expect(
