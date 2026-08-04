@@ -119,7 +119,7 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
     final state = _visibleState;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('4 Check for updates'),
+        title: const Text('5 Check for updates'),
         actions: [
           IconButton(
             key: const Key('check-updates-icon-button'),
