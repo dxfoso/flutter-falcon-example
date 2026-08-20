@@ -474,7 +474,7 @@ class _ActionPanel extends StatelessWidget {
           key: const Key('falcon-update-button'),
           onPressed: busy ? null : onStart,
           icon: const Icon(Icons.system_update_alt),
-          label: Text(_startLabel(info?.plan?.route)),
+          label: Text(_startLabel(info)),
         ),
       if (onStore != null)
         FilledButton.icon(
@@ -641,13 +641,16 @@ IconData _stateIcon(FlutterFalconUpdateState state) => switch (state) {
   FlutterFalconUpdateState.unavailable => Icons.update,
 };
 
-String _startLabel(FlutterFalconDeliveryRoute? route) => switch (route) {
-  FlutterFalconDeliveryRoute.androidPackageInstaller =>
-    'Update through FlutterFalcon',
-  FlutterFalconDeliveryRoute.androidDartPatch => 'Update through FlutterFalcon',
-  FlutterFalconDeliveryRoute.windowsAppInstaller => 'Open App Installer',
-  FlutterFalconDeliveryRoute.macDirectInstaller => 'Open Apple Installer',
-  FlutterFalconDeliveryRoute.linuxAppImage => 'Install AppImage update',
-  FlutterFalconDeliveryRoute.webPwa => 'Apply web update',
-  _ => 'Start update',
+String _startLabel(FlutterFalconUpdateInfo? info) => switch (info?.updateType) {
+  FlutterFalconUpdateType.dartPatch => 'Apply FlutterFalcon patch',
+  FlutterFalconUpdateType.fullPackage => switch (info?.installed.platform) {
+    FlutterFalconPlatform.android => 'Install Android update',
+    FlutterFalconPlatform.windows => 'Open App Installer',
+    FlutterFalconPlatform.macos => 'Open Apple Installer',
+    FlutterFalconPlatform.linux => 'Install AppImage update',
+    _ => 'Install full update',
+  },
+  FlutterFalconUpdateType.webApp => 'Apply web update',
+  FlutterFalconUpdateType.store => 'Open store',
+  null => 'Start update',
 };

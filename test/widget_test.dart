@@ -39,7 +39,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Update available'), findsOneWidget);
-    expect(find.text('Update through FlutterFalcon'), findsOneWidget);
+    expect(find.text('Install Android update'), findsOneWidget);
     expect(find.text('Download APK manually'), findsOneWidget);
     expect(find.byKey(const Key('store-update-button')), findsNothing);
 
@@ -53,6 +53,20 @@ void main() {
     await tester.tap(find.byKey(const Key('manual-download-button')));
     await tester.pump();
     expect(controller.manualDownloadCalls, 1);
+  });
+
+  testWidgets('labels a Dart patch separately from a full Android update', (
+    tester,
+  ) async {
+    final controller = _FakeUpdateClient([
+      Future.value(_info(plan: _directPlan(dartPatch: true))),
+    ]);
+
+    await tester.pumpWidget(_testApp(controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Apply FlutterFalcon patch'), findsOneWidget);
+    expect(find.text('Install Android update'), findsNothing);
   });
 
   testWidgets('opens only the store for a store-managed release', (
@@ -265,14 +279,17 @@ FlutterFalconInstalledApp _installed(FlutterFalconDistributionProfile profile) {
   );
 }
 
-FlutterFalconUpdatePlan _directPlan() {
+FlutterFalconUpdatePlan _directPlan({bool dartPatch = false}) {
   return FlutterFalconUpdatePlan(
     releaseId: 'android-direct-2.0.1-51',
     appId: flutterFalconExamplePubspecName,
     platform: FlutterFalconPlatform.android,
     architecture: 'arm64-v8a',
     profile: FlutterFalconDistributionProfile.androidDirect,
-    route: FlutterFalconDeliveryRoute.androidPackageInstaller,
+    route:
+        dartPatch
+            ? FlutterFalconDeliveryRoute.androidDartPatch
+            : FlutterFalconDeliveryRoute.androidPackageInstaller,
     sourceVersion: '2.0.0+50',
     targetVersion: '2.0.1+51',
     capabilities: const {
