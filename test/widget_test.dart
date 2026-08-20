@@ -136,7 +136,7 @@ void main() {
     await tester.ensureVisible(action);
     expect(tester.getBottomRight(action).dx, lessThanOrEqualTo(360));
     final diagnostics = find.text('Request diagnostics');
-    await tester.ensureVisible(diagnostics);
+    expect(tester.getBottomRight(diagnostics).dy, lessThanOrEqualTo(800));
     expect(tester.getBottomRight(diagnostics).dx, lessThanOrEqualTo(360));
     expect(tester.takeException(), isNull);
   });

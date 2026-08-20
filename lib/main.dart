@@ -90,8 +90,10 @@ class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
       theme: ThemeData(
         colorScheme: colorScheme,
         useMaterial3: true,
+        visualDensity: VisualDensity.compact,
         scaffoldBackgroundColor: colorScheme.surface,
         appBarTheme: AppBarTheme(
+          toolbarHeight: 52,
           backgroundColor: colorScheme.surface,
           foregroundColor: colorScheme.onSurface,
           surfaceTintColor: Colors.transparent,
@@ -102,11 +104,6 @@ class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
       ),
       initialRoute: widget.initialRoute,
       routes: {
-        '/':
-            (context) => _HomePage(
-              captureRuntimeLogs: _captureRuntimeLogs,
-              onCaptureRuntimeLogsChanged: _setCaptureRuntimeLogs,
-            ),
         CheckForUpdatesPage.routeName:
             (context) => CheckForUpdatesPage(
               key: ValueKey((_captureRuntimeLogs, _updateController)),
@@ -116,75 +113,6 @@ class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
               onCaptureRuntimeLogsChanged: _setCaptureRuntimeLogs,
             ),
       },
-    );
-  }
-}
-
-class _HomePage extends StatelessWidget {
-  const _HomePage({
-    required this.captureRuntimeLogs,
-    required this.onCaptureRuntimeLogsChanged,
-  });
-
-  final bool captureRuntimeLogs;
-  final ValueChanged<bool> onCaptureRuntimeLogsChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Flutter Falcon Example')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.rocket_launch_outlined,
-                  size: 48,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  'Flutter Falcon runtime updates.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Inspect this installed build and manage updates from the '
-                  'stable hosted stream.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed:
-                      () => Navigator.pushNamed(
-                        context,
-                        CheckForUpdatesPage.routeName,
-                      ),
-                  icon: const Icon(Icons.system_update_alt),
-                  label: const Text('Check for updates'),
-                ),
-                const SizedBox(height: 16),
-                SwitchListTile.adaptive(
-                  value: captureRuntimeLogs,
-                  onChanged: onCaptureRuntimeLogsChanged,
-                  title: const Text('Send diagnostic logs'),
-                  subtitle: const Text(
-                    'Optional redacted logs help diagnose app failures.',
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

@@ -115,13 +115,12 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
 
   @override
   Widget build(BuildContext context) {
-    final compact = MediaQuery.sizeOf(context).width < 560;
     final info = _info;
     final plan = info?.plan;
     final state = _visibleState;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('74+ Check for updates'),
+        title: const Text('FlutterFalcon · 75'),
         actions: [
           IconButton(
             key: const Key('check-updates-icon-button'),
@@ -134,10 +133,10 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
       body: SafeArea(
         child: SelectionArea(
           child: SingleChildScrollView(
-            padding: EdgeInsets.all(compact ? 16 : 24),
+            padding: const EdgeInsets.all(12),
             child: Center(
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 760),
+                constraints: const BoxConstraints(maxWidth: 600),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -146,23 +145,13 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                       reason: _failure ?? _event?.reason ?? info?.reason,
                       progress: _event?.progress,
                     ),
-                    const SizedBox(height: 16),
-                    _ServerSummary(serverUrl: widget.apiBaseUrl),
-                    if (info != null) ...[
-                      const SizedBox(height: 16),
-                      _VersionSummary(info: info),
-                      const SizedBox(height: 16),
-                      _RouteSummary(info: info),
-                    ],
-                    if (_failure != null) ...[
-                      const SizedBox(height: 16),
-                      _FailurePanel(message: _failure!, onRetry: _check),
-                    ],
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 10),
+                    _BuildSummary(info: info, apiBaseUrl: widget.apiBaseUrl),
+                    const SizedBox(height: 10),
                     _ActionPanel(
                       info: info,
                       busy: _busy,
-                      compact: compact,
+                      failed: _failure != null,
                       onCheck: _check,
                       onStart:
                           plan?.capabilities.contains(
@@ -202,21 +191,22 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                               : null,
                     ),
                     if (info != null) ...[
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 10),
                       _Diagnostics(
                         info: info,
                         configuration: widget.controller.configuration,
                       ),
                     ],
                     if (widget.onCaptureRuntimeLogsChanged != null) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 6),
                       SwitchListTile.adaptive(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
                         value: widget.captureRuntimeLogs,
                         onChanged: widget.onCaptureRuntimeLogsChanged,
                         title: const Text('Send diagnostic logs'),
                         subtitle: const Text(
-                          'Optional redacted application logs. Error reports '
-                          'remain minimized and automatic.',
+                          'Optional redacted application logs.',
                         ),
                       ),
                     ],
@@ -238,23 +228,100 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
   }
 }
 
-class _ServerSummary extends StatelessWidget {
-  const _ServerSummary({required this.serverUrl});
+class _BuildSummary extends StatelessWidget {
+  const _BuildSummary({required this.info, required this.apiBaseUrl});
 
-  final String serverUrl;
+  final FlutterFalconUpdateInfo? info;
+  final String apiBaseUrl;
 
   @override
   Widget build(BuildContext context) {
-    final host = Uri.tryParse(serverUrl)?.host.toLowerCase() ?? '';
+    final host = Uri.tryParse(apiBaseUrl)?.host.toLowerCase() ?? '';
     final local = const {
       'localhost',
       '127.0.0.1',
       '::1',
       '10.0.2.2',
     }.contains(host);
-    return _Fact(
-      label: local ? 'Local server' : 'Live server',
-      value: serverUrl,
+    final installed = info?.installed.displayVersion;
+    final target = info?.plan?.targetVersion ?? installed;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(local ? Icons.computer : Icons.public, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                local ? 'Local server' : 'Live server',
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: SelectableText(
+                  apiBaseUrl,
+                  textAlign: TextAlign.end,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+            ],
+          ),
+          if (info != null) ...[
+            const Divider(height: 18),
+            Wrap(
+              spacing: 18,
+              runSpacing: 8,
+              children: [
+                _InlineFact(label: 'Installed', value: installed!),
+                _InlineFact(label: 'Available', value: target!),
+                _InlineFact(
+                  label: 'Profile',
+                  value: info!.installed.profile.wireName,
+                ),
+                _InlineFact(
+                  label: 'Route',
+                  value: info!.plan?.route.name ?? 'No update',
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _InlineFact extends StatelessWidget {
+  const _InlineFact({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minWidth: 90),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label, style: Theme.of(context).textTheme.labelSmall),
+          SelectableText(
+            value,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -293,19 +360,19 @@ class _StatusPanel extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: background,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10),
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(_stateIcon(state), color: foreground, size: 30),
-                  const SizedBox(width: 14),
+                  Icon(_stateIcon(state), color: foreground, size: 22),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -314,37 +381,39 @@ class _StatusPanel extends StatelessWidget {
                           _stateTitle(state),
                           style: Theme.of(
                             context,
-                          ).textTheme.headlineSmall?.copyWith(
+                          ).textTheme.titleMedium?.copyWith(
                             color: foreground,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 2),
                         SelectableText(
                           reason?.trim().isNotEmpty == true
                               ? reason!
                               : _stateDescription(state),
-                          style: TextStyle(color: foreground, height: 1.35),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: foreground, height: 1.25),
                         ),
-                        if (progressValue != null) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            '${(progressValue * 100).round()}%',
-                            style: TextStyle(
-                              color: foreground,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ),
+                  if (progressValue != null) ...[
+                    const SizedBox(width: 8),
+                    Text(
+                      '${(progressValue * 100).round()}%',
+                      style: TextStyle(
+                        color: foreground,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
             if (_stateIsActive(state))
               LinearProgressIndicator(
                 value: progressValue,
+                minHeight: 3,
                 color: foreground,
                 backgroundColor: background,
               ),
@@ -355,126 +424,11 @@ class _StatusPanel extends StatelessWidget {
   }
 }
 
-class _VersionSummary extends StatelessWidget {
-  const _VersionSummary({required this.info});
-
-  final FlutterFalconUpdateInfo info;
-
-  @override
-  Widget build(BuildContext context) {
-    final installed = info.installed.displayVersion;
-    final target = info.plan?.targetVersion ?? installed;
-    return Row(
-      children: [
-        Expanded(child: _Fact(label: 'Installed', value: installed)),
-        const SizedBox(width: 12),
-        Expanded(child: _Fact(label: 'Available', value: target)),
-      ],
-    );
-  }
-}
-
-class _RouteSummary extends StatelessWidget {
-  const _RouteSummary({required this.info});
-
-  final FlutterFalconUpdateInfo info;
-
-  @override
-  Widget build(BuildContext context) {
-    final plan = info.plan;
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: [
-        _Fact(label: 'Platform', value: info.installed.platform.name),
-        _Fact(label: 'Profile', value: info.installed.profile.wireName),
-        _Fact(label: 'Route', value: plan?.route.name ?? 'No update'),
-        _Fact(label: 'Architecture', value: info.installed.architecture),
-      ],
-    );
-  }
-}
-
-class _Fact extends StatelessWidget {
-  const _Fact({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minWidth: 130),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.labelMedium),
-          const SizedBox(height: 4),
-          SelectableText(
-            value,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FailurePanel extends StatelessWidget {
-  const _FailurePanel({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: colors.errorContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Failure details',
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: colors.onErrorContainer,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          SelectableText(
-            message,
-            style: TextStyle(color: colors.onErrorContainer),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.tonalIcon(
-            key: const Key('retry-update-check-button'),
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _ActionPanel extends StatelessWidget {
   const _ActionPanel({
     required this.info,
     required this.busy,
-    required this.compact,
+    required this.failed,
     required this.onCheck,
     required this.onStart,
     required this.onStore,
@@ -484,7 +438,7 @@ class _ActionPanel extends StatelessWidget {
 
   final FlutterFalconUpdateInfo? info;
   final bool busy;
-  final bool compact;
+  final bool failed;
   final VoidCallback onCheck;
   final VoidCallback? onStart;
   final VoidCallback? onStore;
@@ -523,29 +477,19 @@ class _ActionPanel extends StatelessWidget {
           label: const Text('Cancel update'),
         ),
       OutlinedButton.icon(
-        key: const Key('check-updates-button'),
+        key: Key(failed ? 'retry-update-check-button' : 'check-updates-button'),
         onPressed: busy ? null : onCheck,
         icon: const Icon(Icons.refresh),
-        label: Text(info == null ? 'Check for updates' : 'Check again'),
+        label: Text(
+          failed
+              ? 'Retry'
+              : info == null
+              ? 'Check for updates'
+              : 'Check again',
+        ),
       ),
     ];
-    if (compact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var index = 0; index < buttons.length; index++) ...[
-            buttons[index],
-            if (index != buttons.length - 1) const SizedBox(height: 8),
-          ],
-        ],
-      );
-    }
-    return Wrap(
-      alignment: WrapAlignment.end,
-      spacing: 12,
-      runSpacing: 12,
-      children: buttons,
-    );
+    return Wrap(spacing: 8, runSpacing: 8, children: buttons);
   }
 }
 
@@ -562,8 +506,11 @@ class _Diagnostics extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
+        dense: true,
+        visualDensity: VisualDensity.compact,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 12),
         title: const Text('Request diagnostics'),
-        childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _DiagnosticValue('App ID', configuration.appId),
@@ -591,15 +538,19 @@ class _DiagnosticValue extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Column(
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: Theme.of(context).textTheme.labelLarge),
-          const SizedBox(height: 4),
-          SelectableText(
-            value,
-            style: const TextStyle(fontFamily: 'monospace', height: 1.35),
+          SizedBox(
+            width: 76,
+            child: Text(label, style: Theme.of(context).textTheme.labelMedium),
+          ),
+          Expanded(
+            child: SelectableText(
+              value,
+              style: const TextStyle(fontFamily: 'monospace', height: 1.25),
+            ),
           ),
         ],
       ),
@@ -630,26 +581,21 @@ String _stateTitle(FlutterFalconUpdateState state) => switch (state) {
 };
 
 String _stateDescription(FlutterFalconUpdateState state) => switch (state) {
-  FlutterFalconUpdateState.checking =>
-    'Checking the exact distribution profile for this installed app.',
+  FlutterFalconUpdateState.checking => 'Checking this installed profile.',
   FlutterFalconUpdateState.current =>
-    'No newer release is available for this profile and channel.',
-  FlutterFalconUpdateState.available =>
-    'A compatible update is ready through the declared route.',
+    'No newer release for this profile and channel.',
+  FlutterFalconUpdateState.available => 'A compatible update is ready.',
   FlutterFalconUpdateState.waitingForUser =>
     'Continue in the operating-system confirmation screen.',
-  FlutterFalconUpdateState.downloading =>
-    'The verified update artifact is downloading.',
-  FlutterFalconUpdateState.installing =>
-    'The operating system is installing the verified update.',
-  FlutterFalconUpdateState.restartRequired =>
-    'Restart the app to finish activating the update.',
-  FlutterFalconUpdateState.completed => 'The update finished successfully.',
+  FlutterFalconUpdateState.downloading => 'Downloading the verified update.',
+  FlutterFalconUpdateState.installing => 'Installing the verified update.',
+  FlutterFalconUpdateState.restartRequired => 'Restart the app to finish.',
+  FlutterFalconUpdateState.completed => 'Update finished successfully.',
   FlutterFalconUpdateState.cancelled => 'The update was cancelled.',
   FlutterFalconUpdateState.failed =>
     'The complete failure reason is shown below.',
   FlutterFalconUpdateState.unavailable =>
-    'Start a check to inspect the installed app and update route.',
+    'Check the installed app for updates.',
 };
 
 IconData _stateIcon(FlutterFalconUpdateState state) => switch (state) {
