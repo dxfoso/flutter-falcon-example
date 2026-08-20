@@ -1,12 +1,13 @@
 import 'package:flutter_falcon/flutter_falcon.dart';
 import 'package:flutter_falcon_example/flutter_falcon_updates.dart';
+import 'package:flutter_falcon_example/runtime_configuration.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test('shared v2 application identity uses the public hosted service', () {
+  test('shared v2 application identity accepts the configured service', () {
     const configuration = FlutterFalconV2Configuration(
       appId: flutterFalconExamplePubspecName,
-      serverUrl: flutterFalconServerUrl,
+      serverUrl: 'https://flutterfalcon.com',
       profile: FlutterFalconDistributionProfile.androidDirect,
       channel: flutterFalconChannel,
       directSigningPublicKey:
@@ -22,10 +23,40 @@ void main() {
     );
   });
 
+  test('debug runs default to the local API server', () {
+    final configuration = ExampleRuntimeConfiguration.fromEnvironment(
+      apiBaseUrl: '',
+      releaseMode: false,
+    );
+
+    expect(configuration.apiBaseUrl, localApiBaseUrl);
+    expect(configuration.serverLabel, 'Local server');
+  });
+
+  test('FlutterFalcon build variables select the live API server', () {
+    final configuration = ExampleRuntimeConfiguration.fromEnvironment(
+      apiBaseUrl: 'https://flutterfalcon.com',
+      releaseMode: true,
+    );
+
+    expect(configuration.apiBaseUrl, 'https://flutterfalcon.com');
+    expect(configuration.serverLabel, 'Live server');
+  });
+
+  test('release builds fail when API_BASE_URL is missing', () {
+    expect(
+      () => ExampleRuntimeConfiguration.fromEnvironment(
+        apiBaseUrl: '',
+        releaseMode: true,
+      ),
+      throwsA(isA<StateError>()),
+    );
+  });
+
   test('v2 configuration never falls back to another platform route', () {
     const configuration = FlutterFalconV2Configuration(
       appId: flutterFalconExamplePubspecName,
-      serverUrl: flutterFalconServerUrl,
+      serverUrl: 'https://flutterfalcon.com',
       profile: FlutterFalconDistributionProfile.androidDirect,
       directSigningPublicKey:
           'abababababababababababababababababababababababababababababababab',

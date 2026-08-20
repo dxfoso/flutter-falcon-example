@@ -9,6 +9,7 @@ class CheckForUpdatesPage extends StatefulWidget {
   const CheckForUpdatesPage({
     super.key,
     required this.controller,
+    this.apiBaseUrl = 'https://flutterfalcon.com',
     this.captureRuntimeLogs = false,
     this.onCaptureRuntimeLogsChanged,
   });
@@ -16,6 +17,7 @@ class CheckForUpdatesPage extends StatefulWidget {
   static const routeName = '/updates';
 
   final FlutterFalconExampleUpdateClient controller;
+  final String apiBaseUrl;
   final bool captureRuntimeLogs;
   final ValueChanged<bool>? onCaptureRuntimeLogsChanged;
 
@@ -144,6 +146,8 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                       reason: _failure ?? _event?.reason ?? info?.reason,
                       progress: _event?.progress,
                     ),
+                    const SizedBox(height: 16),
+                    _ServerSummary(serverUrl: widget.apiBaseUrl),
                     if (info != null) ...[
                       const SizedBox(height: 16),
                       _VersionSummary(info: info),
@@ -231,6 +235,27 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
     if (_checking) return FlutterFalconUpdateState.checking;
     if (_event != null) return _event!.state;
     return _info?.state ?? FlutterFalconUpdateState.unavailable;
+  }
+}
+
+class _ServerSummary extends StatelessWidget {
+  const _ServerSummary({required this.serverUrl});
+
+  final String serverUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final host = Uri.tryParse(serverUrl)?.host.toLowerCase() ?? '';
+    final local = const {
+      'localhost',
+      '127.0.0.1',
+      '::1',
+      '10.0.2.2',
+    }.contains(host);
+    return _Fact(
+      label: local ? 'Local server' : 'Live server',
+      value: serverUrl,
+    );
   }
 }
 

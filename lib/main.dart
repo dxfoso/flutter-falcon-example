@@ -5,14 +5,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'check_for_updates_page.dart';
 import 'flutter_falcon_updates.dart';
+import 'runtime_configuration.dart';
 
 const _captureRuntimeLogsPreference = 'capture_runtime_logs';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final preferences = await SharedPreferences.getInstance();
+  final runtimeConfiguration = ExampleRuntimeConfiguration.fromEnvironment();
   runApp(
     FlutterFalconExampleApp(
+      runtimeConfiguration: runtimeConfiguration,
       captureRuntimeLogs:
           preferences.getBool(_captureRuntimeLogsPreference) ?? false,
     ),
@@ -22,12 +25,14 @@ Future<void> main() async {
 class FlutterFalconExampleApp extends StatefulWidget {
   const FlutterFalconExampleApp({
     super.key,
+    required this.runtimeConfiguration,
     this.updateController,
     this.captureRuntimeLogs = false,
     this.initialRoute = CheckForUpdatesPage.routeName,
   });
 
   final FlutterFalconExampleUpdateClient? updateController;
+  final ExampleRuntimeConfiguration runtimeConfiguration;
   final bool captureRuntimeLogs;
   final String initialRoute;
 
@@ -106,6 +111,7 @@ class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
             (context) => CheckForUpdatesPage(
               key: ValueKey((_captureRuntimeLogs, _updateController)),
               controller: _updateController,
+              apiBaseUrl: widget.runtimeConfiguration.apiBaseUrl,
               captureRuntimeLogs: _captureRuntimeLogs,
               onCaptureRuntimeLogsChanged: _setCaptureRuntimeLogs,
             ),

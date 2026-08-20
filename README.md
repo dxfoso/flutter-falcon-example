@@ -25,6 +25,26 @@ fallbacks, publish credentials, or signing secrets.
 
 ## Runtime behavior
 
+The app reads its API server from a public compile-time build variable:
+
+```dart
+const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+```
+
+`flutter run` defaults to `http://localhost:8080`. A release build fails when
+`API_BASE_URL` is missing. In FlutterFalcon, open the selected `pubspec.yaml`,
+choose **Build variables**, and save:
+
+```text
+API_BASE_URL=https://flutterfalcon.com
+```
+
+FlutterFalcon forwards it as `--dart-define=API_BASE_URL=...`. The update page
+shows **Local server** or **Live server** with the effective app API URL. The
+FlutterFalcon update service remains `https://flutterfalcon.com`. For an Android
+emulator, use `http://10.0.2.2:8080` to reach a server on the host computer.
+Build variables are embedded in the app, so they must never contain secrets.
+
 Each app uses `FlutterFalconUpdateController` with the v2 HTTP release source,
 native method-channel adapter, and per-client event reporter. The UI enables an
 action only when the exact-profile update plan declares its capability:

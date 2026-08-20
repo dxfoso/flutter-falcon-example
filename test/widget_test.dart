@@ -25,6 +25,8 @@ void main() {
     expect(find.text('2.0.0+54'), findsNWidgets(2));
     expect(find.text('android-direct'), findsOneWidget);
     expect(find.text('No update'), findsOneWidget);
+    expect(find.text('Live server'), findsOneWidget);
+    expect(find.text('https://flutterfalcon.com'), findsWidgets);
     expect(find.text('Check again'), findsWidgets);
   });
 
@@ -156,6 +158,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Request diagnostics'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Request diagnostics'));
     await tester.pumpAndSettle();
     expect(find.text('stable'), findsOneWidget);
@@ -193,7 +197,7 @@ class _FakeUpdateClient implements FlutterFalconExampleUpdateClient {
   FlutterFalconV2Configuration get configuration =>
       FlutterFalconV2Configuration(
         appId: flutterFalconExamplePubspecName,
-        serverUrl: flutterFalconServerUrl,
+        serverUrl: 'https://flutterfalcon.com',
         profile: profile,
         channel: flutterFalconChannel,
         storeListingId: profile.storeManaged ? 'com.example.store' : null,
