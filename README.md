@@ -53,10 +53,12 @@ action only when the exact-profile update plan declares its capability:
 - Store targets open only their official store route.
 - Web asks only the active service worker to update.
 
-The update page displays the installed and target versions, platform, profile,
-route, architecture, progress, full redacted failure reason, and client
-diagnostics. Optional application-log reporting is off by default and requires
-explicit consent inside the app.
+The About & updates page displays the installed and target versions, update
+type, profile, route, progress, full failure reason, and capability-driven
+actions. Automatic updates are persisted, default off, and start only direct
+plans that declare `start`; stores and manual downloads remain explicit. After
+Android installer permission is granted, the pending update retries once when
+the app resumes. Optional application-log reporting also requires consent.
 
 ## Validate the root target
 

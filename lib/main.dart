@@ -8,6 +8,7 @@ import 'flutter_falcon_updates.dart';
 import 'runtime_configuration.dart';
 
 const _captureRuntimeLogsPreference = 'capture_runtime_logs';
+const _automaticUpdatesPreference = 'automatic_updates';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,8 @@ Future<void> main() async {
       runtimeConfiguration: runtimeConfiguration,
       captureRuntimeLogs:
           preferences.getBool(_captureRuntimeLogsPreference) ?? false,
+      automaticUpdates:
+          preferences.getBool(_automaticUpdatesPreference) ?? false,
     ),
   );
 }
@@ -28,12 +31,14 @@ class FlutterFalconExampleApp extends StatefulWidget {
     required this.runtimeConfiguration,
     this.updateController,
     this.captureRuntimeLogs = false,
+    this.automaticUpdates = false,
     this.initialRoute = CheckForUpdatesPage.routeName,
   });
 
   final FlutterFalconExampleUpdateClient? updateController;
   final ExampleRuntimeConfiguration runtimeConfiguration;
   final bool captureRuntimeLogs;
+  final bool automaticUpdates;
   final String initialRoute;
 
   @override
@@ -43,19 +48,12 @@ class FlutterFalconExampleApp extends StatefulWidget {
 
 class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
   late bool _captureRuntimeLogs = widget.captureRuntimeLogs;
+  late bool _automaticUpdates = widget.automaticUpdates;
   late FlutterFalconExampleUpdateClient _updateController =
       widget.updateController ??
       createFalconController(captureRuntimeLogs: _captureRuntimeLogs);
 
   bool get _ownsController => widget.updateController == null;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_updateController.confirmPendingBoot());
-    });
-  }
 
   Future<void> _setCaptureRuntimeLogs(bool enabled) async {
     final preferences = await SharedPreferences.getInstance();
@@ -66,6 +64,12 @@ class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
       _updateController = createFalconController(captureRuntimeLogs: enabled);
     }
     if (mounted) setState(() => _captureRuntimeLogs = enabled);
+  }
+
+  Future<void> _setAutomaticUpdates(bool enabled) async {
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_automaticUpdatesPreference, enabled);
+    if (mounted) setState(() => _automaticUpdates = enabled);
   }
 
   @override
@@ -109,6 +113,8 @@ class _FlutterFalconExampleAppState extends State<FlutterFalconExampleApp> {
               key: ValueKey((_captureRuntimeLogs, _updateController)),
               controller: _updateController,
               apiBaseUrl: widget.runtimeConfiguration.apiBaseUrl,
+              automaticUpdates: _automaticUpdates,
+              onAutomaticUpdatesChanged: _setAutomaticUpdates,
               captureRuntimeLogs: _captureRuntimeLogs,
               onCaptureRuntimeLogsChanged: _setCaptureRuntimeLogs,
             ),

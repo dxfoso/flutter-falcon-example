@@ -10,6 +10,8 @@ class CheckForUpdatesPage extends StatefulWidget {
     super.key,
     required this.controller,
     this.apiBaseUrl = 'https://flutterfalcon.com',
+    this.automaticUpdates = false,
+    this.onAutomaticUpdatesChanged,
     this.captureRuntimeLogs = false,
     this.onCaptureRuntimeLogsChanged,
   });
@@ -18,6 +20,8 @@ class CheckForUpdatesPage extends StatefulWidget {
 
   final FlutterFalconExampleUpdateClient controller;
   final String apiBaseUrl;
+  final bool automaticUpdates;
+  final ValueChanged<bool>? onAutomaticUpdatesChanged;
   final bool captureRuntimeLogs;
   final ValueChanged<bool>? onCaptureRuntimeLogsChanged;
 
@@ -25,21 +29,25 @@ class CheckForUpdatesPage extends StatefulWidget {
   State<CheckForUpdatesPage> createState() => _CheckForUpdatesPageState();
 }
 
-class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
+class _CheckForUpdatesPageState extends State<CheckForUpdatesPage>
+    with WidgetsBindingObserver {
   StreamSubscription<FlutterFalconUpdateEvent>? _subscription;
   FlutterFalconUpdateInfo? _info;
   FlutterFalconUpdateEvent? _event;
   String? _failure;
   bool _checking = false;
   bool _acting = false;
+  FlutterFalconUpdateInfo? _permissionRetryInfo;
+  bool _permissionRetrying = false;
 
   bool get _busy => _checking || _acting;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _listen();
-    unawaited(_check());
+    unawaited(_initialize());
   }
 
   @override
@@ -51,7 +59,21 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
       _event = null;
       _failure = null;
       _listen();
-      unawaited(_check());
+      unawaited(_initialize());
+    } else if (!oldWidget.automaticUpdates && widget.automaticUpdates) {
+      unawaited(_check(startAutomatically: true));
+    }
+  }
+
+  Future<void> _initialize() async {
+    try {
+      await widget.controller.confirmPendingBoot();
+    } catch (error) {
+      if (mounted) setState(() => _failure = error.toString());
+      return;
+    }
+    if (mounted) {
+      await _check(startAutomatically: widget.automaticUpdates);
     }
   }
 
@@ -64,6 +86,18 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
           if (event.state == FlutterFalconUpdateState.failed) {
             _failure = event.reason;
           }
+          if (event.state == FlutterFalconUpdateState.waitingForUser &&
+              event.reason?.contains('Allow installs from this app') == true) {
+            _permissionRetryInfo = _info;
+          } else if (const {
+            FlutterFalconUpdateState.cancelled,
+            FlutterFalconUpdateState.failed,
+            FlutterFalconUpdateState.installing,
+            FlutterFalconUpdateState.restartRequired,
+            FlutterFalconUpdateState.completed,
+          }.contains(event.state)) {
+            _permissionRetryInfo = null;
+          }
         });
       },
       onError: (Object error) {
@@ -73,8 +107,9 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
     );
   }
 
-  Future<void> _check() async {
+  Future<void> _check({bool startAutomatically = false}) async {
     if (_busy) return;
+    FlutterFalconUpdateInfo? checked;
     setState(() {
       _checking = true;
       _failure = null;
@@ -83,12 +118,46 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
       final info = await widget.controller.checkForUpdate();
       if (!mounted) return;
       setState(() => _info = info);
+      checked = info;
     } catch (error) {
       if (!mounted) return;
       setState(() => _failure = error.toString());
     } finally {
       if (mounted) setState(() => _checking = false);
     }
+    if (mounted &&
+        startAutomatically &&
+        checked?.plan?.capabilities.contains(
+              FlutterFalconUpdateCapability.start,
+            ) ==
+            true) {
+      await _startUpdate(checked!);
+    }
+  }
+
+  Future<void> _startUpdate(FlutterFalconUpdateInfo info) {
+    return _runAction(() => widget.controller.startUpdate(info));
+  }
+
+  Future<void> _cancelUpdate(FlutterFalconUpdateInfo info) {
+    _permissionRetryInfo = null;
+    return _runAction(() => widget.controller.cancelUpdate(info));
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed ||
+        _permissionRetrying ||
+        _busy ||
+        _permissionRetryInfo == null) {
+      return;
+    }
+    final info = _permissionRetryInfo!;
+    _permissionRetryInfo = null;
+    _permissionRetrying = true;
+    unawaited(
+      _startUpdate(info).whenComplete(() => _permissionRetrying = false),
+    );
   }
 
   Future<void> _runAction(Future<void> Function() action) async {
@@ -109,6 +178,7 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     unawaited(_subscription?.cancel());
     super.dispose();
   }
@@ -120,7 +190,7 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
     final state = _visibleState;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FlutterFalcon · 75'),
+        title: const Text('About & updates'),
         actions: [
           IconButton(
             key: const Key('check-updates-icon-button'),
@@ -158,9 +228,7 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                                     FlutterFalconUpdateCapability.start,
                                   ) ==
                                   true
-                              ? () => _runAction(
-                                () => widget.controller.startUpdate(info!),
-                              )
+                              ? () => _startUpdate(info!)
                               : null,
                       onStore:
                           plan?.capabilities.contains(
@@ -185,11 +253,23 @@ class _CheckForUpdatesPageState extends State<CheckForUpdatesPage> {
                                     FlutterFalconUpdateCapability.cancel,
                                   ) ==
                                   true
-                              ? () => _runAction(
-                                () => widget.controller.cancelUpdate(info!),
-                              )
+                              ? () => _cancelUpdate(info!)
                               : null,
                     ),
+                    if (widget.onAutomaticUpdatesChanged != null) ...[
+                      const SizedBox(height: 6),
+                      SwitchListTile.adaptive(
+                        key: const Key('automatic-updates-switch'),
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        value: widget.automaticUpdates,
+                        onChanged: widget.onAutomaticUpdatesChanged,
+                        title: const Text('Automatic updates'),
+                        subtitle: const Text(
+                          'Checks and starts supported direct updates.',
+                        ),
+                      ),
+                    ],
                     if (info != null) ...[
                       const SizedBox(height: 10),
                       _Diagnostics(

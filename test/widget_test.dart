@@ -5,7 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon.dart';
 import 'package:flutter_falcon_example/check_for_updates_page.dart';
 import 'package:flutter_falcon_example/flutter_falcon_updates.dart';
+import 'package:flutter_falcon_example/main.dart';
+import 'package:flutter_falcon_example/runtime_configuration.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('shows checking and current states from the v2 controller', (
@@ -28,6 +31,112 @@ void main() {
     expect(find.text('Live server'), findsOneWidget);
     expect(find.text('https://flutterfalcon.com'), findsWidgets);
     expect(find.text('Check again'), findsWidgets);
+    expect(find.text('About & updates'), findsOneWidget);
+  });
+
+  testWidgets('automatic updates start only a declared direct action', (
+    tester,
+  ) async {
+    final controller = _FakeUpdateClient([
+      Future.value(_info(plan: _directPlan())),
+    ]);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CheckForUpdatesPage(
+          controller: controller,
+          automaticUpdates: true,
+          onAutomaticUpdatesChanged: (_) {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.checkCalls, 1);
+    expect(controller.startCalls, 1);
+    expect(find.text('Automatic updates'), findsOneWidget);
+  });
+
+  testWidgets('automatic updates never open a store', (tester) async {
+    final controller = _FakeUpdateClient([
+      Future.value(
+        _info(
+          profile: FlutterFalconDistributionProfile.androidPlay,
+          plan: _storePlan(),
+        ),
+      ),
+    ], profile: FlutterFalconDistributionProfile.androidPlay);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: CheckForUpdatesPage(
+          controller: controller,
+          automaticUpdates: true,
+          onAutomaticUpdatesChanged: (_) {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(controller.startCalls, 0);
+    expect(controller.storeCalls, 0);
+    expect(find.text('Open store'), findsOneWidget);
+  });
+
+  testWidgets('persists the automatic updates preference', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final controller = _FakeUpdateClient([Future.value(_info())]);
+
+    await tester.pumpWidget(
+      FlutterFalconExampleApp(
+        runtimeConfiguration: const ExampleRuntimeConfiguration(
+          apiBaseUrl: 'https://flutterfalcon.com',
+          isLocal: false,
+        ),
+        updateController: controller,
+      ),
+    );
+    await tester.pumpAndSettle();
+    final automatic = find.byKey(const Key('automatic-updates-switch'));
+    await tester.ensureVisible(automatic);
+    await tester.tap(automatic);
+    await tester.pumpAndSettle();
+
+    final preferences = await SharedPreferences.getInstance();
+    expect(preferences.getBool('automatic_updates'), isTrue);
+  });
+
+  testWidgets('Android permission return retries the pending update once', (
+    tester,
+  ) async {
+    final info = _info(plan: _directPlan());
+    final controller = _FakeUpdateClient([Future.value(info)]);
+
+    await tester.pumpWidget(_testApp(controller));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('falcon-update-button')));
+    await tester.pump();
+    expect(controller.startCalls, 1);
+
+    controller.emit(
+      FlutterFalconUpdateEvent(
+        state: FlutterFalconUpdateState.waitingForUser,
+        installed: info.installed,
+        occurredUtc: DateTime.utc(2026, 8, 21),
+        plan: info.plan,
+        reason: 'Allow installs from this app, then retry the update.',
+      ),
+    );
+    await tester.pump();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+
+    expect(controller.startCalls, 2);
   });
 
   testWidgets('starts only the capability declared by a direct release', (
@@ -192,6 +301,9 @@ class _FakeUpdateClient implements FlutterFalconExampleUpdateClient {
   int storeCalls = 0;
   int manualDownloadCalls = 0;
   int cancelCalls = 0;
+  int confirmPendingBootCalls = 0;
+
+  void emit(FlutterFalconUpdateEvent event) => _events.add(event);
 
   @override
   FlutterFalconV2Configuration get configuration =>
@@ -246,7 +358,9 @@ class _FakeUpdateClient implements FlutterFalconExampleUpdateClient {
   }
 
   @override
-  Future<void> confirmPendingBoot() async {}
+  Future<void> confirmPendingBoot() async {
+    confirmPendingBootCalls += 1;
+  }
 
   @override
   Future<void> dispose() async {
