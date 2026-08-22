@@ -61,15 +61,26 @@ if (Test-Path -LiteralPath $cmakeCache) {
   }
 }
 
+& $FlutterExecutable pub get
+if ($LASTEXITCODE -ne 0) {
+  exit $LASTEXITCODE
+}
+
+& $FlutterExecutable pub run flutter_falcon:flutter_falcon_v2_prebuild `
+  --project . `
+  --platform windows `
+  --artifact-type portable
+if ($LASTEXITCODE -ne 0) {
+  exit $LASTEXITCODE
+}
+
 $flutterArgs = @(
   'run',
   '-d',
   'windows',
+  '--dart-define-from-file=.dart_tool/flutter_falcon_v2_defines.json',
   "--dart-define=API_BASE_URL=$ApiBaseUrl"
 )
-if ($Env:FLUTTER_FALCON_READ_TOKEN) {
-  $flutterArgs += "--dart-define=FLUTTER_FALCON_READ_TOKEN=$Env:FLUTTER_FALCON_READ_TOKEN"
-}
 
 & $FlutterExecutable @flutterArgs
 if ($LASTEXITCODE -ne 0) {
