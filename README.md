@@ -57,9 +57,9 @@ through `FLUTTER_ROOT`, or supplied with `-FlutterExecutable`. Use
 `flutter doctor -v` if the Windows desktop toolchain is unavailable. Debug runs
 do not require FlutterFalcon prebuild metadata; release builds remain strict.
 
-Each app uses `FlutterFalconUpdateController` with the v2 HTTP release source,
-native method-channel adapter, and per-client event reporter. The UI enables an
-action only when the exact-profile update plan declares its capability:
+The app uses the package-owned `FlutterFalconAboutPage.standard`. FlutterFalcon
+owns the controller, HTTP clients, preferences, diagnostics, lifecycle handling,
+and capability-driven update actions:
 
 - Direct targets start the signed operating-system installer route.
 - Store targets open only their official store route.

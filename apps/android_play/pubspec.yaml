@@ -34,12 +34,12 @@ dependencies:
   flutter_falcon:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 141c79835743de029daf1ad3013da3369793d14d
+      ref: c7ad29f92370fdc55c6134aa516cf2c22a9ee31b
       path: flutter_falcon
   flutter_falcon_android_play:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 141c79835743de029daf1ad3013da3369793d14d
+      ref: c7ad29f92370fdc55c6134aa516cf2c22a9ee31b
       path: flutter_falcon_android_play
 
   # The following adds the Cupertino Icons font to your application.
