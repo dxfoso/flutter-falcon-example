@@ -1,7 +1,7 @@
 name: flutter_falcon_example
 description: Minimal Flutter Falcon test app.
 publish_to: 'none'
-version: 2.0.0+79
+version: 2.0.0+80
 
 environment:
   sdk: ^3.7.0
@@ -12,37 +12,37 @@ dependencies:
   flutter_falcon:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
       path: flutter_falcon
   flutter_falcon_android_direct:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
       path: flutter_falcon_android_direct
   flutter_falcon_ios_app_store:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
       path: flutter_falcon_ios_app_store
   flutter_falcon_macos_app_store:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
       path: flutter_falcon_macos_app_store
   flutter_falcon_windows_direct:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
       path: flutter_falcon_windows_direct
   flutter_falcon_linux_flatpak:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
       path: flutter_falcon_linux_flatpak
   flutter_falcon_web_pwa:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
       path: flutter_falcon_web_pwa
 
 dev_dependencies:
@@ -53,6 +53,8 @@ dev_dependencies:
   shared_preferences: ^2.5.5
 
 flutter_falcon:
+  required_build_variables:
+    - API_BASE_URL
   platforms:
     ios:
       store_listing_id: '0000000000'

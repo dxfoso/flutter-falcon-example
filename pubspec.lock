@@ -98,8 +98,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
-      resolved-ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
+      resolved-ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
@@ -107,8 +107,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon_android_direct
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
-      resolved-ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
+      resolved-ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
@@ -116,8 +116,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon_ios_app_store
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
-      resolved-ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
+      resolved-ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
@@ -125,8 +125,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon_linux_flatpak
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
-      resolved-ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
+      resolved-ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
@@ -134,8 +134,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon_macos_app_store
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
-      resolved-ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
+      resolved-ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
@@ -143,8 +143,8 @@ packages:
     dependency: transitive
     description:
       path: flutter_falcon_platform_interface
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
-      resolved-ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
+      resolved-ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
@@ -152,8 +152,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon_web_pwa
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
-      resolved-ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
+      resolved-ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
@@ -161,8 +161,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon_windows_direct
-      ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
-      resolved-ref: bacdf48e1f6b772273b397aeb0ebabb8bc3c2b2e
+      ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
+      resolved-ref: "5b73f951ef5681bb3a5af50e2867db49c61fdefa"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "2.0.0"
