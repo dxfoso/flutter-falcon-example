@@ -1,9 +1,47 @@
+param(
+  [string]$ApiBaseUrl,
+  [string]$FlutterExecutable
+)
+
 $ErrorActionPreference = 'Stop'
 
 Set-Location $PSScriptRoot
 
-if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) {
-  throw "Flutter command was not found. Add Flutter to your PATH and retry."
+if (-not $ApiBaseUrl) {
+  $ApiBaseUrl = if ($Env:API_BASE_URL) {
+    $Env:API_BASE_URL
+  } else {
+    'http://localhost:8080'
+  }
+}
+
+if (-not $FlutterExecutable) {
+  $flutterCommand = Get-Command flutter -ErrorAction SilentlyContinue
+  if ($flutterCommand) {
+    $FlutterExecutable = $flutterCommand.Source
+  } elseif ($Env:FLUTTER_ROOT) {
+    $flutterCandidates = if (
+      [System.Environment]::OSVersion.Platform -eq 'Win32NT'
+    ) {
+      @(
+        (Join-Path $Env:FLUTTER_ROOT 'bin\flutter.bat'),
+        (Join-Path $Env:FLUTTER_ROOT 'bin/flutter')
+      )
+    } else {
+      @(
+        (Join-Path $Env:FLUTTER_ROOT 'bin/flutter'),
+        (Join-Path $Env:FLUTTER_ROOT 'bin\flutter.bat')
+      )
+    }
+    $FlutterExecutable = $flutterCandidates |
+      Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } |
+      Select-Object -First 1
+  }
+}
+
+if (-not $FlutterExecutable -or
+    -not (Test-Path -LiteralPath $FlutterExecutable -PathType Leaf)) {
+  throw 'Flutter was not found. Add its bin directory to PATH, set FLUTTER_ROOT, or pass -FlutterExecutable.'
 }
 
 $windowsBuildDirectory = Join-Path $PSScriptRoot 'build\windows'
@@ -23,9 +61,17 @@ if (Test-Path -LiteralPath $cmakeCache) {
   }
 }
 
-$args = @('run', '-d', 'windows')
+$flutterArgs = @(
+  'run',
+  '-d',
+  'windows',
+  "--dart-define=API_BASE_URL=$ApiBaseUrl"
+)
 if ($Env:FLUTTER_FALCON_READ_TOKEN) {
-  $args += "--dart-define=FLUTTER_FALCON_READ_TOKEN=$Env:FLUTTER_FALCON_READ_TOKEN"
+  $flutterArgs += "--dart-define=FLUTTER_FALCON_READ_TOKEN=$Env:FLUTTER_FALCON_READ_TOKEN"
 }
 
-flutter @args
+& $FlutterExecutable @flutterArgs
+if ($LASTEXITCODE -ne 0) {
+  exit $LASTEXITCODE
+}

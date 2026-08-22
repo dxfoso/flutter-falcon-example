@@ -45,6 +45,17 @@ FlutterFalcon update service remains `https://flutterfalcon.com`. For an Android
 emulator, use `http://10.0.2.2:8080` to reach a server on the host computer.
 Build variables are embedded in the app, so they must never contain secrets.
 
+On Windows, run the local configuration with:
+
+```powershell
+.\run.ps1
+```
+
+It passes `API_BASE_URL=http://localhost:8080`. Override the URL with
+`$env:API_BASE_URL` or `-ApiBaseUrl`. Flutter must be on `PATH`, discoverable
+through `FLUTTER_ROOT`, or supplied with `-FlutterExecutable`. Use
+`flutter doctor -v` if the Windows desktop toolchain is unavailable.
+
 Each app uses `FlutterFalconUpdateController` with the v2 HTTP release source,
 native method-channel adapter, and per-client event reporter. The UI enables an
 action only when the exact-profile update plan declares its capability:
