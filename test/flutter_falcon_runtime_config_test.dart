@@ -1,6 +1,7 @@
 import 'package:flutter_falcon/flutter_falcon.dart';
 import 'package:flutter_falcon_example/flutter_falcon_updates.dart';
 import 'package:flutter_falcon_example/runtime_configuration.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -31,6 +32,22 @@ void main() {
 
     expect(configuration.apiBaseUrl, localApiBaseUrl);
     expect(configuration.serverLabel, 'Local server');
+  });
+
+  test('normal Windows debug run does not need generated defines', () {
+    final configuration = debugFlutterFalconConfiguration(
+      platform: TargetPlatform.windows,
+    );
+
+    expect(configuration.appId, flutterFalconExamplePubspecName);
+    expect(
+      configuration.profile,
+      FlutterFalconDistributionProfile.windowsDirect,
+    );
+    expect(
+      () => configuration.validateForPlatform(FlutterFalconPlatform.windows),
+      returnsNormally,
+    );
   });
 
   test('FlutterFalcon build variables select the live API server', () {

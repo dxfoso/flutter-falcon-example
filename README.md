@@ -54,9 +54,8 @@ On Windows, run the local configuration with:
 It passes `API_BASE_URL=http://localhost:8080`. Override the URL with
 `$env:API_BASE_URL` or `-ApiBaseUrl`. Flutter must be on `PATH`, discoverable
 through `FLUTTER_ROOT`, or supplied with `-FlutterExecutable`. Use
-`flutter doctor -v` if the Windows desktop toolchain is unavailable. The script
-runs the Windows Direct prebuild and loads its generated Dart defines before
-launching the app.
+`flutter doctor -v` if the Windows desktop toolchain is unavailable. Debug runs
+do not require FlutterFalcon prebuild metadata; release builds remain strict.
 
 Each app uses `FlutterFalconUpdateController` with the v2 HTTP release source,
 native method-channel adapter, and per-client event reporter. The UI enables an
