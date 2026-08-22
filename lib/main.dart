@@ -85,7 +85,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
       final info = _updates.info;
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Falcon example'),
+          title: const Text('79 Falcon example'),
           actions: [
             IconButton(
               key: const Key('check-icon'),
