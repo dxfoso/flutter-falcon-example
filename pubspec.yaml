@@ -1,7 +1,7 @@
 name: flutter_falcon_example
 description: Minimal Flutter Falcon test app.
 publish_to: 'none'
-version: 2.0.0+76
+version: 2.0.0+77
 
 environment:
   sdk: ^3.7.0
@@ -12,43 +12,45 @@ dependencies:
   flutter_falcon:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: c7ad29f92370fdc55c6134aa516cf2c22a9ee31b
+      ref: 674b90d445ccaacca45195a8ad2c7fa4cbf45ee0
       path: flutter_falcon
   flutter_falcon_android_direct:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: c7ad29f92370fdc55c6134aa516cf2c22a9ee31b
+      ref: 674b90d445ccaacca45195a8ad2c7fa4cbf45ee0
       path: flutter_falcon_android_direct
   flutter_falcon_ios_app_store:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: c7ad29f92370fdc55c6134aa516cf2c22a9ee31b
+      ref: 674b90d445ccaacca45195a8ad2c7fa4cbf45ee0
       path: flutter_falcon_ios_app_store
   flutter_falcon_macos_app_store:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: c7ad29f92370fdc55c6134aa516cf2c22a9ee31b
+      ref: 674b90d445ccaacca45195a8ad2c7fa4cbf45ee0
       path: flutter_falcon_macos_app_store
   flutter_falcon_windows_direct:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: c7ad29f92370fdc55c6134aa516cf2c22a9ee31b
+      ref: 674b90d445ccaacca45195a8ad2c7fa4cbf45ee0
       path: flutter_falcon_windows_direct
   flutter_falcon_linux_flatpak:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: c7ad29f92370fdc55c6134aa516cf2c22a9ee31b
+      ref: 674b90d445ccaacca45195a8ad2c7fa4cbf45ee0
       path: flutter_falcon_linux_flatpak
   flutter_falcon_web_pwa:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: c7ad29f92370fdc55c6134aa516cf2c22a9ee31b
+      ref: 674b90d445ccaacca45195a8ad2c7fa4cbf45ee0
       path: flutter_falcon_web_pwa
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  package_info_plus: ^8.3.1
+  shared_preferences: ^2.5.5
 
 flutter_falcon:
   platforms:

@@ -57,15 +57,16 @@ through `FLUTTER_ROOT`, or supplied with `-FlutterExecutable`. Use
 `flutter doctor -v` if the Windows desktop toolchain is unavailable. Debug runs
 do not require FlutterFalcon prebuild metadata; release builds remain strict.
 
-The app uses the package-owned `FlutterFalconAboutPage.standard`. FlutterFalcon
-owns the controller, HTTP clients, preferences, diagnostics, lifecycle handling,
-and capability-driven update actions:
+The app renders its own `ExampleAboutPage` cards, buttons, switches, labels, and
+colors. Its `FlutterFalconUpdateWorkflow` comes from the package and owns the
+controller, HTTP clients, preferences, diagnostics, lifecycle handling, and
+capability-driven update actions:
 
 - Direct targets start the signed operating-system installer route.
 - Store targets open only their official store route.
 - Web asks only the active service worker to update.
 
-The About & updates page displays the installed and target versions, update
+The custom About/update page displays the installed and target versions, update
 type, profile, route, progress, full failure reason, and capability-driven
 actions. Automatic updates are persisted, default off, and start only direct
 plans that declare `start`; stores and manual downloads remain explicit. After
