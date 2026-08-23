@@ -98,74 +98,11 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon
-      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      resolved-ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
+      ref: e8df4ff18fb8e3d785e649da968fd9c86a7389c1
+      resolved-ref: e8df4ff18fb8e3d785e649da968fd9c86a7389c1
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
-    version: "2.0.0"
-  flutter_falcon_android_direct:
-    dependency: "direct main"
-    description:
-      path: flutter_falcon_android_direct
-      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      resolved-ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      url: "https://github.com/dxfoso/flutterfalcon.git"
-    source: git
-    version: "2.0.0"
-  flutter_falcon_ios_app_store:
-    dependency: "direct main"
-    description:
-      path: flutter_falcon_ios_app_store
-      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      resolved-ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      url: "https://github.com/dxfoso/flutterfalcon.git"
-    source: git
-    version: "2.0.0"
-  flutter_falcon_linux_flatpak:
-    dependency: "direct main"
-    description:
-      path: flutter_falcon_linux_flatpak
-      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      resolved-ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      url: "https://github.com/dxfoso/flutterfalcon.git"
-    source: git
-    version: "2.0.0"
-  flutter_falcon_macos_app_store:
-    dependency: "direct main"
-    description:
-      path: flutter_falcon_macos_app_store
-      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      resolved-ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      url: "https://github.com/dxfoso/flutterfalcon.git"
-    source: git
-    version: "2.0.0"
-  flutter_falcon_platform_interface:
-    dependency: transitive
-    description:
-      path: flutter_falcon_platform_interface
-      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      resolved-ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      url: "https://github.com/dxfoso/flutterfalcon.git"
-    source: git
-    version: "2.0.0"
-  flutter_falcon_web_pwa:
-    dependency: "direct main"
-    description:
-      path: flutter_falcon_web_pwa
-      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      resolved-ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      url: "https://github.com/dxfoso/flutterfalcon.git"
-    source: git
-    version: "2.0.0"
-  flutter_falcon_windows_direct:
-    dependency: "direct main"
-    description:
-      path: flutter_falcon_windows_direct
-      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      resolved-ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
-      url: "https://github.com/dxfoso/flutterfalcon.git"
-    source: git
-    version: "2.0.0"
+    version: "3.0.0"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -252,12 +189,12 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"
+      sha256: "1741988757a65eb6b36abe716829688cf01910bbf91c34354ff7ec1c3de2b349"
       url: "https://pub.dev"
     source: hosted
-    version: "1.17.0"
+    version: "1.18.0"
   package_info_plus:
-    dependency: "direct dev"
+    dependency: transitive
     description:
       name: package_info_plus
       sha256: "16eee997588c60225bda0488b6dcfac69280a6b7a3cf02c741895dd370a02968"
@@ -433,10 +370,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "8161c84903fd860b26bfdefb7963b3f0b68fee7adea0f59ef805ecca346f0c7a"
+      sha256: "949a932224383300f01be9221c39180316445ecb8e7547f70a41a35bf421fb9e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.10"
+    version: "0.7.11"
   typed_data:
     dependency: transitive
     description:
@@ -445,70 +382,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
-  url_launcher:
-    dependency: transitive
-    description:
-      name: url_launcher
-      sha256: f6a7e5c4835bb4e3026a04793a4199ca2d14c739ec378fdfe23fc8075d0439f8
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.3.2"
-  url_launcher_android:
-    dependency: transitive
-    description:
-      name: url_launcher_android
-      sha256: "81777b08c498a292d93ff2feead633174c386291e35612f8da438d6e92c4447e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.3.20"
-  url_launcher_ios:
-    dependency: transitive
-    description:
-      name: url_launcher_ios
-      sha256: d80b3f567a617cb923546034cc94bfe44eb15f989fe670b37f26abdb9d939cb7
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.3.4"
-  url_launcher_linux:
-    dependency: transitive
-    description:
-      name: url_launcher_linux
-      sha256: "4e9ba368772369e3e08f231d2301b4ef72b9ff87c31192ef471b380ef29a4935"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.1"
-  url_launcher_macos:
-    dependency: transitive
-    description:
-      name: url_launcher_macos
-      sha256: c043a77d6600ac9c38300567f33ef12b0ef4f4783a2c1f00231d2b1941fea13f
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.3"
-  url_launcher_platform_interface:
-    dependency: transitive
-    description:
-      name: url_launcher_platform_interface
-      sha256: "552f8a1e663569be95a8190206a38187b531910283c3e982193e4f2733f01029"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.3.2"
-  url_launcher_web:
-    dependency: transitive
-    description:
-      name: url_launcher_web
-      sha256: "4bd2b7b4dc4d4d0b94e5babfffbca8eac1a126c7f3d6ecbc1a11013faa3abba2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.4.1"
-  url_launcher_windows:
-    dependency: transitive
-    description:
-      name: url_launcher_windows
-      sha256: "3284b6d2ac454cf34f114e1d3319866fdd1e19cdc329999057e44ffe936cfa77"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.4"
   vector_math:
     dependency: transitive
     description:
@@ -558,5 +431,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.9.0 <4.0.0"
+  dart: ">=3.10.0-0 <4.0.0"
   flutter: ">=3.35.0"

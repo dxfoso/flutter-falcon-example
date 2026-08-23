@@ -1,4 +1,4 @@
-name: FlutterFalcon example v2
+name: FlutterFalcon example
 "on":
   push:
     branches: [master, main]
@@ -10,8 +10,8 @@ name: FlutterFalcon example v2
       cron: "20 04 * * *"
       ref: master
 jobs:
-  v2-example:
-    name: Validate isolated v2 example artifacts
+  example:
+    name: Test package and build Android artifacts
     runs-on: ubuntu-latest
-    run: .action-server/tasks/flutter-falcon-example-v2.sh
+    run: .action-server/tasks/flutter-falcon-example.sh
     timeoutMinutes: 180
