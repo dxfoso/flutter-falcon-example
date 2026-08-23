@@ -1,7 +1,7 @@
 name: flutter_falcon_example
 description: Minimal Flutter Falcon test app.
 publish_to: 'none'
-version: 2.0.0+80
+version: 2.0.0+81
 
 environment:
   sdk: ^3.7.0
@@ -12,37 +12,37 @@ dependencies:
   flutter_falcon:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
+      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
       path: flutter_falcon
   flutter_falcon_android_direct:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
+      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
       path: flutter_falcon_android_direct
   flutter_falcon_ios_app_store:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
+      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
       path: flutter_falcon_ios_app_store
   flutter_falcon_macos_app_store:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
+      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
       path: flutter_falcon_macos_app_store
   flutter_falcon_windows_direct:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
+      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
       path: flutter_falcon_windows_direct
   flutter_falcon_linux_flatpak:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
+      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
       path: flutter_falcon_linux_flatpak
   flutter_falcon_web_pwa:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 5b73f951ef5681bb3a5af50e2867db49c61fdefa
+      ref: dedaa52e5b65fb1f2353bd08edd27c32541fecfd
       path: flutter_falcon_web_pwa
 
 dev_dependencies:

@@ -134,13 +134,27 @@ class _ServerCard extends StatelessWidget {
   final ExampleRuntimeConfiguration configuration;
 
   @override
-  Widget build(BuildContext context) => Card.filled(
-    child: ListTile(
-      leading: Icon(configuration.isLocal ? Icons.computer : Icons.public),
-      title: Text(configuration.isLocal ? 'Local server' : 'Live server'),
-      subtitle: SelectableText(configuration.apiBaseUrl),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final artifact = FlutterFalconV2BuildArtifactInfo.fromEnvironment();
+    final buildLabel =
+        artifact == null
+            ? 'Local Flutter build'
+            : '${artifact.platform.name} · ${artifact.artifactType.toUpperCase()}';
+    return Card.filled(
+      child: ListTile(
+        leading: Icon(configuration.isLocal ? Icons.computer : Icons.public),
+        title: Text(configuration.isLocal ? 'Local server' : 'Live server'),
+        subtitle: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SelectableText(configuration.apiBaseUrl),
+            Text(buildLabel),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _UpdateCard extends StatelessWidget {

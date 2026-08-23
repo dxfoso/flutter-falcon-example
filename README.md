@@ -44,6 +44,8 @@ shows **Local server** or **Live server** with the effective app API URL. The
 FlutterFalcon update service remains `https://flutterfalcon.com`. For an Android
 emulator, use `http://10.0.2.2:8080` to reach a server on the host computer.
 Build variables are embedded in the app, so they must never contain secrets.
+Hosted builds also show their embedded platform and artifact type; a normal
+local `flutter run` shows **Local Flutter build**.
 
 On Windows, run the local configuration with:
 

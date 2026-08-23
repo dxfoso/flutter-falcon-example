@@ -50,6 +50,7 @@ void main() {
     expect(find.byType(FlutterFalconAboutPage), findsNothing);
     expect(find.byType(ExampleAboutPage), findsOneWidget);
     expect(find.text('Local server'), findsOneWidget);
+    expect(find.text('Local Flutter build'), findsOneWidget);
     expect(find.text('You are up to date'), findsOneWidget);
     expect(find.text('Installed'), findsOneWidget);
     expect(find.text('Available'), findsOneWidget);
