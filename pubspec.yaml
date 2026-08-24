@@ -12,7 +12,7 @@ dependencies:
   flutter_falcon:
     git:
       url: https://github.com/dxfoso/flutterfalcon.git
-      ref: 194d01630d312cd876b01889eb816266f385f49d
+      ref: aeb991fc1a70d5346c791abf26d39af5b81dbb11
       path: flutter_falcon
 
 dev_dependencies:
