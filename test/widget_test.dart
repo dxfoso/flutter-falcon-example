@@ -18,6 +18,7 @@ void main() {
         return {
           'engineAvailable': true,
           'restartSupported': true,
+          'updateType': 'dartCodePush',
           'currentPatchNumber': 0,
           'nextPatchNumber': 1,
         };
@@ -58,6 +59,7 @@ void main() {
     expect(find.text('Local server'), findsOneWidget);
     expect(find.textContaining('FlutterFalcon · android APK'), findsOneWidget);
     expect(find.text('You are up to date'), findsOneWidget);
+    expect(find.textContaining('Update: Dart code push'), findsOneWidget);
     expect(find.byKey(const Key('check-updates-button')), findsOneWidget);
     expect(find.byKey(const Key('automatic-updates-switch')), findsOneWidget);
 

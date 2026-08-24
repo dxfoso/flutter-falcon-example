@@ -29,7 +29,7 @@ Then choose the artifact and build mode:
   registers the store baseline; later compatible Dart-only commits publish a
   signed patch for that exact installed version.
 
-The page shows Local/Live, Standard/FlutterFalcon, artifact type, update state,
+The page shows Local/Live, Standard/FlutterFalcon, artifact and update type,
 patch numbers, automatic updates, Check, Update, Retry, and Restart.
 
 Build variables are compiled into the app and must never contain secrets.

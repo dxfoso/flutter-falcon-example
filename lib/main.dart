@@ -183,6 +183,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
             if (info != null)
               Text(
                 'Engine: ${info.engineAvailable ? 'ready' : 'standard'} · '
+                'Update: ${info.updateType == FlutterFalconRuntimeUpdateType.dartCodePush ? 'Dart code push' : 'none'} · '
                 'Patch: ${info.currentPatchNumber} · '
                 'Next: ${info.nextPatchNumber}',
               ),
