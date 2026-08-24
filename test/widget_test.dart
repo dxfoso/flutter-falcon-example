@@ -57,6 +57,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Local server'), findsOneWidget);
+    expect(find.text('82 FlutterFalcon patched'), findsOneWidget);
     expect(find.textContaining('FlutterFalcon · android APK'), findsOneWidget);
     expect(find.text('You are up to date'), findsOneWidget);
     expect(find.textContaining('Update: Dart code push'), findsOneWidget);
