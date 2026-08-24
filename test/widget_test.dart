@@ -20,7 +20,7 @@ void main() {
           'restartSupported': true,
           'updateType': 'dartCodePush',
           'currentPatchNumber': 0,
-          'nextPatchNumber': 1,
+          'nextPatchNumber': 0,
         };
       }
       if (call.method == 'checkForUpdate') {
@@ -57,7 +57,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Local server'), findsOneWidget);
-    expect(find.text('82 FlutterFalcon patched'), findsOneWidget);
+    expect(find.text('FlutterFalcon Example'), findsOneWidget);
     expect(find.textContaining('FlutterFalcon · android APK'), findsOneWidget);
     expect(find.text('You are up to date'), findsOneWidget);
     expect(find.textContaining('Update: Dart code push'), findsOneWidget);

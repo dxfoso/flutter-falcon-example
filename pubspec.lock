@@ -98,11 +98,11 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon
-      ref: "05a1b7a689dfc6ed25bce34d04ae62d017ae4357"
-      resolved-ref: "05a1b7a689dfc6ed25bce34d04ae62d017ae4357"
+      ref: "2761cc730a94f38689cce86a2476a719a2731103"
+      resolved-ref: "2761cc730a94f38689cce86a2476a719a2731103"
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
-    version: "3.0.2"
+    version: "3.0.3"
   flutter_lints:
     dependency: "direct dev"
     description:
