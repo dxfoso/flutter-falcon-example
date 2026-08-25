@@ -59,14 +59,14 @@ void main() {
     expect(find.text('Local server'), findsOneWidget);
     expect(find.text('FlutterFalcon Example'), findsOneWidget);
     expect(find.textContaining('FlutterFalcon · android APK'), findsOneWidget);
-    expect(find.text('You are up to date'), findsOneWidget);
+    expect(find.text('App is up to date'), findsOneWidget);
     expect(find.textContaining('Update: Dart code push'), findsOneWidget);
     expect(find.byKey(const Key('check-updates-button')), findsOneWidget);
     expect(find.byKey(const Key('automatic-updates-switch')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('check-updates-button')));
     await tester.pumpAndSettle();
-    expect(find.text('You are up to date'), findsOneWidget);
+    expect(find.text('App is up to date'), findsOneWidget);
     await controller.dispose();
   });
 }

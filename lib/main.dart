@@ -197,7 +197,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
 String _stateLabel(FlutterFalconRuntimeState state) => switch (state) {
       FlutterFalconRuntimeState.idle => 'Ready to check',
       FlutterFalconRuntimeState.checking => 'Checking for updates',
-      FlutterFalconRuntimeState.current => 'You are up to date',
+      FlutterFalconRuntimeState.current => 'App is up to date',
       FlutterFalconRuntimeState.updateAvailable => 'Update available',
       FlutterFalconRuntimeState.downloading => 'Downloading update',
       FlutterFalconRuntimeState.restartRequired => 'Restart required',
