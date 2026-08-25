@@ -93,7 +93,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
         state == FlutterFalconRuntimeState.downloading;
     final build = _updates.build;
     return Scaffold(
-      appBar: AppBar(title: const Text('FlutterFalcon Example')),
+      appBar: AppBar(title: const Text('FlutterFalcon Example · Isolated')),
       body: SelectionArea(
         child: ListView(
           padding: const EdgeInsets.all(16),
