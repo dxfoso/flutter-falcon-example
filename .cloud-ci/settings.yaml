@@ -1,0 +1,8 @@
+displayName: FlutterFalcon Example
+allowForkPullRequests: false
+favoriteArtifacts:
+  example:
+    - task-status.json
+    - task-results.json
+    - task-step-results.json
+    - task-summary.txt

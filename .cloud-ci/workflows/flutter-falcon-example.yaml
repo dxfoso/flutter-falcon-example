@@ -1,3 +1,4 @@
+version: 1
 name: FlutterFalcon example
 "on":
   push:
@@ -12,6 +13,8 @@ name: FlutterFalcon example
 jobs:
   example:
     name: Test package and build Android artifacts
-    runs-on: ubuntu-latest
-    run: .action-server/tasks/flutter-falcon-example.sh
+    required: true
+    runsOn: [linux, x64, docker, host]
+    executor: host
+    run: .cloud-ci/tasks/flutter-falcon-example.sh
     timeoutMinutes: 180

@@ -2,7 +2,7 @@
 set -uo pipefail
 
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
-artifact_dir="${ACTION_SERVER_ARTIFACT_DIR:-$repo_root/.action-server/artifacts/flutter-falcon-example}"
+artifact_dir="${CLOUD_CI_ARTIFACT_DIR:-$repo_root/build/cloud-ci-artifacts/flutter-falcon-example}"
 mkdir -p "$artifact_dir"
 started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 status=passed
@@ -65,7 +65,7 @@ payload = {
     "taskId": "flutter-falcon-example",
     "status": status,
     "trigger": trigger,
-    "latestPublicUrl": __import__("os").environ.get("ACTION_SERVER_ARTIFACT_URL", ""),
+    "latestPublicUrl": __import__("os").environ.get("CLOUD_CI_ARTIFACT_URL", ""),
     "favoriteTextOutputs": ["repository-update-summary.txt"],
     "outputs": outputs,
 }
