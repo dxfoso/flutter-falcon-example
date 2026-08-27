@@ -5,10 +5,10 @@ packages:
     dependency: transitive
     description:
       name: archive
-      sha256: a96e8b390886ee8abb49b7bd3ac8df6f451c621619f52a26e815fdcf568959ff
+      sha256: ace891da0862b0e4cabbb064ee3fd87b2728b898949fdb366d83fe98342c9f19
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.9"
+    version: "4.2.0"
   async:
     dependency: transitive
     description:
@@ -98,8 +98,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon
-      ref: "4bee990866727c72c165138241b2d8be02272e2d"
-      resolved-ref: "4bee990866727c72c165138241b2d8be02272e2d"
+      ref: c535c11cb66429a63f024dd356d8d4ed746c7566
+      resolved-ref: c535c11cb66429a63f024dd356d8d4ed746c7566
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "3.0.5"
@@ -410,10 +410,10 @@ packages:
     dependency: transitive
     description:
       name: win32
-      sha256: daf97c9d80197ed7b619040e86c8ab9a9dad285e7671ee7390f9180cc828a51e
+      sha256: "329edf97fdd893e0f1e3b9e88d6a0e627128cc17cc316a8d67fda8f1451178ba"
       url: "https://pub.dev"
     source: hosted
-    version: "5.10.1"
+    version: "5.13.0"
   xdg_directories:
     dependency: transitive
     description:
