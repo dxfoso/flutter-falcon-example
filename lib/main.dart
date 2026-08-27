@@ -26,7 +26,7 @@ class FlutterFalconExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: '99 FlutterFalcon Example',
+        title: '100 FlutterFalcon Example',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
