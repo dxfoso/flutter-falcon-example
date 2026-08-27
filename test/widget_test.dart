@@ -57,7 +57,7 @@ void main() {
 
     expect(find.text('Local server'), findsOneWidget);
     expect(
-      find.text('FlutterFalcon Example · Automatic Dart update'),
+      find.text('FlutterFalcon Example · Automatic Android update'),
       findsOneWidget,
     );
     expect(find.textContaining('FlutterFalcon · android APK'), findsOneWidget);
