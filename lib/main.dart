@@ -26,7 +26,7 @@ class FlutterFalconExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: '95 FlutterFalcon Example',
+        title: '96 FlutterFalcon Example',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
@@ -132,6 +132,11 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
                         'Update direction: ${info.updateDirectionLabel}',
                         key: const Key('update-direction'),
                       ),
+                      if (info.targetVersion case final target?)
+                        Text(
+                          'Target version: $target',
+                          key: const Key('target-version'),
+                        ),
                     ],
                     if (info?.message case final message?) ...[
                       const SizedBox(height: 4),
