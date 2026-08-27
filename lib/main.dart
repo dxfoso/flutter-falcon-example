@@ -26,7 +26,7 @@ class FlutterFalconExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: '97 FlutterFalcon Example',
+        title: '98 FlutterFalcon Example',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
@@ -94,7 +94,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
     final build = _updates.build;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FlutterFalcon Example · Store-safe patch'),
+        title: const Text('FlutterFalcon Example · Automatic Dart update'),
       ),
       body: SelectionArea(
         child: ListView(
