@@ -63,13 +63,51 @@ void main() {
     );
     expect(find.textContaining('FlutterFalcon · android APK'), findsOneWidget);
     expect(find.text('App is up to date'), findsOneWidget);
-    expect(find.textContaining('Update: Dart code push'), findsOneWidget);
+    expect(
+      find.text('Update direction: FlutterFalcon code update'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Direction: FlutterFalcon code update'),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('check-updates-button')), findsOneWidget);
     expect(find.byKey(const Key('automatic-updates-switch')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('check-updates-button')));
     await tester.pumpAndSettle();
     expect(find.text('App is up to date'), findsOneWidget);
+    await controller.dispose();
+  });
+
+  testWidgets('shows normal replacement direction for a standard build',
+      (tester) async {
+    final controller = FlutterFalconCodePushController(
+      channel: channel,
+      buildInfo: const FlutterFalconBuildInfo(
+        mode: FlutterFalconBuildMode.standard,
+        platform: 'android',
+        artifactType: 'apk',
+        engineRevision: '',
+      ),
+    );
+    await tester.pumpWidget(
+      FlutterFalconExampleApp(
+        runtimeConfiguration: const ExampleRuntimeConfiguration(
+          apiBaseUrl: 'http://localhost:8080',
+          isLocal: true,
+        ),
+        controller: controller,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text(
+        'Update direction: Complete app replacement (normal update)',
+      ),
+      findsOneWidget,
+    );
     await controller.dispose();
   });
 }

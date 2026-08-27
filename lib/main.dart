@@ -126,6 +126,13 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
                       _stateLabel(state),
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
+                    if (info != null) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Update direction: ${info.updateDirectionLabel}',
+                        key: const Key('update-direction'),
+                      ),
+                    ],
                     if (info?.message case final message?) ...[
                       const SizedBox(height: 4),
                       Text(message),
@@ -154,7 +161,13 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
                             key: const Key('update-button'),
                             onPressed: busy ? null : _updates.update,
                             icon: const Icon(Icons.download),
-                            label: const Text('Update'),
+                            label: Text(
+                              info!.updateType ==
+                                      FlutterFalconRuntimeUpdateType
+                                          .dartCodePush
+                                  ? 'Apply FlutterFalcon update'
+                                  : 'Install complete update',
+                            ),
                           ),
                         if (info?.restartRequired == true)
                           FilledButton.icon(
@@ -185,7 +198,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
             if (info != null)
               Text(
                 'Engine: ${info.engineAvailable ? 'ready' : 'standard'} · '
-                'Update: ${info.updateType == FlutterFalconRuntimeUpdateType.dartCodePush ? 'Dart code push' : 'none'} · '
+                'Direction: ${info.updateDirectionLabel} · '
                 'Patch: ${info.currentPatchNumber} · '
                 'Next: ${info.nextPatchNumber}',
               ),
