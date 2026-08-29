@@ -98,8 +98,8 @@ packages:
     dependency: "direct main"
     description:
       path: flutter_falcon
-      ref: "9d7df0e1059ac39c3cacb2d2f32d3be94633e369"
-      resolved-ref: "9d7df0e1059ac39c3cacb2d2f32d3be94633e369"
+      ref: bdb96e97a05679798a0e99a177aaf498c2c8fd86
+      resolved-ref: bdb96e97a05679798a0e99a177aaf498c2c8fd86
       url: "https://github.com/dxfoso/flutterfalcon.git"
     source: git
     version: "4.2.2"
