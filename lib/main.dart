@@ -26,7 +26,7 @@ class FlutterFalconExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: '103 automatic FlutterFalcon patch',
+        title: '104 automatic FlutterFalcon patch applied',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
