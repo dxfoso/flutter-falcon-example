@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon.dart';
 import 'package:flutter_falcon_example/main.dart';
 import 'package:flutter_falcon_example/runtime_configuration.dart';
@@ -107,6 +107,48 @@ void main() {
       ),
       findsOneWidget,
     );
+    await controller.dispose();
+  });
+
+  testWidgets('uses the package restart action for an iOS-style runtime',
+      (tester) async {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, (call) async {
+      if (call.method == 'getRuntimeInfo') {
+        return {
+          'engineAvailable': true,
+          'restartSupported': false,
+          'currentPatchNumber': 0,
+          'nextPatchNumber': 1,
+        };
+      }
+      return null;
+    });
+    final controller = FlutterFalconCodePushController(
+      channel: channel,
+      buildInfo: const FlutterFalconBuildInfo(
+        mode: FlutterFalconBuildMode.codePush,
+        platform: 'ios',
+        artifactType: 'ipa',
+        engineRevision: 'engine',
+      ),
+    );
+    await tester.pumpWidget(
+      FlutterFalconExampleApp(
+        runtimeConfiguration: const ExampleRuntimeConfiguration(
+          apiBaseUrl: 'https://api.example.com',
+          isLocal: false,
+        ),
+        controller: controller,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Close and reopen'), findsOneWidget);
+    final button = tester.widget<FilledButton>(
+      find.byKey(const Key('restart-button')),
+    );
+    expect(button.onPressed, isNull);
     await controller.dispose();
   });
 

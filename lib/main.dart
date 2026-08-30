@@ -181,11 +181,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
                                 ? _updates.restart
                                 : null,
                             icon: const Icon(Icons.restart_alt),
-                            label: Text(
-                              info.restartSupported
-                                  ? 'Restart'
-                                  : 'Close and reopen',
-                            ),
+                            label: Text(info.restartActionLabel),
                           ),
                       ],
                     ),
