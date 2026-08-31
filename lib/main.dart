@@ -2,14 +2,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'runtime_configuration.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final packageInfo = await PackageInfo.fromPlatform();
   runApp(
     FlutterFalconExampleApp(
       runtimeConfiguration: ExampleRuntimeConfiguration.fromEnvironment(),
+      appVersion: _appVersion(packageInfo),
     ),
   );
 }
@@ -18,15 +21,17 @@ class FlutterFalconExampleApp extends StatelessWidget {
   const FlutterFalconExampleApp({
     super.key,
     required this.runtimeConfiguration,
+    required this.appVersion,
     this.controller,
   });
 
   final ExampleRuntimeConfiguration runtimeConfiguration;
+  final String appVersion;
   final FlutterFalconCodePushController? controller;
 
   @override
   Widget build(BuildContext context) => MaterialApp(
-        title: '104 automatic FlutterFalcon patch applied',
+        title: 'FlutterFalcon Example',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(
@@ -37,6 +42,7 @@ class FlutterFalconExampleApp extends StatelessWidget {
         ),
         home: ExampleAboutPage(
           runtimeConfiguration: runtimeConfiguration,
+          appVersion: appVersion,
           controller: controller,
         ),
       );
@@ -46,10 +52,12 @@ class ExampleAboutPage extends StatefulWidget {
   const ExampleAboutPage({
     super.key,
     required this.runtimeConfiguration,
+    required this.appVersion,
     this.controller,
   });
 
   final ExampleRuntimeConfiguration runtimeConfiguration;
+  final String appVersion;
   final FlutterFalconCodePushController? controller;
 
   @override
@@ -110,8 +118,10 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
                 title: Text(widget.runtimeConfiguration.serverLabel),
                 subtitle: Text(
                   '${widget.runtimeConfiguration.apiBaseUrl}\n'
+                  'Version ${widget.appVersion}\n'
                   '${build.codePushEnabled ? 'FlutterFalcon' : 'Standard Flutter'}'
                   '${build.platform.isEmpty ? '' : ' · ${build.platform} ${build.artifactType.toUpperCase()}'}',
+                  key: const Key('app-version'),
                 ),
               ),
             ),
@@ -209,6 +219,10 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
     );
   }
 }
+
+String _appVersion(PackageInfo info) => info.buildNumber.trim().isEmpty
+    ? info.version
+    : '${info.version}+${info.buildNumber}';
 
 String _stateLabel(FlutterFalconRuntimeState state) => switch (state) {
       FlutterFalconRuntimeState.idle => 'Ready to check',

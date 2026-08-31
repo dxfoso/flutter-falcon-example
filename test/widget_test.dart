@@ -50,6 +50,7 @@ void main() {
           apiBaseUrl: 'http://localhost:8080',
           isLocal: true,
         ),
+        appVersion: '2.0.4+105',
         controller: controller,
       ),
     );
@@ -61,6 +62,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('FlutterFalcon · android APK'), findsOneWidget);
+    expect(find.textContaining('Version 2.0.4+105'), findsOneWidget);
     expect(find.text('App is up to date'), findsOneWidget);
     expect(
       find.text('Update direction: No update available'),
@@ -96,6 +98,7 @@ void main() {
           apiBaseUrl: 'http://localhost:8080',
           isLocal: true,
         ),
+        appVersion: '2.0.4+105',
         controller: controller,
       ),
     );
@@ -139,6 +142,7 @@ void main() {
           apiBaseUrl: 'https://api.example.com',
           isLocal: false,
         ),
+        appVersion: '2.0.4+105',
         controller: controller,
       ),
     );
@@ -187,6 +191,7 @@ void main() {
           apiBaseUrl: 'https://api.example.com',
           isLocal: false,
         ),
+        appVersion: '2.0.4+105',
         controller: controller,
       ),
     );
