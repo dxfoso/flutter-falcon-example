@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import 'runtime_configuration.dart';
+import 'runtime_probe_arguments.dart';
 
 const _e2eRuntimeMarker = String.fromEnvironment('FF_E2E_RUNTIME_MARKER');
 const _e2eHoldArgument = '--flutter-falcon-e2e-hold-before-first-frame';
@@ -21,7 +21,7 @@ Future<void> main() async {
       '[flutter_falcon_e2e] phase=main marker=$_e2eRuntimeMarker',
     );
   }
-  if (Platform.executableArguments.contains(_e2eHoldArgument)) {
+  if (hasRuntimeProbeArgument(_e2eHoldArgument)) {
     debugPrint(
       '[flutter_falcon_e2e] phase=hold-before-first-frame '
       'marker=$_e2eRuntimeMarker',

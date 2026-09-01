@@ -15,5 +15,14 @@ void main() {
     expect(source, contains('_e2eRuntimeMarker.isNotEmpty'));
     expect(source, contains('current=\${info.currentPatchNumber}'));
     expect(source, contains('next=\${info.nextPatchNumber}'));
+    expect(source, isNot(contains("import 'dart:io'")));
+
+    final conditionalImport =
+        File('lib/runtime_probe_arguments.dart').readAsStringSync();
+    expect(conditionalImport, contains('if (dart.library.io)'));
+    expect(
+      File('lib/runtime_probe_arguments_io.dart').readAsStringSync(),
+      contains('Platform.executableArguments.contains(argument)'),
+    );
   });
 }
