@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_falcon/flutter_falcon.dart';
@@ -6,8 +7,27 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'runtime_configuration.dart';
 
+const _e2eRuntimeMarker = String.fromEnvironment('FF_E2E_RUNTIME_MARKER');
+const _e2eHoldArgument = '--flutter-falcon-e2e-hold-before-first-frame';
+const _e2eHoldSeconds = int.fromEnvironment(
+  'FF_E2E_HOLD_SECONDS',
+  defaultValue: 120,
+);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (_e2eRuntimeMarker.isNotEmpty) {
+    debugPrint(
+      '[flutter_falcon_e2e] phase=main marker=$_e2eRuntimeMarker',
+    );
+  }
+  if (Platform.executableArguments.contains(_e2eHoldArgument)) {
+    debugPrint(
+      '[flutter_falcon_e2e] phase=hold-before-first-frame '
+      'marker=$_e2eRuntimeMarker',
+    );
+    await Future<void>.delayed(Duration(seconds: _e2eHoldSeconds));
+  }
   final packageInfo = await PackageInfo.fromPlatform();
   runApp(
     FlutterFalconExampleApp(
@@ -76,6 +96,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
     _ownsController = widget.controller == null;
     _updates = widget.controller ?? FlutterFalconCodePushController();
     _subscription = _updates.events.listen((info) {
+      _recordRuntimeEvidence(info);
       if (mounted) setState(() => _info = info);
     });
     unawaited(_initialize());
@@ -83,7 +104,17 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
 
   Future<void> _initialize() async {
     final info = await _updates.initialize();
+    _recordRuntimeEvidence(info);
     if (mounted) setState(() => _info = info);
+  }
+
+  void _recordRuntimeEvidence(FlutterFalconRuntimeInfo info) {
+    if (_e2eRuntimeMarker.isEmpty) return;
+    debugPrint(
+      '[flutter_falcon_e2e] phase=runtime marker=$_e2eRuntimeMarker '
+      'state=${info.state.name} current=${info.currentPatchNumber} '
+      'next=${info.nextPatchNumber}',
+    );
   }
 
   @override
