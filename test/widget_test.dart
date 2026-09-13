@@ -74,6 +74,11 @@ void main() {
     );
     expect(find.byKey(const Key('check-updates-button')), findsOneWidget);
     expect(find.byKey(const Key('automatic-updates-switch')), findsOneWidget);
+    expect(find.byKey(const Key('diagnostic-logs-switch')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('diagnostic-logs-switch')));
+    await tester.pumpAndSettle();
+    expect(controller.diagnosticLogsEnabled, isTrue);
 
     await tester.tap(find.byKey(const Key('check-updates-button')));
     await tester.pumpAndSettle();

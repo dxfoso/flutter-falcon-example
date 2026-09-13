@@ -237,6 +237,16 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
               onChanged: busy ? null : _updates.setAutomaticUpdates,
               title: const Text('Automatic updates'),
             ),
+            SwitchListTile.adaptive(
+              key: const Key('diagnostic-logs-switch'),
+              contentPadding: EdgeInsets.zero,
+              value: _updates.diagnosticLogsEnabled,
+              onChanged: (value) async {
+                await _updates.setDiagnosticLogsEnabled(value);
+                if (mounted) setState(() {});
+              },
+              title: const Text('Diagnostic logs'),
+            ),
             if (info != null)
               Text(
                 'Engine: ${info.engineAvailable ? 'ready' : 'standard'} · '
