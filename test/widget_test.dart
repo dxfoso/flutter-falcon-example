@@ -62,7 +62,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining('FlutterFalcon · android APK'), findsOneWidget);
-    expect(find.textContaining('Version 2.0.4+105'), findsOneWidget);
+    expect(find.textContaining('Version 2.0.4 (build 105)'), findsOneWidget);
     expect(find.text('App is up to date'), findsOneWidget);
     expect(
       find.text('Update direction: No update available'),
