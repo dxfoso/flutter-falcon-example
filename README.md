@@ -35,3 +35,5 @@ patch numbers, automatic updates, Check, Update, Retry, and Restart.
 Build variables are compiled into the app and must never contain secrets.
 Google Play/App Store publishing still requires the relevant store account and
 signing credentials.
+
+Release identity uses SDK4.3.1 or newer: keep canonical version+build in update/store APIs, display through formatFlutterFalconReleaseVersion, and show build mode separately. Hosted builds select the identity; prebuild and every compiler stage must receive that same value.

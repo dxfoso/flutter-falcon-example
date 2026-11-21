@@ -149,7 +149,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
                 title: Text(widget.runtimeConfiguration.serverLabel),
                 subtitle: Text(
                   '${widget.runtimeConfiguration.apiBaseUrl}\n'
-                  'Version ${widget.appVersion}\n'
+                  'Version ${formatFlutterFalconReleaseVersion(widget.appVersion)}\n'
                   '${build.codePushEnabled ? 'FlutterFalcon' : 'Standard Flutter'}'
                   '${build.platform.isEmpty ? '' : ' · ${build.platform} ${build.artifactType.toUpperCase()}'}',
                   key: const Key('app-version'),
@@ -175,7 +175,7 @@ class _ExampleAboutPageState extends State<ExampleAboutPage> {
                       ),
                       if (info.targetVersion case final target?)
                         Text(
-                          'Target version: $target',
+                          'Target version: ${formatFlutterFalconReleaseVersion(target)}',
                           key: const Key('target-version'),
                         ),
                     ],
