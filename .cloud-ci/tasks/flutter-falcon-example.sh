@@ -20,7 +20,7 @@ if ! run_build ghcr.io/cirruslabs/flutter:3.41.6 '
   dart run flutter_falcon:flutter_falcon_prebuild \
     --platform android --artifact-type apk --build-mode standard \
     --dart-define API_BASE_URL=https://api.example.com
-  flutter build apk --release \
+  flutter build apk --release --target=.dart_tool/flutter_falcon_app.dart \
     --dart-define-from-file=.dart_tool/flutter_falcon_defines.json
 '; then status=failed; fi
 
@@ -31,7 +31,7 @@ if [[ "$status" == passed ]] && ! run_build registry.cloud.divclouds.com/flutter
     --platform android --artifact-type aab --build-mode code-push \
     --engine-revision 2c5e6477714ac64bbeb6f332228a8f2d74fc7cad0539f176b251c667c1a1cdc9 \
     --dart-define API_BASE_URL=https://api.example.com
-  flutter build appbundle --release --target-platform android-arm64 \
+  flutter build appbundle --release --target=.dart_tool/flutter_falcon_app.dart --target-platform android-arm64 \
     --local-engine-src-path=/opt/flutter_falcon_engine \
     --local-engine=android_release_arm64 --local-engine-host=host_release \
     --dart-define-from-file=.dart_tool/flutter_falcon_defines.json
